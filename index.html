@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>花园世界｜公会花册查询</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="title-box">
+            <h1>🌷 公会专属花册图鉴</h1>
+            <p>双向查询 · 成员花卉收录系统</p>
+        </div>
+
+        <!-- 两种查询切换 -->
+        <div class="search-tab">
+            <button class="tab-btn active" onclick="switchTab(1)">按成员查询</button>
+            <button class="tab-btn" onclick="switchTab(2)">按花卉查询</button>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="searchVal" placeholder="请输入关键词...">
+            <button class="search-btn" onclick="searchData()">立即查询</button>
+        </div>
+
+        <div class="result-box" id="resultBox">
+            <div class="empty-tip">请输入内容进行查询</div>
+        </div>
+
+        <div class="copyright">
+            专属定制花册 · 仅内部使用 · 禁止篡改
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script>
+        let nowTab = 1;
+        function switchTab(num){
+            nowTab = num;
+            document.querySelectorAll('.tab-btn').forEach((item,idx)=>{
+                item.classList.toggle('active', idx+1 === num)
+            })
+            document.getElementById('resultBox').innerHTML = '<div class="empty-tip">已切换查询模式，请重新输入</div>';
+        }
+
+        function searchData(){
+            let key = document.getElementById('searchVal').value.trim();
+            let resDom = document.getElementById('resultBox');
+            if(!key){
+                resDom.innerHTML = '<div class="empty-tip">请输入有效关键词</div>';
+                return;
+            }
+            let html = '';
+            if(nowTab === 1){
+                // 按成员查花
+                let user = flowerData.find(item=>item.name.includes(key));
+                if(!user){
+                    html = '<div class="empty-tip">未查询到该成员</div>';
+                }else{
+                    html += `<div class="user-name">👤 成员：${user.name}</div>`;
+                    html += '<div class="flower-list">';
+                    user.flowers.forEach(f=>{
+                        html += `<span class="flower-item">${f}</span>`;
+                    })
+                    html += '</div>';
+                }
+            }else{
+                // 按花查成员
+                let list = [];
+                flowerData.forEach(user=>{
+                    user.flowers.forEach(f=>{
+                        if(f.includes(key)){
+                            list.push(user.name);
+                        }
+                    })
+                })
+                if(list.length === 0){
+                    html = '<div class="empty-tip">暂无玩家拥有该花卉</div>';
+                }else{
+                    html += `<div class="user-name">🌸 持有该花卉成员</div>`;
+                    html += '<div class="flower-list">';
+                    [...new Set(list)].forEach(name=>{
+                        html += `<span class="flower-item">${name}</span>`;
+                    })
+                    html += '</div>';
+                }
+            }
+            resDom.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
