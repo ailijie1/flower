@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>公会花册</title>
+<style>
+body{background:#fef8f5;text-align:center;padding:30px;font-family:微软雅黑;}
+.main{background:white;width:500px;margin:0 auto;padding:30px;border-radius:20px;}
+input{width:300px;padding:10px;margin:10px;border:1px solid #ffc8dd;border-radius:10px;}
+button{padding:10px 20px;background:#ffb0c8;border:none;border-radius:10px;color:white;}
+.res{margin-top:20px;text-align:left;padding:0 30px;}
+.tag{background:#e1f7e1;padding:5px 12px;border-radius:15px;margin:5px;display:inline-block;}
+</style>
+</head>
+<body>
+<div class="main">
+<h2>🌸公会花册查询</h2>
+
+<h3>输入花名查谁有</h3>
+<input id="f" placeholder="例如：玫瑰花">
+<button onclick="sf()">查询</button>
+
+<h3>输入人名查有什么花</h3>
+<input id="m" placeholder="例如：小明">
+<button onclick="sm()">查询</button>
+
+<div class="res" id="result"></div>
+</div>
+
+<script>
+function sf(){
+  let n=document.getElementById("f").value;
+  fetch("/sflower",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:"name="+n})
+  .then(r=>r.json()).then(d=>{show(d)});
+}
+function sm(){
+  let n=document.getElementById("m").value;
+  fetch("/smember",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:"name="+n})
+  .then(r=>r.json()).then(d=>{show(d)});
+}
+function show(d){
+  let s="";
+  if(d.length==0)s="暂无
