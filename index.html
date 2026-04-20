@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>🌸 花园世界 · 公会花册 Pro</title>
+    <title>🌸 花园世界 · 公会花册</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
@@ -142,11 +142,13 @@
             align-items: center;
             gap: 10px;
             cursor: pointer;
-            padding: 4px 8px 4px 4px;
+            padding: 4px 12px 4px 4px;
             border-radius: 40px;
+            background: rgba(255,255,255,0.3);
+            transition: 0.2s;
         }
         .user-profile:hover {
-            background: rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.6);
         }
         .user-avatar {
             width: 40px;
@@ -163,6 +165,11 @@
         .user-name {
             font-weight: 600;
             color: #2e5a1e;
+        }
+        .user-name i {
+            margin-left: 4px;
+            font-size: 0.7rem;
+            opacity: 0.7;
         }
         .logout-btn {
             padding: 8px 16px;
@@ -235,24 +242,32 @@
         .stat-card {
             flex: 1;
             background: linear-gradient(135deg, #f0f8ea, #e0efd5);
-            padding: 12px 6px;
+            padding: 16px 6px;
             border-radius: 20px;
             text-align: center;
             border: 1px solid #bdd8ae;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
         .stat-card:hover {
             transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(58, 122, 46, 0.15);
+        }
+        .stat-card:active {
+            transform: translateY(0);
         }
         .stat-number {
-            font-size: 1.8rem;
+            font-size: 2rem;
             font-weight: 700;
             color: #1e5a1e;
         }
         .stat-label {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: #5a7e4a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
         }
         .result-area {
             min-height: 160px;
@@ -357,14 +372,15 @@
             box-shadow: 0 5px 0 #b26500;
         }
         .ocr-btn {
-            padding: 12px 20px;
+            padding: 8px 16px;
             background: #2196f3;
             color: white;
             border: none;
             border-radius: 40px;
             font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 5px 0 #1565c0;
+            box-shadow: 0 4px 0 #1565c0;
+            font-size: 0.8rem;
         }
         .sync-status {
             display: flex;
@@ -409,6 +425,8 @@
             font-size: 0.8rem;
             margin-top: 20px;
         }
+
+        /* 弹窗 */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -422,8 +440,9 @@
         }
         .modal {
             background: white;
-            max-width: 400px;
+            max-width: 500px;
             width: 100%;
+            max-height: 70vh;
             border-radius: 32px;
             overflow: hidden;
             animation: modalSlideIn 0.25s;
@@ -455,6 +474,40 @@
         }
         .modal-body {
             padding: 20px 24px;
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+        .modal-search {
+            padding: 12px 16px;
+            border: 1.5px solid #b8daa0;
+            border-radius: 30px;
+            width: 100%;
+            margin-bottom: 16px;
+            outline: none;
+        }
+        .modal-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid #e0efd5;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: 0.15s;
+        }
+        .modal-list-item:hover {
+            background: #f0f8ea;
+        }
+        .modal-item-name {
+            font-weight: 500;
+            color: #1e4a1e;
+        }
+        .modal-item-badge {
+            background: #3a7a2e;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
         }
         .modal-input {
             padding: 14px 18px;
@@ -480,15 +533,6 @@
             margin: 12px 0;
             display: none;
         }
-        #ocrResult {
-            margin-top: 12px;
-            padding: 12px;
-            background: #f0f8ea;
-            border-radius: 16px;
-            font-size: 0.9rem;
-            max-height: 150px;
-            overflow-y: auto;
-        }
         .flower-tag {
             display: inline-block;
             background: #3a7a2e;
@@ -502,8 +546,10 @@
         .flower-tag.selected {
             background: #e68900;
         }
+
         @media (max-width: 480px) {
             .flower-grid { grid-template-columns: repeat(2, 1fr); }
+            .container { padding: 20px 16px; }
         }
     </style>
 </head>
@@ -539,7 +585,7 @@
         <div class="user-bar">
             <div class="user-profile" id="userProfile">
                 <div class="user-avatar" id="userAvatar">🌸</div>
-                <span class="user-name" id="userName">加载中...</span>
+                <span class="user-name" id="userName">花友 <i class="fas fa-pencil-alt"></i></span>
             </div>
             <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> 退出</button>
         </div>
@@ -574,7 +620,7 @@
         <div class="collapsible">
             <div class="collapse-header" onclick="toggleCollapse('addPanel')">
                 <i class="fas fa-plus-circle" style="color:#e68900;"></i> 添加花卉记录
-                <button class="ocr-btn" onclick="event.stopPropagation(); openOCRModal()" style="margin-left:12px; padding:6px 16px; font-size:0.8rem;">
+                <button class="ocr-btn" onclick="event.stopPropagation(); openOCRModal()">
                     <i class="fas fa-camera"></i> 截图识别
                 </button>
                 <i class="fas fa-chevron-down" id="addIcon" style="margin-left:auto;"></i>
@@ -612,19 +658,44 @@
     </div>
 </div>
 
+<!-- 昵称修改弹窗 -->
+<div class="modal-overlay" id="nicknameModal">
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <span class="modal-title"><i class="fas fa-user-edit"></i> 修改昵称</span>
+            <button class="modal-close" onclick="closeNicknameModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <input type="text" id="nicknameInput" class="modal-input" placeholder="输入新昵称" maxlength="12">
+            <button class="modal-btn" onclick="saveNickname()">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 成员/花卉列表弹窗 -->
+<div class="modal-overlay" id="listModal">
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <span class="modal-title" id="listModalTitle"><i class="fas fa-users"></i> 成员列表</span>
+            <button class="modal-close" onclick="closeListModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <input type="text" class="modal-search" id="listModalSearch" placeholder="🔍 搜索..." oninput="filterListModal()">
+            <div id="listModalContainer"></div>
+        </div>
+    </div>
+</div>
+
 <!-- 截图识别弹窗 -->
 <div class="modal-overlay" id="ocrModal">
-    <div class="modal" style="max-width:500px;" onclick="event.stopPropagation()">
+    <div class="modal" onclick="event.stopPropagation()">
         <div class="modal-header">
-            <span class="modal-title"><i class="fas fa-camera"></i> 截图识别花卉</span>
+            <span class="modal-title"><i class="fas fa-camera"></i> 截图识别</span>
             <button class="modal-close" onclick="closeOCRModal()"><i class="fas fa-times"></i></button>
         </div>
         <div class="modal-body">
-            <p style="color:#5a7e4a; margin-bottom:12px;">
-                上传游戏图鉴截图，自动识别花卉名称
-            </p>
             <input type="file" id="imageUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
-            <button class="modal-btn" onclick="document.getElementById('imageUpload').click()" style="background:#2196f3; box-shadow:0 5px 0 #1565c0;">
+            <button class="modal-btn" onclick="document.getElementById('imageUpload').click()" style="background:#2196f3;">
                 <i class="fas fa-image"></i> 选择图片
             </button>
             <img id="imagePreview" src="" alt="预览">
@@ -643,27 +714,23 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
     (function(){
-        // ==================== 配置 ====================
         const SUPABASE_URL = "https://amngvhgusyipxnnkejzp.supabase.co";
         const SUPABASE_KEY = "sb_publishable_yIYNCHcT4Z0z-NMcKVmjTQ_6SoHyxwZ";
         const INVITE_CODE = "XIAOGUO521";
-        
-        // 百度OCR配置（你需要替换成自己的）
-        const BAIDU_API_KEY = "mXud4KPB3rJvto6DDJnjidcJ";
-        const BAIDU_SECRET_KEY = "RHTHC9BUZ1lYHIBNG0XoQRBZsdFdO7cN";
+        const BAIDU_API_KEY = "mXud4KPB3vAyo6DDJnjdcU";
+        const BAIDU_SECRET_KEY = "RHTHC9BUZ1IYHIBNG0xQRzB2sfd07cN";
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         
         let flowerData = [];
         let queryMode = 'member';
         let currentRecordId = 1;
-        let currentPage = 1;
-        const pageSize = 12;
-        let currentResultData = null;
         let currentUser = null;
-        let currentNickname = '';
+        let currentNickname = '花友';
+        let listModalData = [];
         let recognizedFlowers = [];
         let selectedFlowers = new Set();
+        let baiduAccessToken = '';
 
         // DOM
         const authContainer = document.getElementById('authContainer');
@@ -677,6 +744,12 @@
         const logoutBtn = document.getElementById('logoutBtn');
         const userNameSpan = document.getElementById('userName');
         const userAvatar = document.getElementById('userAvatar');
+        const nicknameModal = document.getElementById('nicknameModal');
+        const nicknameInput = document.getElementById('nicknameInput');
+        const listModal = document.getElementById('listModal');
+        const listModalTitle = document.getElementById('listModalTitle');
+        const listModalContainer = document.getElementById('listModalContainer');
+        const listModalSearch = document.getElementById('listModalSearch');
         const ocrModal = document.getElementById('ocrModal');
         const imagePreview = document.getElementById('imagePreview');
         const ocrLoading = document.getElementById('ocrLoading');
@@ -684,17 +757,15 @@
         const recognizedFlowersDiv = document.getElementById('recognizedFlowers');
         const importSelectedBtn = document.getElementById('importSelectedBtn');
 
-        // 头像
+        // 通用函数
         function getAvatarText(name) { return name ? name.charAt(0).toUpperCase() : '🌸'; }
-        function updateUserUI(nickname) { currentNickname = nickname || '花友'; userNameSpan.textContent = currentNickname; userAvatar.textContent = getAvatarText(currentNickname); }
+        function updateUserUI(nickname) { currentNickname = nickname || '花友'; userNameSpan.innerHTML = `${currentNickname} <i class="fas fa-pencil-alt"></i>`; userAvatar.textContent = getAvatarText(currentNickname); }
 
-        // 用户资料
         async function getUserProfile(userId) {
             const { data } = await supabase.from('profiles').select('nickname').eq('id', userId).single();
             data ? updateUserUI(data.nickname) : updateUserUI('花友');
         }
 
-        // 认证
         async function checkAuth() {
             const { data: { session } } = await supabase.auth.getSession();
             if(session) { currentUser = session.user; await getUserProfile(session.user.id); showApp(); }
@@ -732,6 +803,21 @@
         logoutBtn.onclick = async ()=>{ await supabase.auth.signOut(); showAuth(); };
         loginTab.onclick = ()=>{ loginTab.classList.add('active'); registerTab.classList.remove('active'); loginForm.style.display='flex'; registerForm.style.display='none'; };
         registerTab.onclick = ()=>{ registerTab.classList.add('active'); loginTab.classList.remove('active'); registerForm.style.display='flex'; loginForm.style.display='none'; };
+
+        // 昵称修改
+        document.getElementById('userProfile').onclick = ()=>{
+            nicknameModal.style.display = 'flex';
+            nicknameInput.value = currentNickname;
+        };
+        window.closeNicknameModal = ()=> nicknameModal.style.display = 'none';
+        window.saveNickname = async ()=>{
+            const nickname = nicknameInput.value.trim();
+            if(!nickname) { alert('请输入昵称'); return; }
+            await supabase.from('profiles').upsert({ id: currentUser.id, nickname });
+            updateUserUI(nickname);
+            closeNicknameModal();
+            addCloudLog('修改昵称', null, null);
+        };
 
         // 花卉系统
         const byMemberBtn = document.getElementById('byMemberBtn');
@@ -815,42 +901,76 @@
             if(id==='logPanel' && panel.classList.contains('open')) loadCloudLogs();
         };
 
-        // ==================== 截图识别 ====================
-        let baiduAccessToken = '';
+        // 统计卡片弹窗
+        function showMemberModal() {
+            const members = flowerData.map(m=>({ name:m.name, count:m.flowers.length })).sort((a,b)=>a.name.localeCompare(b.name));
+            listModalData = members;
+            listModalTitle.innerHTML = '<i class="fas fa-users"></i> 成员列表';
+            renderListModal(members);
+            listModal.style.display = 'flex';
+        }
 
+        function showFlowerModal() {
+            const flowerMap = new Map();
+            flowerData.forEach(m=>m.flowers.forEach(f=>flowerMap.set(f, (flowerMap.get(f)||0)+1)));
+            const flowers = Array.from(flowerMap.entries()).map(([name,count])=>({ name, count })).sort((a,b)=>a.name.localeCompare(b.name));
+            listModalData = flowers;
+            listModalTitle.innerHTML = '<i class="fas fa-flower"></i> 花卉图鉴';
+            renderListModal(flowers);
+            listModal.style.display = 'flex';
+        }
+
+        function renderListModal(items) {
+            if(!items.length) { listModalContainer.innerHTML = '<div style="text-align:center; padding:30px;">暂无数据</div>'; return; }
+            listModalContainer.innerHTML = items.map(item=>`
+                <div class="modal-list-item" onclick="jumpToItem('${item.name}')">
+                    <span class="modal-item-name"><i class="fas fa-${listModalData[0].count !== undefined ? 'user' : 'flower'}"></i> ${item.name}</span>
+                    <span class="modal-item-badge">${item.count}</span>
+                </div>
+            `).join('');
+        }
+
+        window.filterListModal = function() {
+            const kw = listModalSearch.value.toLowerCase();
+            const filtered = listModalData.filter(item=>item.name.toLowerCase().includes(kw));
+            renderListModal(filtered);
+        };
+
+        window.closeListModal = ()=> listModal.style.display = 'none';
+
+        window.jumpToItem = function(name) {
+            closeListModal();
+            if(listModalTitle.innerHTML.includes('成员')) {
+                const member = flowerData.find(m=>m.name===name);
+                if(member) { queryMode='member'; byMemberBtn.click(); searchInput.value = name; performSearch(); }
+            } else {
+                queryMode='flower'; byFlowerBtn.click(); searchInput.value = name; performSearch();
+            }
+        };
+
+        document.getElementById('memberStatsCard').onclick = showMemberModal;
+        document.getElementById('flowerStatsCard').onclick = showFlowerModal;
+
+        // OCR
         async function getBaiduToken() {
             if(baiduAccessToken) return baiduAccessToken;
-            const url = `https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=${BAIDU_API_KEY}&client_secret=${BAIDU_SECRET_KEY}`;
-            const res = await fetch(url, { method:'POST' });
+            const res = await fetch(`https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=${BAIDU_API_KEY}&client_secret=${BAIDU_SECRET_KEY}`, { method:'POST' });
             const data = await res.json();
             baiduAccessToken = data.access_token;
             return baiduAccessToken;
         }
 
-        window.openOCRModal = function() {
-            ocrModal.style.display = 'flex';
-            imagePreview.style.display = 'none';
-            ocrResult.innerHTML = '';
-            recognizedFlowersDiv.innerHTML = '';
-            importSelectedBtn.style.display = 'none';
-            selectedFlowers.clear();
-        };
-
-        window.closeOCRModal = function() { ocrModal.style.display = 'none'; };
+        window.openOCRModal = ()=> { ocrModal.style.display = 'flex'; imagePreview.style.display = 'none'; ocrResult.innerHTML = ''; recognizedFlowersDiv.innerHTML = ''; importSelectedBtn.style.display = 'none'; selectedFlowers.clear(); };
+        window.closeOCRModal = ()=> ocrModal.style.display = 'none';
 
         window.handleImageUpload = async function(event) {
             const file = event.target.files[0];
             if(!file) return;
-            
-            // 预览
             const reader = new FileReader();
-            reader.onload = e => { imagePreview.src = e.target.result; imagePreview.style.display = 'block'; };
+            reader.onload = e=> { imagePreview.src = e.target.result; imagePreview.style.display = 'block'; };
             reader.readAsDataURL(file);
-            
-            // OCR识别
             ocrLoading.style.display = 'block';
             ocrResult.innerHTML = '';
-            
             try {
                 const token = await getBaiduToken();
                 const base64 = await new Promise(r=>{ const rd=new FileReader(); rd.onload=e=>r(e.target.result.split(',')[1]); rd.readAsDataURL(file); });
@@ -858,64 +978,35 @@
                     method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:`image=${encodeURIComponent(base64)}`
                 });
                 const data = await res.json();
-                
                 if(data.words_result) {
                     const words = data.words_result.map(w=>w.words);
-                    ocrResult.innerHTML = `<strong>识别到 ${words.length} 个文本：</strong><br>${words.join('<br>')}`;
-                    
-                    // 过滤出可能的花卉名（长度2-8个中文字符）
+                    ocrResult.innerHTML = `<strong>识别到 ${words.length} 个文本</strong>`;
                     recognizedFlowers = words.filter(w=>/^[\u4e00-\u9fa5]{2,8}$/.test(w));
                     renderRecognizedFlowers();
                 }
-            } catch(e) {
-                ocrResult.innerHTML = '识别失败：' + e.message;
-            } finally {
-                ocrLoading.style.display = 'none';
-            }
+            } catch(e) { ocrResult.innerHTML = '识别失败'; }
+            finally { ocrLoading.style.display = 'none'; }
         };
 
         function renderRecognizedFlowers() {
-            if(recognizedFlowers.length === 0) {
-                recognizedFlowersDiv.innerHTML = '<p style="color:#d32f2f;">未识别到花卉名称</p>';
-                return;
-            }
-            recognizedFlowersDiv.innerHTML = '<p style="margin-bottom:8px;">点击选择要导入的花卉：</p>' + 
-                recognizedFlowers.map(f=>`<span class="flower-tag" onclick="toggleFlowerSelection('${f}')" id="flower_${f}">${f}</span>`).join('');
+            if(recognizedFlowers.length === 0) { recognizedFlowersDiv.innerHTML = '<p style="color:#d32f2f;">未识别到花卉</p>'; return; }
+            recognizedFlowersDiv.innerHTML = recognizedFlowers.map(f=>`<span class="flower-tag" onclick="toggleFlower('${f}')" id="flower_${f}">${f}</span>`).join('');
             importSelectedBtn.style.display = 'block';
         }
 
-        window.toggleFlowerSelection = function(flower) {
-            const el = document.getElementById(`flower_${flower}`);
-            if(selectedFlowers.has(flower)) {
-                selectedFlowers.delete(flower);
-                el.classList.remove('selected');
-            } else {
-                selectedFlowers.add(flower);
-                el.classList.add('selected');
-            }
+        window.toggleFlower = function(f) {
+            const el = document.getElementById(`flower_${f}`);
+            selectedFlowers.has(f) ? (selectedFlowers.delete(f), el.classList.remove('selected')) : (selectedFlowers.add(f), el.classList.add('selected'));
         };
 
         window.importSelectedFlowers = async function() {
-            if(selectedFlowers.size === 0) { alert('请至少选择一个花卉'); return; }
-            
-            const memberName = prompt('这些花卉属于哪位成员？', '');
+            if(selectedFlowers.size === 0) { alert('请选择花卉'); return; }
+            const memberName = prompt('这些花卉属于哪位成员？');
             if(!memberName) return;
-            
             let member = flowerData.find(m=>m.name===memberName);
             const flowers = Array.from(selectedFlowers);
-            
-            if(member) {
-                flowers.forEach(f=>{ if(!member.flowers.includes(f)) member.flowers.push(f); });
-            } else {
-                flowerData.push({name:memberName, flowers:flowers});
-            }
-            
-            if(await saveToCloud()) {
-                await addCloudLog('截图导入', memberName, flowers.join(','));
-                alert(`成功为 ${memberName} 导入 ${flowers.length} 种花卉！`);
-                closeOCRModal();
-                updateStats();
-            }
+            member ? flowers.forEach(f=>{ if(!member.flowers.includes(f)) member.flowers.push(f); }) : flowerData.push({name:memberName, flowers});
+            if(await saveToCloud()) { await addCloudLog('截图导入', memberName, flowers.join(',')); alert(`成功导入 ${flowers.length} 种花卉！`); closeOCRModal(); updateStats(); }
         };
 
         // 启动
