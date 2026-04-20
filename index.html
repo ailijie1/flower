@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>🌸 花园世界 · 公会花册</title>
+    <title>🌸 花园世界 · 公会花册 Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
@@ -253,9 +253,6 @@
             transform: translateY(-3px);
             box-shadow: 0 8px 16px rgba(58, 122, 46, 0.15);
         }
-        .stat-card:active {
-            transform: translateY(0);
-        }
         .stat-number {
             font-size: 2rem;
             font-weight: 700;
@@ -318,10 +315,6 @@
             border-radius: 30px;
             cursor: pointer;
             color: #2e5a1e;
-        }
-        .page-btn.disabled {
-            opacity: 0.4;
-            pointer-events: none;
         }
         .collapsible {
             margin-top: 16px;
@@ -702,7 +695,7 @@
             <div id="ocrLoading" style="display:none; text-align:center; padding:20px;">
                 <i class="fas fa-spinner fa-spin"></i> 识别中...
             </div>
-            <div id="ocrResult"></div>
+            <div id="ocrResult" style="margin-top:12px; padding:12px; background:#f0f8ea; border-radius:16px; font-size:0.9rem; max-height:150px; overflow-y:auto;"></div>
             <div id="recognizedFlowers" style="margin-top:12px;"></div>
             <button class="modal-btn" id="importSelectedBtn" onclick="importSelectedFlowers()" style="display:none; margin-top:16px;">
                 <i class="fas fa-download"></i> 导入选中花卉
@@ -816,7 +809,7 @@
             await supabase.from('profiles').upsert({ id: currentUser.id, nickname });
             updateUserUI(nickname);
             closeNicknameModal();
-            addCloudLog('修改昵称', null, null);
+            addCloudLog('修改昵称');
         };
 
         // 花卉系统
@@ -954,10 +947,14 @@
         // OCR
         async function getBaiduToken() {
             if(baiduAccessToken) return baiduAccessToken;
-            const res = await fetch(`https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=${BAIDU_API_KEY}&client_secret=${BAIDU_SECRET_KEY}`, { method:'POST' });
-            const data = await res.json();
-            baiduAccessToken = data.access_token;
-            return baiduAccessToken;
+            try {
+                const res = await fetch(`https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=${BAIDU_API_KEY}&client_secret=${BAIDU_SECRET_KEY}`, { method:'POST' });
+                const data = await res.json();
+                console.log('Token响应:', data);
+                if(data.error) throw new Error(data.error_description);
+                baiduAccessToken = data.access_token;
+                return baiduAccessToken;
+            } catch(e) { console.error('Token获取失败:', e); throw e; }
         }
 
         window.openOCRModal = ()=> { ocrModal.style.display = 'flex'; imagePreview.style.display = 'none'; ocrResult.innerHTML = ''; recognizedFlowersDiv.innerHTML = ''; importSelectedBtn.style.display = 'none'; selectedFlowers.clear(); };
@@ -965,31 +962,53 @@
 
         window.handleImageUpload = async function(event) {
             const file = event.target.files[0];
-            if(!file) return;
+            if(!file) { alert('请选择图片'); return; }
+            
             const reader = new FileReader();
             reader.onload = e=> { imagePreview.src = e.target.result; imagePreview.style.display = 'block'; };
             reader.readAsDataURL(file);
+            
             ocrLoading.style.display = 'block';
-            ocrResult.innerHTML = '';
+            ocrResult.innerHTML = '正在识别，请稍候...';
+            
             try {
                 const token = await getBaiduToken();
-                const base64 = await new Promise(r=>{ const rd=new FileReader(); rd.onload=e=>r(e.target.result.split(',')[1]); rd.readAsDataURL(file); });
+                console.log('Token获取成功');
+                
+                const base64 = await new Promise((resolve, reject) => {
+                    const rd = new FileReader();
+                    rd.onload = e => resolve(e.target.result.split(',')[1]);
+                    rd.onerror = reject;
+                    rd.readAsDataURL(file);
+                });
+                console.log('图片转base64成功，长度:', base64.length);
+                
                 const res = await fetch(`https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic?access_token=${token}`, {
                     method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:`image=${encodeURIComponent(base64)}`
                 });
                 const data = await res.json();
-                if(data.words_result) {
+                console.log('OCR返回:', data);
+                
+                if(data.error_code) {
+                    ocrResult.innerHTML = `识别失败：${data.error_msg} (错误码: ${data.error_code})`;
+                } else if(data.words_result) {
                     const words = data.words_result.map(w=>w.words);
-                    ocrResult.innerHTML = `<strong>识别到 ${words.length} 个文本</strong>`;
+                    ocrResult.innerHTML = `<strong>识别到 ${words.length} 个文本：</strong><br>${words.join('<br>')}`;
                     recognizedFlowers = words.filter(w=>/^[\u4e00-\u9fa5]{2,8}$/.test(w));
                     renderRecognizedFlowers();
+                } else {
+                    ocrResult.innerHTML = '未识别到文字';
                 }
-            } catch(e) { ocrResult.innerHTML = '识别失败'; }
-            finally { ocrLoading.style.display = 'none'; }
+            } catch(e) {
+                console.error('识别错误:', e);
+                ocrResult.innerHTML = '识别失败：' + e.message;
+            } finally {
+                ocrLoading.style.display = 'none';
+            }
         };
 
         function renderRecognizedFlowers() {
-            if(recognizedFlowers.length === 0) { recognizedFlowersDiv.innerHTML = '<p style="color:#d32f2f;">未识别到花卉</p>'; return; }
+            if(recognizedFlowers.length === 0) { recognizedFlowersDiv.innerHTML = '<p style="color:#d32f2f;">未识别到花卉名称</p>'; return; }
             recognizedFlowersDiv.innerHTML = recognizedFlowers.map(f=>`<span class="flower-tag" onclick="toggleFlower('${f}')" id="flower_${f}">${f}</span>`).join('');
             importSelectedBtn.style.display = 'block';
         }
