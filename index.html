@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>🌸 花园世界 · 公会花册 Pro</title>
+    <title>🌸 花园世界 · 公会花册 Pro+</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
@@ -114,7 +114,6 @@
             transform: translateY(3px);
             box-shadow: 0 2px 0 #245218;
         }
-        /* 统计卡片 - 双卡 */
         .stats-row {
             display: flex;
             gap: 10px;
@@ -218,7 +217,7 @@
             transition: max-height 0.3s ease;
         }
         .collapse-content.open {
-            max-height: 300px;
+            max-height: 400px;
             overflow-y: auto;
         }
         .form-row {
@@ -295,11 +294,11 @@
 <div class="container">
     <h1>
         <i class="fas fa-flower" style="color:#e65100;"></i>
-        花园世界 Pro
+        花园世界 Pro+
         <i class="fas fa-leaf"></i>
     </h1>
     <p class="subtitle">
-        <i class="fas fa-cloud"></i> 云端图鉴 · 网格分页 · 更新日志
+        <i class="fas fa-cloud"></i> 云端图鉴 · 网格分页 · 全局日志
     </p>
 
     <div class="btn-group">
@@ -312,7 +311,6 @@
         <button id="searchBtn"><i class="fas fa-search"></i> 查询</button>
     </div>
 
-    <!-- 统计卡片（双卡） -->
     <div class="stats-row" id="statsPanel">
         <div class="stat-card"><div class="stat-number" id="totalMembers">0</div><div class="stat-label">总成员</div></div>
         <div class="stat-card"><div class="stat-number" id="totalFlowers">0</div><div class="stat-label">花卉种类</div></div>
@@ -324,7 +322,6 @@
         </div>
     </div>
 
-    <!-- 添加记录（可折叠） -->
     <div class="collapsible">
         <div class="collapse-header" onclick="toggleCollapse('addPanel')">
             <i class="fas fa-plus-circle" style="color:#e68900;"></i> 添加花卉记录
@@ -339,17 +336,15 @@
         </div>
     </div>
 
-    <!-- 云端日志（可折叠） -->
     <div class="collapsible">
         <div class="collapse-header" onclick="toggleCollapse('logPanel')">
-            <i class="fas fa-history" style="color:#6f9e4c;"></i> 云端更新日志
+            <i class="fas fa-history" style="color:#6f9e4c;"></i> 云端更新日志（全员可见）
             <i class="fas fa-chevron-down" id="logIcon" style="margin-left:auto;"></i>
         </div>
         <div id="logPanel" class="collapse-content">
             <ul class="log-list" id="logList">
                 <li class="log-item"><span class="log-time">--:--</span> 加载中...</li>
             </ul>
-            <button class="refresh-btn" id="clearLogBtn" style="margin-top:8px; width:100%;"><i class="fas fa-trash-alt"></i> 清空本地日志</button>
         </div>
     </div>
 
@@ -359,7 +354,7 @@
     </div>
 
     <p class="footer">
-        <i class="fas fa-database"></i> Supabase · 网格分页 · 实时日志
+        <i class="fas fa-database"></i> Supabase · 云端日志 · 全员实时共享
     </p>
 </div>
 
@@ -374,9 +369,6 @@
         let currentPage = 1;
         const pageSize = 12;
         let currentResultData = null;
-        
-        // 日志系统（本地存储）
-        let updateLogs = JSON.parse(localStorage.getItem('flower_logs') || '[]');
 
         const byMemberBtn = document.getElementById('byMemberBtn');
         const byFlowerBtn = document.getElementById('byFlowerBtn');
@@ -392,23 +384,44 @@
         const totalFlowersSpan = document.getElementById('totalFlowers');
         const logList = document.getElementById('logList');
 
-        function addLog(message) {
-            const now = new Date();
-            const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
-            updateLogs.unshift({ time: timeStr, text: message });
-            if (updateLogs.length > 30) updateLogs.pop();
-            localStorage.setItem('flower_logs', JSON.stringify(updateLogs));
-            renderLogs();
+        // 添加云端日志
+        async function addCloudLog(action, memberName = null, flowerName = null) {
+            try {
+                await fetch(`${SUPABASE_URL}/rest/v1/flower_logs`, {
+                    method: 'POST',
+                    headers: {
+                        "apikey": SUPABASE_KEY,
+                        "Authorization": `Bearer ${SUPABASE_KEY}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ action, member_name: memberName, flower_name: flowerName })
+                });
+            } catch (e) {
+                console.warn('日志写入失败', e);
+            }
         }
 
-        function renderLogs() {
-            if (updateLogs.length === 0) {
-                logList.innerHTML = '<li class="log-item"><span class="log-time">--:--</span> 暂无日志</li>';
-                return;
+        // 加载云端日志
+        async function loadCloudLogs() {
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/flower_logs?select=*&order=created_at.desc&limit=30`, {
+                    headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
+                });
+                const logs = await response.json();
+                if (logs && logs.length) {
+                    logList.innerHTML = logs.map(log => {
+                        const time = new Date(log.created_at).toLocaleTimeString('zh-CN', { hour12: false, hour: '2-digit', minute: '2-digit' });
+                        let text = log.action;
+                        if (log.member_name) text += `：${log.member_name}`;
+                        if (log.flower_name) text += ` → ${log.flower_name}`;
+                        return `<li class="log-item"><span class="log-time">${time}</span> ${text}</li>`;
+                    }).join('');
+                } else {
+                    logList.innerHTML = '<li class="log-item"><span class="log-time">--:--</span> 暂无云端日志</li>';
+                }
+            } catch (e) {
+                logList.innerHTML = '<li class="log-item"><span class="log-time">--:--</span> 日志加载失败</li>';
             }
-            logList.innerHTML = updateLogs.slice(0, 15).map(log => 
-                `<li class="log-item"><span class="log-time">${log.time}</span> ${log.text}</li>`
-            ).join('');
         }
 
         function updateStats() {
@@ -430,7 +443,6 @@
                     currentRecordId = records[0].id;
                     flowerData = records[0].data || [];
                     syncMessage.innerHTML = `<i class="fas fa-check-circle" style="color:#3a7a2e;"></i> 云端 ${flowerData.length}位成员`;
-                    addLog(`数据加载成功，${flowerData.length}位成员`);
                 } else {
                     flowerData = [];
                     syncMessage.innerHTML = `<i class="fas fa-database"></i> 云端无数据`;
@@ -442,12 +454,12 @@
                 } else {
                     resultArea.innerHTML = `<div style="color:#5a7e4a; text-align:center; padding:20px;"><i class="fas fa-search"></i> 输入关键词查询</div>`;
                 }
+                await addCloudLog('数据加载');
             } catch (e) {
                 syncMessage.innerHTML = '<i class="fas fa-exclamation-triangle"></i> 使用缓存';
                 const cached = localStorage.getItem('flowerData_cache');
                 if (cached) { flowerData = JSON.parse(cached); updateStats(); }
             }
-            renderLogs();
         }
 
         async function saveToCloud() {
@@ -519,6 +531,9 @@
             panel.classList.toggle('open');
             icon.classList.toggle('fa-chevron-down');
             icon.classList.toggle('fa-chevron-up');
+            if (id === 'logPanel' && panel.classList.contains('open')) {
+                loadCloudLogs();
+            }
         };
 
         function performSearch() {
@@ -526,11 +541,11 @@
             if (!kw) return;
             if (queryMode === 'member') {
                 const m = flowerData.find(m => m.name.includes(kw));
-                if (m) { renderPaginatedResult('member', m); addLog(`查询成员：${m.name}`); }
+                if (m) { renderPaginatedResult('member', m); addCloudLog('查询成员', m.name); }
                 else { resultArea.innerHTML = `<div style="color:#a00; padding:20px; text-align:center;">❌ 未找到</div>`; currentResultData = null; }
             } else {
                 const members = flowerData.filter(m => m.flowers.some(f => f.includes(kw)));
-                if (members.length) { renderPaginatedResult('flower', members); addLog(`查询花卉：${kw} (${members.length}人)`); }
+                if (members.length) { renderPaginatedResult('flower', members); addCloudLog('查询花卉', null, kw); }
                 else { resultArea.innerHTML = `<div style="color:#a00; padding:20px; text-align:center;">❌ 未找到</div>`; currentResultData = null; }
             }
         }
@@ -544,33 +559,32 @@
             const mName = newMemberName.value.trim(), fName = newFlowerName.value.trim();
             if(!mName||!fName) return;
             let member = flowerData.find(m=>m.name===mName);
+            let isNewMember = false;
             if(member) {
                 if(member.flowers.includes(fName)) { alert('已存在'); return; }
                 member.flowers.push(fName);
             } else {
                 flowerData.push({ name: mName, flowers: [fName] });
+                isNewMember = true;
             }
             if(await saveToCloud()) {
-                addLog(`➕ ${mName} 添加了 ${fName}`);
+                const action = isNewMember ? '新增成员' : '添加花卉';
+                await addCloudLog(action, mName, fName);
                 newMemberName.value=''; newFlowerName.value='';
                 if(currentResultData?.type==='member' && currentResultData.data.name===mName) {
                     renderPaginatedResult('member', flowerData.find(m=>m.name===mName));
+                }
+                // 如果日志面板是打开的，刷新日志
+                if (document.getElementById('logPanel').classList.contains('open')) {
+                    loadCloudLogs();
                 }
             }
         };
 
         refreshDataBtn.onclick = loadData;
-        document.getElementById('clearLogBtn').onclick = ()=>{
-            updateLogs = [];
-            localStorage.setItem('flower_logs', JSON.stringify(updateLogs));
-            renderLogs();
-            addLog('日志已清空');
-        };
 
         // 初始化
-        renderLogs();
         loadData();
-        // 默认展开添加面板
         document.getElementById('addPanel').classList.add('open');
         document.getElementById('addIcon').classList.remove('fa-chevron-down');
         document.getElementById('addIcon').classList.add('fa-chevron-up');
