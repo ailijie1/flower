@@ -907,7 +907,7 @@
         };
         window.closeMatchModal = ()=> matchModal.style.display = 'none';
 
-        document.getElementById('screenshotInput').addEventListener('change', async (e)=>{
+       document.getElementById('screenshotInput').addEventListener('change', async (e)=>{
             const file = e.target.files[0];
             if(!file) return;
             const reader = new FileReader();
@@ -915,7 +915,11 @@
             reader.readAsDataURL(file);
             
             matchLoading.style.display = 'block';
-            matchResult.innerHTML = '';
+            matchResult.innerHTML = '正在准备匹配...';
+            matchedFlowersDiv.innerHTML = '';
+            importMatchedBtn.style.display = 'none';
+            selectedMatchedFlowers.clear();
+            matchedFlowers = [];
             
             const img = new Image();
             img.src = URL.createObjectURL(file);
@@ -924,15 +928,15 @@
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             
-            matchedFlowers = [];
-            
             const scanStartY = 0;
             const scanEndY = Math.min(img.height * 0.6, img.height - 100);
             const scanStep = 30;
             const maxFlowers = Math.min(flowerLibrary.size, 80);
             const libraryArray = Array.from(flowerLibrary).slice(0, maxFlowers);
             
-            matchResult.innerHTML = `正在匹配 ${libraryArray.length} 种花卉...`;
+            matchResult.innerHTML = `开始匹配 ${libraryArray.length} 种花卉...`;
+            matchedFlowersDiv.innerHTML = '<span style="color:#7f9f6b;"><i class="fas fa-spinner fa-spin"></i> 匹配中，结果将实时显示...</span>';
+            importMatchedBtn.style.display = 'block';
             
             for(let [flowerName, templateImg] of libraryArray) {
                 canvas.width = img.width;
@@ -962,25 +966,24 @@
                     }
                 }
                 
-                // 提高阈值到 0.28，减少误识别
                 if(bestMatch > 0.28) {
                     matchedFlowers.push(flowerName);
-                    matchResult.innerHTML = `✅ 已匹配: ${flowerName} (${(bestMatch*100).toFixed(1)}%)`;
+                    matchResult.innerHTML = `✅ 已匹配 ${matchedFlowers.length} 种花卉`;
+                    let tagsHtml = matchedFlowers.map(f=>`<span class="flower-tag" onclick="toggleMatchedFlower('${f}')" id="match_${f}">${f}</span>`).join('');
+                    matchedFlowersDiv.innerHTML = tagsHtml;
                 }
                 
-                if(matchedFlowers.length % 5 === 0) {
-                    await new Promise(r => setTimeout(r, 10));
-                }
+                await new Promise(r => setTimeout(r, 5));
             }
             
             matchLoading.style.display = 'none';
             
             if(matchedFlowers.length > 0) {
-                matchResult.innerHTML = `✅ 匹配到 ${matchedFlowers.length} 种花卉`;
-                matchedFlowersDiv.innerHTML = matchedFlowers.map(f=>`<span class="flower-tag" onclick="toggleMatchedFlower('${f}')" id="match_${f}">${f}</span>`).join('');
-                importMatchedBtn.style.display = 'block';
+                matchResult.innerHTML = `✅ 匹配完成！共 ${matchedFlowers.length} 种花卉`;
             } else {
                 matchResult.innerHTML = '⚠️ 未匹配到任何花卉，请调整截图或扩充图鉴库';
+                matchedFlowersDiv.innerHTML = '';
+                importMatchedBtn.style.display = 'none';
             }
         });
 
