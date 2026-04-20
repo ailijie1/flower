@@ -336,12 +336,18 @@
         </div>
     </div>
 
+    <!-- 云端日志（可折叠）含刷新按钮 -->
     <div class="collapsible">
         <div class="collapse-header" onclick="toggleCollapse('logPanel')">
             <i class="fas fa-history" style="color:#6f9e4c;"></i> 云端更新日志（全员可见）
             <i class="fas fa-chevron-down" id="logIcon" style="margin-left:auto;"></i>
         </div>
         <div id="logPanel" class="collapse-content">
+            <div style="display:flex; justify-content:flex-end; margin-bottom:8px;">
+                <button class="refresh-btn" id="refreshLogBtn" style="padding:4px 12px; font-size:0.8rem;" onclick="event.stopPropagation(); loadCloudLogs()">
+                    <i class="fas fa-sync-alt"></i> 刷新日志
+                </button>
+            </div>
             <ul class="log-list" id="logList">
                 <li class="log-item"><span class="log-time">--:--</span> 加载中...</li>
             </ul>
@@ -574,7 +580,6 @@
                 if(currentResultData?.type==='member' && currentResultData.data.name===mName) {
                     renderPaginatedResult('member', flowerData.find(m=>m.name===mName));
                 }
-                // 如果日志面板是打开的，刷新日志
                 if (document.getElementById('logPanel').classList.contains('open')) {
                     loadCloudLogs();
                 }
