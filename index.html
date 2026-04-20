@@ -660,24 +660,46 @@
                 };
             });
         }
-        
-        async function saveLibraryToDB(images) {
-            const db = await openDB();
-            const tx = db.transaction(STORE_NAME, 'readwrite');
-            const store = tx.objectStore(STORE_NAME);
-            await store.clear();
-            for(let [name, img] of images) {
-                const canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0);
-                const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
-                await store.put(blob, name);
+             async function saveLibraryToDB(images) {
+            try {
+                const db = await openDB();
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                
+                // 清空旧数据
+                await store.clear();
+                
+                // 等待清空完成后再添加新数据
+                for(let [name, img] of images) {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    
+                    const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+                    
+                    // 使用新的请求来存储
+                    const putRequest = store.put(blob, name);
+                    await new Promise((resolve, reject) => {
+                        putRequest.onsuccess = resolve;
+                        putRequest.onerror = reject;
+                    });
+                }
+                
+                // 等待事务完成
+                await new Promise((resolve, reject) => {
+                    tx.oncomplete = resolve;
+                    tx.onerror = reject;
+                });
+                
+                libraryStatus.innerHTML = `✅ 图鉴库已永久保存 (${images.size}种)`;
+                libraryCount.innerHTML = `📚 已加载 ${images.size} 种花卉`;
+            } catch(e) {
+                console.error('保存失败:', e);
+                libraryStatus.innerHTML = `❌ 保存失败: ${e.message}`;
             }
-            document.getElementById('libraryStatus').innerHTML = `✅ 图鉴库已永久保存 (${images.size}种)`;
         }
-        
         async function loadLibraryFromDB() {
             try {
                 const db = await openDB();
