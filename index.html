@@ -190,14 +190,13 @@
 </div>
 
 <script>
-    // ==================== 🔑 你的配置 ====================
+    // ==================== 你的配置 ====================
     const SUPABASE_URL = "https://amngvhgusyipxnnkejzp.supabase.co";
     const SUPABASE_KEY = "sb_publishable_yIYNCHcT4Z0z-NMcKVmjTQ_6SoHyxwZ";
     // ==================================================
 
     const TABLE_NAME = "flowers";
     const API_URL = `${SUPABASE_URL}/rest/v1/${TABLE_NAME}?select=data`;
-    const UPDATE_URL = `${SUPABASE_URL}/rest/v1/${TABLE_NAME}?id=eq.1`;
 
     let flowerData = [];
     let queryMode = 'member';
@@ -222,17 +221,34 @@
                     "Authorization": `Bearer ${SUPABASE_KEY}`
                 }
             });
-            if (!response.ok) throw new Error('加载失败');
+            
+            if (!response.ok) {
+                console.error('响应状态:', response.status);
+                throw new Error('加载失败');
+            }
+            
             const data = await response.json();
-            flowerData = data[0]?.data || [];
-            syncMessage.textContent = `✅ 云端已连接 (${flowerData.length}位成员)`;
+            console.log('获取到的数据:', data);
+            
+            // 数据在 data[0].data 里
+            if (data && data.length > 0 && data[0].data) {
+                flowerData = data[0].data;
+                syncMessage.textContent = `✅ 云端已连接 (${flowerData.length}位成员)`;
+            } else {
+                flowerData = [];
+                syncMessage.textContent = `⚠️ 云端无数据 (0位成员)`;
+            }
+            
             updatePlaceholder();
             localStorage.setItem('flowerData_cache', JSON.stringify(flowerData));
         } catch (error) {
             console.error('加载失败:', error);
             syncMessage.textContent = '❌ 连接失败，使用本地缓存';
             const cached = localStorage.getItem('flowerData_cache');
-            if (cached) flowerData = JSON.parse(cached);
+            if (cached) {
+                flowerData = JSON.parse(cached);
+                syncMessage.textContent = `📦 使用缓存 (${flowerData.length}位成员)`;
+            }
             updatePlaceholder();
         }
     }
@@ -240,6 +256,18 @@
     async function saveToCloud() {
         syncMessage.textContent = '☁️ 正在同步到云端...';
         try {
+            // 先获取当前记录的 ID
+            const getResponse = await fetch(API_URL, {
+                headers: {
+                    "apikey": SUPABASE_KEY,
+                    "Authorization": `Bearer ${SUPABASE_KEY}`
+                }
+            });
+            const records = await getResponse.json();
+            const recordId = records[0]?.id || 1;
+            
+            const UPDATE_URL = `${SUPABASE_URL}/rest/v1/${TABLE_NAME}?id=eq.${recordId}`;
+            
             const response = await fetch(UPDATE_URL, {
                 method: 'PATCH',
                 headers: {
@@ -249,6 +277,7 @@
                 },
                 body: JSON.stringify({ data: flowerData })
             });
+            
             if (!response.ok) throw new Error('保存失败');
             syncMessage.textContent = `✅ 云端已更新 (${flowerData.length}位成员)`;
             localStorage.setItem('flowerData_cache', JSON.stringify(flowerData));
@@ -264,6 +293,8 @@
         searchInput.placeholder = queryMode === 'member' ? '输入成员名字…' : '输入花卉名称…';
         if (flowerData.length > 0) {
             resultArea.innerHTML = queryMode === 'member' ? '✨ 输入成员名字，查看ta的花卉 ✨' : '🌿 输入花卉，看看哪位成员拥有它 🌿';
+        } else {
+            resultArea.innerHTML = '⚠️ 暂无数据，请点击刷新或添加记录';
         }
     }
 
@@ -340,6 +371,7 @@
 
     refreshDataBtn.addEventListener('click', loadData);
 
+    // 启动时加载数据
     loadData();
 </script>
 </body>
