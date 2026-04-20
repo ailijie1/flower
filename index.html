@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>🌸 花园世界 · 公会花册 Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -345,28 +344,6 @@
             cursor: pointer;
             box-shadow: 0 5px 0 #b26500;
         }
-        .library-btn {
-            padding: 8px 16px;
-            background: #9c27b0;
-            color: white;
-            border: none;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 4px 0 #6a1b9a;
-            font-size: 0.8rem;
-        }
-        .ocr-btn {
-            padding: 8px 16px;
-            background: #2196f3;
-            color: white;
-            border: none;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 4px 0 #1565c0;
-            font-size: 0.8rem;
-        }
         .sync-status {
             display: flex;
             align-items: center;
@@ -454,28 +431,60 @@
             max-height: 50vh;
             overflow-y: auto;
         }
-        .flower-tag {
-            display: inline-block;
+        .modal-input {
+            padding: 14px 18px;
+            border: 1.5px solid #b8daa0;
+            border-radius: 40px;
+            width: 100%;
+            margin-bottom: 16px;
+        }
+        .modal-btn {
+            padding: 14px;
             background: #3a7a2e;
             color: white;
-            padding: 6px 14px;
-            border-radius: 20px;
-            margin: 4px;
-            font-size: 0.85rem;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            width: 100%;
             cursor: pointer;
         }
-        .flower-tag.selected {
-            background: #e68900;
+        .modal-search {
+            padding: 12px 16px;
+            border: 1.5px solid #b8daa0;
+            border-radius: 30px;
+            width: 100%;
+            margin-bottom: 16px;
+            outline: none;
         }
-        #libraryStatus {
-            margin-top: 8px;
-            font-size: 0.85rem;
-            color: #5a7e4a;
+        .modal-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid #e0efd5;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: 0.15s;
+        }
+        .modal-list-item:hover {
+            background: #f0f8ea;
+        }
+        .modal-item-name {
+            font-weight: 500;
+            color: #1e4a1e;
+        }
+        .modal-item-badge {
+            background: #3a7a2e;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
         }
     </style>
 </head>
 <body>
 <div class="container">
+    <!-- 登录界面 -->
     <div id="authContainer" class="auth-container">
         <h1>🌸 花园世界</h1>
         <p class="subtitle">公会专属 · 登录后使用</p>
@@ -500,6 +509,7 @@
         <p class="auth-footer">🌱 需要邀请码？请联系公会管理员</p>
     </div>
 
+    <!-- 主应用 -->
     <div id="appContainer" class="app-container">
         <div class="user-bar">
             <div class="user-profile" id="userProfile">
@@ -539,12 +549,6 @@
         <div class="collapsible">
             <div class="collapse-header" onclick="toggleCollapse('addPanel')">
                 <i class="fas fa-plus-circle" style="color:#e68900;"></i> 添加花卉记录
-                <button class="library-btn" onclick="event.stopPropagation(); openLibraryModal()">
-                    <i class="fas fa-book"></i> 图鉴
-                </button>
-                <button class="ocr-btn" onclick="event.stopPropagation(); openMatchModal()">
-                    <i class="fas fa-camera"></i> 匹配
-                </button>
                 <i class="fas fa-chevron-down" id="addIcon" style="margin-left:auto;"></i>
             </div>
             <div id="addPanel" class="collapse-content">
@@ -580,47 +584,30 @@
     </div>
 </div>
 
-<!-- 图鉴库弹窗 -->
-<div class="modal-overlay" id="libraryModal">
-    <div class="modal">
+<!-- 昵称修改弹窗 -->
+<div class="modal-overlay" id="nicknameModal">
+    <div class="modal" onclick="event.stopPropagation()">
         <div class="modal-header">
-            <span class="modal-title"><i class="fas fa-book"></i> 花卉图鉴库</span>
-            <button class="modal-close" onclick="closeLibraryModal()"><i class="fas fa-times"></i></button>
+            <span class="modal-title"><i class="fas fa-user-edit"></i> 修改昵称</span>
+            <button class="modal-close" onclick="closeNicknameModal()"><i class="fas fa-times"></i></button>
         </div>
         <div class="modal-body">
-            <p style="margin-bottom:16px;">上传包含花卉截图的 ZIP 文件，文件名即花名。</p>
-            <input type="file" id="libraryZipInput" accept=".zip" style="display:none;">
-            <button class="modal-btn" onclick="document.getElementById('libraryZipInput').click()" style="background:#9c27b0;">
-                <i class="fas fa-upload"></i> 上传图鉴库 (ZIP)
-            </button>
-            <div id="libraryStatus"></div>
-            <div id="libraryCount" style="margin-top:12px; font-weight:600;"></div>
+            <input type="text" id="nicknameInput" class="modal-input" placeholder="输入新昵称" maxlength="12">
+            <button class="modal-btn" onclick="saveNickname()">保存</button>
         </div>
     </div>
 </div>
 
-<!-- 匹配识别弹窗 -->
-<div class="modal-overlay" id="matchModal">
-    <div class="modal" style="max-width:600px;">
+<!-- 成员/花卉列表弹窗 -->
+<div class="modal-overlay" id="listModal">
+    <div class="modal" onclick="event.stopPropagation()">
         <div class="modal-header">
-            <span class="modal-title"><i class="fas fa-search"></i> 图鉴匹配识别</span>
-            <button class="modal-close" onclick="closeMatchModal()"><i class="fas fa-times"></i></button>
+            <span class="modal-title" id="listModalTitle"><i class="fas fa-users"></i> 成员列表</span>
+            <button class="modal-close" onclick="closeListModal()"><i class="fas fa-times"></i></button>
         </div>
         <div class="modal-body">
-            <p style="margin-bottom:16px;">上传游戏截图，自动匹配图鉴库中的花卉。</p>
-            <input type="file" id="screenshotInput" accept="image/*" style="display:none;">
-            <button class="modal-btn" onclick="document.getElementById('screenshotInput').click()" style="background:#2196f3;">
-                <i class="fas fa-image"></i> 选择截图
-            </button>
-            <img id="screenshotPreview" style="max-width:100%; max-height:200px; margin:16px 0; display:none; border-radius:12px;">
-            <div id="matchLoading" style="display:none; text-align:center; padding:20px;">
-                <i class="fas fa-spinner fa-spin"></i> 正在匹配...
-            </div>
-            <div id="matchResult"></div>
-            <div id="matchedFlowers" style="margin-top:16px;"></div>
-            <button class="modal-btn" id="importMatchedBtn" onclick="importMatchedFlowers()" style="display:none; margin-top:16px;">
-                <i class="fas fa-download"></i> 导入选中花卉
-            </button>
+            <input type="text" class="modal-search" id="listModalSearch" placeholder="🔍 搜索..." oninput="filterListModal()">
+            <div id="listModalContainer"></div>
         </div>
     </div>
 </div>
@@ -639,86 +626,7 @@
         let currentRecordId = 1;
         let currentUser = null;
         let currentNickname = '花友';
-        let flowerLibrary = new Map();
-        let matchedFlowers = [];
-        let selectedMatchedFlowers = new Set();
-
-        // ==================== 本地数据库存储 ====================
-        const DB_NAME = 'FlowerLibraryDB';
-        const STORE_NAME = 'images';
-        
-        function openDB() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, 1);
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => resolve(request.result);
-                request.onupgradeneeded = (e) => {
-                    const db = e.target.result;
-                    if(!db.objectStoreNames.contains(STORE_NAME)) {
-                        db.createObjectStore(STORE_NAME);
-                    }
-                };
-            });
-        }
-             async function saveLibraryToDB(images) {
-            try {
-                const db = await openDB();
-                const tx = db.transaction(STORE_NAME, 'readwrite');
-                const store = tx.objectStore(STORE_NAME);
-                
-                // 清空旧数据
-                await store.clear();
-                
-                // 等待清空完成后再添加新数据
-                for(let [name, img] of images) {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-                    
-                    const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
-                    
-                    // 使用新的请求来存储
-                    const putRequest = store.put(blob, name);
-                    await new Promise((resolve, reject) => {
-                        putRequest.onsuccess = resolve;
-                        putRequest.onerror = reject;
-                    });
-                }
-                
-                // 等待事务完成
-                await new Promise((resolve, reject) => {
-                    tx.oncomplete = resolve;
-                    tx.onerror = reject;
-                });
-                
-                libraryStatus.innerHTML = `✅ 图鉴库已永久保存 (${images.size}种)`;
-                libraryCount.innerHTML = `📚 已加载 ${images.size} 种花卉`;
-            } catch(e) {
-                console.error('保存失败:', e);
-                libraryStatus.innerHTML = `❌ 保存失败: ${e.message}`;
-            }
-        }
-        async function loadLibraryFromDB() {
-            try {
-                const db = await openDB();
-                const tx = db.transaction(STORE_NAME, 'readonly');
-                const store = tx.objectStore(STORE_NAME);
-                const keys = await store.getAllKeys();
-                flowerLibrary.clear();
-                for(let key of keys) {
-                    const blob = await store.get(key);
-                    const img = new Image();
-                    img.src = URL.createObjectURL(blob);
-                    await new Promise(r => { img.onload = r; });
-                    flowerLibrary.set(key, img);
-                }
-                if(flowerLibrary.size > 0) {
-                    document.getElementById('libraryCount').innerHTML = `📚 已加载 ${flowerLibrary.size} 种花卉`;
-                }
-            } catch(e) {}
-        }
+        let listModalData = [];
 
         // DOM
         const authContainer = document.getElementById('authContainer');
@@ -730,15 +638,12 @@
         const logoutBtn = document.getElementById('logoutBtn');
         const userNameSpan = document.getElementById('userName');
         const userAvatar = document.getElementById('userAvatar');
-        const libraryModal = document.getElementById('libraryModal');
-        const libraryStatus = document.getElementById('libraryStatus');
-        const libraryCount = document.getElementById('libraryCount');
-        const matchModal = document.getElementById('matchModal');
-        const screenshotPreview = document.getElementById('screenshotPreview');
-        const matchLoading = document.getElementById('matchLoading');
-        const matchResult = document.getElementById('matchResult');
-        const matchedFlowersDiv = document.getElementById('matchedFlowers');
-        const importMatchedBtn = document.getElementById('importMatchedBtn');
+        const nicknameModal = document.getElementById('nicknameModal');
+        const nicknameInput = document.getElementById('nicknameInput');
+        const listModal = document.getElementById('listModal');
+        const listModalTitle = document.getElementById('listModalTitle');
+        const listModalContainer = document.getElementById('listModalContainer');
+        const listModalSearch = document.getElementById('listModalSearch');
 
         function getAvatarText(name) { return name ? name.charAt(0).toUpperCase() : '🌸'; }
         function updateUserUI(nickname) { currentNickname = nickname || '花友'; userNameSpan.innerHTML = `${currentNickname} <i class="fas fa-pencil-alt"></i>`; userAvatar.textContent = getAvatarText(currentNickname); }
@@ -786,6 +691,22 @@
         loginTab.onclick = ()=>{ loginTab.classList.add('active'); registerTab.classList.remove('active'); document.getElementById('loginForm').style.display='flex'; document.getElementById('registerForm').style.display='none'; };
         registerTab.onclick = ()=>{ registerTab.classList.add('active'); loginTab.classList.remove('active'); document.getElementById('registerForm').style.display='flex'; document.getElementById('loginForm').style.display='none'; };
 
+        // 昵称修改
+        document.getElementById('userProfile').onclick = ()=>{
+            nicknameModal.style.display = 'flex';
+            nicknameInput.value = currentNickname;
+        };
+        window.closeNicknameModal = ()=> nicknameModal.style.display = 'none';
+        window.saveNickname = async ()=>{
+            const nickname = nicknameInput.value.trim();
+            if(!nickname) { alert('请输入昵称'); return; }
+            await supabase.from('profiles').upsert({ id: currentUser.id, nickname });
+            updateUserUI(nickname);
+            closeNicknameModal();
+            addCloudLog('修改昵称');
+        };
+
+        // 花卉系统
         const byMemberBtn = document.getElementById('byMemberBtn');
         const byFlowerBtn = document.getElementById('byFlowerBtn');
         const searchInput = document.getElementById('searchInput');
@@ -867,143 +788,57 @@
             if(id==='logPanel' && panel.classList.contains('open')) loadCloudLogs();
         };
 
-        // 图鉴库
-        window.openLibraryModal = ()=> { libraryModal.style.display = 'flex'; };
-        window.closeLibraryModal = ()=> libraryModal.style.display = 'none';
+        // 统计卡片弹窗
+        function showMemberModal() {
+            const members = flowerData.map(m=>({ name:m.name, count:m.flowers.length })).sort((a,b)=>a.name.localeCompare(b.name));
+            listModalData = members;
+            listModalTitle.innerHTML = '<i class="fas fa-users"></i> 成员列表';
+            renderListModal(members);
+            listModal.style.display = 'flex';
+        }
 
-        document.getElementById('libraryZipInput').addEventListener('change', async (e)=>{
-            const file = e.target.files[0];
-            if(!file) return;
-            libraryStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 正在解压...';
-            try {
-                const zip = await JSZip.loadAsync(file);
-                const imageFiles = Object.keys(zip.files).filter(f => f.match(/\.(png|jpg|jpeg)$/i) && !zip.files[f].dir);
-                flowerLibrary.clear();
-                for(const filename of imageFiles) {
-                    const flowerName = filename.replace(/\.[^/.]+$/, "").replace(/.*[\\/]/, '');
-                    const blob = await zip.files[filename].async('blob');
-                    const img = new Image();
-                    img.src = URL.createObjectURL(blob);
-                    await new Promise(r=>{ img.onload = r; });
-                    flowerLibrary.set(flowerName, img);
-                }
-                await saveLibraryToDB(flowerLibrary);
-                libraryStatus.innerHTML = '✅ 图鉴库已永久保存！';
-                libraryCount.innerHTML = `📚 已加载 ${flowerLibrary.size} 种花卉`;
-            } catch(err) {
-                libraryStatus.innerHTML = `❌ 加载失败: ${err.message}`;
-            }
-        });
+        function showFlowerModal() {
+            const flowerMap = new Map();
+            flowerData.forEach(m=>m.flowers.forEach(f=>flowerMap.set(f, (flowerMap.get(f)||0)+1)));
+            const flowers = Array.from(flowerMap.entries()).map(([name,count])=>({ name, count })).sort((a,b)=>a.name.localeCompare(b.name));
+            listModalData = flowers;
+            listModalTitle.innerHTML = '<i class="fas fa-flower"></i> 花卉图鉴';
+            renderListModal(flowers);
+            listModal.style.display = 'flex';
+        }
 
-        // 匹配
-        window.openMatchModal = ()=>{ 
-            if(flowerLibrary.size === 0) { alert('请先上传图鉴库'); return; }
-            matchModal.style.display = 'flex'; 
-            screenshotPreview.style.display = 'none';
-            matchResult.innerHTML = '';
-            matchedFlowersDiv.innerHTML = '';
-            importMatchedBtn.style.display = 'none';
-            selectedMatchedFlowers.clear();
+        function renderListModal(items) {
+            if(!items.length) { listModalContainer.innerHTML = '<div style="text-align:center; padding:30px;">暂无数据</div>'; return; }
+            listModalContainer.innerHTML = items.map(item=>`
+                <div class="modal-list-item" onclick="jumpToItem('${item.name}')">
+                    <span class="modal-item-name"><i class="fas fa-${listModalData[0].count !== undefined ? 'user' : 'flower'}"></i> ${item.name}</span>
+                    <span class="modal-item-badge">${item.count}</span>
+                </div>
+            `).join('');
+        }
+
+        window.filterListModal = function() {
+            const kw = listModalSearch.value.toLowerCase();
+            const filtered = listModalData.filter(item=>item.name.toLowerCase().includes(kw));
+            renderListModal(filtered);
         };
-        window.closeMatchModal = ()=> matchModal.style.display = 'none';
 
-       document.getElementById('screenshotInput').addEventListener('change', async (e)=>{
-            const file = e.target.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = ev=>{ screenshotPreview.src = ev.target.result; screenshotPreview.style.display = 'block'; };
-            reader.readAsDataURL(file);
-            
-            matchLoading.style.display = 'block';
-            matchResult.innerHTML = '正在准备匹配...';
-            matchedFlowersDiv.innerHTML = '';
-            importMatchedBtn.style.display = 'none';
-            selectedMatchedFlowers.clear();
-            matchedFlowers = [];
-            
-            const img = new Image();
-            img.src = URL.createObjectURL(file);
-            await new Promise(r=>{ img.onload = r; });
-            
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            
-            const scanStartY = 0;
-            const scanEndY = Math.min(img.height * 0.6, img.height - 100);
-            const scanStep = 30;
-            const maxFlowers = Math.min(flowerLibrary.size, 80);
-            const libraryArray = Array.from(flowerLibrary).slice(0, maxFlowers);
-            
-            matchResult.innerHTML = `开始匹配 ${libraryArray.length} 种花卉...`;
-            matchedFlowersDiv.innerHTML = '<span style="color:#7f9f6b;"><i class="fas fa-spinner fa-spin"></i> 匹配中，结果将实时显示...</span>';
-            importMatchedBtn.style.display = 'block';
-            
-            for(let [flowerName, templateImg] of libraryArray) {
-                canvas.width = img.width;
-                canvas.height = img.height;
-                ctx.drawImage(img, 0, 0);
-                
-                const templateWidth = templateImg.width;
-                const templateHeight = templateImg.height;
-                if(templateWidth > img.width || templateHeight > img.height) continue;
-                
-                let bestMatch = 0;
-                
-                for(let y = scanStartY; y <= scanEndY - templateHeight; y += scanStep) {
-                    for(let x = 0; x <= img.width - templateWidth; x += scanStep) {
-                        let matchCount = 0, totalSamples = 0;
-                        for(let ty = 0; ty < templateHeight; ty += 4) {
-                            for(let tx = 0; tx < templateWidth; tx += 4) {
-                                const templatePixel = ctx.getImageData(tx, ty, 1, 1).data;
-                                const screenPixel = ctx.getImageData(x + tx, y + ty, 1, 1).data;
-                                const diff = Math.abs(templatePixel[0] - screenPixel[0]) + Math.abs(templatePixel[1] - screenPixel[1]) + Math.abs(templatePixel[2] - screenPixel[2]);
-                                if(diff < 60) matchCount++;
-                                totalSamples++;
-                            }
-                        }
-                        const similarity = matchCount / totalSamples;
-                        if(similarity > bestMatch) bestMatch = similarity;
-                    }
-                }
-                
-                if(bestMatch > 0.28) {
-                    matchedFlowers.push(flowerName);
-                    matchResult.innerHTML = `✅ 已匹配 ${matchedFlowers.length} 种花卉`;
-                    let tagsHtml = matchedFlowers.map(f=>`<span class="flower-tag" onclick="toggleMatchedFlower('${f}')" id="match_${f}">${f}</span>`).join('');
-                    matchedFlowersDiv.innerHTML = tagsHtml;
-                }
-                
-                await new Promise(r => setTimeout(r, 5));
-            }
-            
-            matchLoading.style.display = 'none';
-            
-            if(matchedFlowers.length > 0) {
-                matchResult.innerHTML = `✅ 匹配完成！共 ${matchedFlowers.length} 种花卉`;
+        window.closeListModal = ()=> listModal.style.display = 'none';
+
+        window.jumpToItem = function(name) {
+            closeListModal();
+            if(listModalTitle.innerHTML.includes('成员')) {
+                const member = flowerData.find(m=>m.name===name);
+                if(member) { queryMode='member'; byMemberBtn.click(); searchInput.value = name; performSearch(); }
             } else {
-                matchResult.innerHTML = '⚠️ 未匹配到任何花卉，请调整截图或扩充图鉴库';
-                matchedFlowersDiv.innerHTML = '';
-                importMatchedBtn.style.display = 'none';
+                queryMode='flower'; byFlowerBtn.click(); searchInput.value = name; performSearch();
             }
-        });
-
-        window.toggleMatchedFlower = function(f) {
-            const el = document.getElementById(`match_${f}`);
-            selectedMatchedFlowers.has(f) ? (selectedMatchedFlowers.delete(f), el.classList.remove('selected')) : (selectedMatchedFlowers.add(f), el.classList.add('selected'));
         };
 
-        window.importMatchedFlowers = async function() {
-            if(selectedMatchedFlowers.size === 0) { alert('请选择花卉'); return; }
-            const memberName = prompt('这些花卉属于哪位成员？');
-            if(!memberName) return;
-            let member = flowerData.find(m=>m.name===memberName);
-            const flowers = Array.from(selectedMatchedFlowers);
-            member ? flowers.forEach(f=>{ if(!member.flowers.includes(f)) member.flowers.push(f); }) : flowerData.push({name:memberName, flowers});
-            if(await saveToCloud()) { await addCloudLog('图鉴导入', memberName, flowers.join(',')); alert(`成功导入 ${flowers.length} 种花卉！`); closeMatchModal(); updateStats(); }
-        };
+        document.getElementById('memberStatsCard').onclick = showMemberModal;
+        document.getElementById('flowerStatsCard').onclick = showFlowerModal;
 
         // 启动
-        loadLibraryFromDB();
         checkAuth();
         document.getElementById('addPanel').classList.add('open');
         document.getElementById('addIcon').classList.add('fa-chevron-up');
