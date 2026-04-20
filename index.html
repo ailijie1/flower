@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>🌸 花园世界 · 公会花册</title>
+    <!-- Font Awesome 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -12,7 +14,7 @@
             font-family: 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif;
         }
         body {
-            background: linear-gradient(145deg, #f2f7f0 0%, #e6f0da 100%);
+            background: radial-gradient(circle at 20% 30%, #e8f5e9, #c8e6c9, #a5d6a7);
             min-height: 100vh;
             padding: 24px 16px;
             display: flex;
@@ -20,347 +22,475 @@
             justify-content: center;
         }
         .container {
-            max-width: 700px;
+            max-width: 720px;
             width: 100%;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             padding: 32px 28px;
-            border-radius: 40px 20px 40px 20px;
-            box-shadow: 0 20px 40px rgba(40, 60, 20, 0.12);
-            border: 1px solid #e2f0d9;
+            border-radius: 48px 24px 48px 24px;
+            box-shadow: 0 30px 50px rgba(0, 30, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+            border: 1px solid rgba(200, 230, 180, 0.5);
+            transition: all 0.3s ease;
         }
         h1 {
-            color: #3b5e2b;
+            color: #1e3a1e;
             text-align: center;
             font-weight: 600;
-            font-size: 2.1rem;
+            font-size: 2.2rem;
+            letter-spacing: 2px;
             margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            text-shadow: 0 2px 5px rgba(60, 100, 40, 0.1);
+        }
+        h1 i {
+            color: #e65100;
+            font-size: 1.8rem;
+            opacity: 0.8;
         }
         .subtitle {
             text-align: center;
-            color: #6e8b5e;
-            margin-bottom: 20px;
-            border-bottom: 1px dashed #bdd8ae;
-            padding-bottom: 14px;
+            color: #3e5e2b;
+            margin-bottom: 24px;
+            font-size: 1rem;
+            font-weight: 500;
+            border-bottom: 1px dashed #a4c28e;
+            padding-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         .btn-group {
             display: flex;
             justify-content: center;
-            gap: 16px;
-            margin-bottom: 24px;
+            gap: 12px;
+            margin-bottom: 28px;
+            background: rgba(240, 255, 230, 0.5);
+            padding: 6px;
+            border-radius: 60px;
+            backdrop-filter: blur(4px);
         }
         .query-btn {
-            padding: 10px 28px;
-            border: 1.5px solid #a4c28e;
-            background: #f9fff7;
-            color: #3b5e2b;
-            border-radius: 48px;
+            padding: 12px 28px;
+            border: none;
+            background: transparent;
+            color: #2e4a1e;
+            border-radius: 40px;
             font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .query-btn i {
+            font-size: 1rem;
+            opacity: 0.7;
         }
         .query-btn.active {
-            background: #5b8c3e;
+            background: #2e7d32;
             color: white;
+            box-shadow: 0 6px 12px rgba(46, 125, 50, 0.25);
         }
         .search-box {
             display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
-            background: #fafff7;
-            padding: 10px 10px 10px 18px;
+            gap: 10px;
+            margin-bottom: 28px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 6px 6px 6px 20px;
             border-radius: 60px;
-            border: 1px solid #c2dbb3;
+            border: 1px solid #c5e0b4;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
         }
         #searchInput {
             flex: 1;
-            padding: 12px 6px 12px 0;
+            padding: 14px 6px 14px 0;
             border: none;
             background: transparent;
             font-size: 1.05rem;
             outline: none;
+            color: #1e3a1e;
+        }
+        #searchInput::placeholder {
+            color: #7f9f6b;
+            font-weight: 300;
         }
         #searchBtn {
             padding: 12px 28px;
-            background: #5f9c3e;
+            background: #2e7d32;
             color: white;
             border: none;
             border-radius: 40px;
             font-weight: 600;
             cursor: pointer;
+            box-shadow: 0 6px 0 #1b5e20;
+            transition: all 0.1s ease;
+            border: 1px solid #4caf50;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        #searchBtn:hover {
+            background: #3c8c40;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 #1b5e20;
+        }
+        #searchBtn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #1b5e20;
         }
         .result-area {
-            min-height: 100px;
-            padding: 18px;
-            background: #fbfef9;
-            border-radius: 20px;
-            border: 2px solid #cddfbe;
+            min-height: 140px;
+            padding: 22px 22px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 28px;
+            border: 1px solid #d0e6c0;
+            box-shadow: inset 0 1px 4px rgba(0,0,0,0.02), 0 10px 20px -10px #7f9f6b;
             font-size: 1.1rem;
             line-height: 1.7;
-            margin-bottom: 24px;
+            margin-bottom: 28px;
+            color: #1a3a1a;
+            transition: all 0.2s;
+        }
+        .result-area i {
+            color: #e65100;
+            margin-right: 6px;
         }
         .add-section {
-            border-top: 2px dashed #a4c28e;
-            padding-top: 20px;
+            border-top: 2px dashed #9bbb8b;
+            padding-top: 24px;
         }
         .add-title {
-            color: #3b5e2b;
-            font-size: 1.2rem;
+            color: #1e3a1e;
+            font-size: 1.3rem;
             font-weight: 600;
-            margin-bottom: 12px;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         .form-row {
             display: flex;
-            gap: 8px;
+            gap: 10px;
             flex-wrap: wrap;
         }
         .form-input {
             flex: 1;
-            min-width: 140px;
-            padding: 12px 16px;
-            border: 1.5px solid #c2dbb3;
-            border-radius: 30px;
+            min-width: 160px;
+            padding: 14px 18px;
+            border: 1.5px solid #c5e0b4;
+            border-radius: 40px;
             font-size: 1rem;
             background: white;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .form-input:focus {
+            border-color: #2e7d32;
+            box-shadow: 0 0 0 3px rgba(46,125,50,0.1);
         }
         .add-btn {
-            padding: 12px 24px;
-            background: #e9b35f;
+            padding: 14px 28px;
+            background: #e68900;
             color: white;
             border: none;
             border-radius: 40px;
             font-weight: 600;
             cursor: pointer;
+            box-shadow: 0 6px 0 #b26500;
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #ffb74d;
+        }
+        .add-btn:hover {
+            background: #f59e00;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 #b26500;
         }
         .sync-status {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-top: 12px;
-            color: #6e8b5e;
-            font-size: 0.9rem;
+            margin-top: 18px;
+            color: #2e5a1e;
+            font-size: 0.95rem;
+            background: rgba(210, 240, 190, 0.4);
+            padding: 8px 16px;
+            border-radius: 40px;
+            backdrop-filter: blur(4px);
         }
         .refresh-btn {
-            padding: 6px 16px;
-            background: #8baa78;
+            padding: 8px 18px;
+            background: #6f9e4c;
             color: white;
             border: none;
-            border-radius: 20px;
+            border-radius: 30px;
             cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+            box-shadow: 0 4px 0 #3e6925;
+        }
+        .refresh-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #3e6925;
         }
         .footer {
             text-align: center;
-            color: #6b8a58;
+            color: #5f7e4a;
             font-size: 0.85rem;
-            margin-top: 20px;
+            margin-top: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            opacity: 0.8;
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #e0efd5 25%, #f0faea 50%, #e0efd5 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 12px;
+            height: 20px;
+            width: 100%;
+        }
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .fade-in {
+            animation: fadeInUp 0.3s ease-out;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .highlight {
+            background: linear-gradient(120deg, #fff9c4 0%, #fff9c4 80%);
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: 500;
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>🌸 花园世界</h1>
-    <p class="subtitle">公会专属花册 · 云端同步版</p>
+    <h1>
+        <i class="fas fa-seedling"></i>
+        花园世界
+        <i class="fas fa-leaf"></i>
+    </h1>
+    <p class="subtitle">
+        <i class="fas fa-cloud-upload-alt"></i> 公会专属花册 · 实时云端同步
+        <i class="fas fa-users"></i>
+    </p>
 
     <div class="btn-group">
-        <button class="query-btn active" id="byMemberBtn">🌿 按成员</button>
-        <button class="query-btn" id="byFlowerBtn">🌺 按花卉</button>
+        <button class="query-btn active" id="byMemberBtn"><i class="fas fa-user"></i> 按成员</button>
+        <button class="query-btn" id="byFlowerBtn"><i class="fas fa-flower"></i> 按花卉</button>
     </div>
 
     <div class="search-box">
         <input type="text" id="searchInput" placeholder="输入成员名字…" autocomplete="off">
-        <button id="searchBtn">🔍 查询</button>
+        <button id="searchBtn"><i class="fas fa-search"></i> 查询</button>
     </div>
 
-    <div id="resultArea" class="result-area">✨ 正在连接云端数据库...</div>
+    <div id="resultArea" class="result-area">
+        <div class="skeleton" style="width:70%; margin-bottom:12px;"></div>
+        <div class="skeleton" style="width:90%;"></div>
+    </div>
 
     <div class="add-section">
-        <div class="add-title">🌱 添加花卉记录（实时云端同步）</div>
+        <div class="add-title">
+            <i class="fas fa-plus-circle" style="color:#e68900;"></i> 
+            添加花卉记录
+            <span style="font-size:0.8rem; background:#e8f5e9; padding:4px 12px; border-radius:30px;">实时同步</span>
+        </div>
         <div class="form-row">
             <input type="text" id="newMemberName" class="form-input" placeholder="成员名字">
             <input type="text" id="newFlowerName" class="form-input" placeholder="花卉名称">
-            <button class="add-btn" id="addRecordBtn">➕ 添加到云端</button>
+            <button class="add-btn" id="addRecordBtn"><i class="fas fa-cloud-upload-alt"></i> 添加到云端</button>
         </div>
         <div class="sync-status">
-            <span id="syncMessage">📡 准备就绪</span>
-            <button class="refresh-btn" id="refreshDataBtn">🔄 刷新数据</button>
+            <span id="syncMessage"><i class="fas fa-sync fa-spin"></i> 准备就绪</span>
+            <button class="refresh-btn" id="refreshDataBtn"><i class="fas fa-sync-alt"></i> 刷新数据</button>
         </div>
     </div>
 
-    <p class="footer">🌐 Supabase云端 · 全员实时共享</p>
+    <p class="footer">
+        <i class="fas fa-database"></i> Supabase 驱动 · 全员实时共享
+        <i class="fas fa-shield-alt"></i>
+    </p>
 </div>
 
 <script>
-    // ==================== 你的配置 ====================
-    const SUPABASE_URL = "https://amngvhgusyipxnnkejzp.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_yIYNCHcT4Z0z-NMcKVmjTQ_6SoHyxwZ";
-    // ==================================================
+    (function(){
+        "use strict";
+        const SUPABASE_URL = "https://amngvhgusyipxnnkejzp.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_yIYNCHcT4Z0z-NMcKVmjTQ_6SoHyxwZ";
 
-    let flowerData = [];
-    let queryMode = 'member';
-    let currentRecordId = 1; // 存储记录ID
+        let flowerData = [];
+        let queryMode = 'member';
+        let currentRecordId = 1;
+        let isLoading = false;
 
-    const byMemberBtn = document.getElementById('byMemberBtn');
-    const byFlowerBtn = document.getElementById('byFlowerBtn');
-    const searchInput = document.getElementById('searchInput');
-    const searchBtn = document.getElementById('searchBtn');
-    const resultArea = document.getElementById('resultArea');
-    const addRecordBtn = document.getElementById('addRecordBtn');
-    const newMemberName = document.getElementById('newMemberName');
-    const newFlowerName = document.getElementById('newFlowerName');
-    const syncMessage = document.getElementById('syncMessage');
-    const refreshDataBtn = document.getElementById('refreshDataBtn');
+        const byMemberBtn = document.getElementById('byMemberBtn');
+        const byFlowerBtn = document.getElementById('byFlowerBtn');
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const resultArea = document.getElementById('resultArea');
+        const addRecordBtn = document.getElementById('addRecordBtn');
+        const newMemberName = document.getElementById('newMemberName');
+        const newFlowerName = document.getElementById('newFlowerName');
+        const syncMessage = document.getElementById('syncMessage');
+        const refreshDataBtn = document.getElementById('refreshDataBtn');
 
-    async function loadData() {
-        syncMessage.textContent = '📡 正在从云端加载...';
-        try {
-            // 获取所有记录
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/flowers?select=*`, {
-                headers: {
-                    "apikey": SUPABASE_KEY,
-                    "Authorization": `Bearer ${SUPABASE_KEY}`
+        function showSkeleton() {
+            resultArea.innerHTML = `
+                <div class="skeleton" style="width:60%; margin-bottom:12px;"></div>
+                <div class="skeleton" style="width:80%; margin-bottom:8px;"></div>
+                <div class="skeleton" style="width:70%;"></div>
+            `;
+        }
+
+        async function loadData() {
+            if (isLoading) return;
+            isLoading = true;
+            showSkeleton();
+            syncMessage.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 从云端拉取数据...';
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/flowers?select=*`, {
+                    headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
+                });
+                if (!response.ok) throw new Error('加载失败');
+                const records = await response.json();
+                if (records && records.length > 0) {
+                    currentRecordId = records[0].id;
+                    flowerData = records[0].data || [];
+                    syncMessage.innerHTML = `<i class="fas fa-check-circle" style="color:#2e7d32;"></i> 云端已连接 (${flowerData.length}位成员)`;
+                } else {
+                    flowerData = [];
+                    syncMessage.innerHTML = `<i class="fas fa-exclamation-triangle"></i> 云端无数据`;
                 }
-            });
-            
-            if (!response.ok) {
-                throw new Error('加载失败');
+                updatePlaceholder();
+                localStorage.setItem('flowerData_cache', JSON.stringify(flowerData));
+            } catch (error) {
+                syncMessage.innerHTML = '<i class="fas fa-wifi"></i> 连接失败，使用本地缓存';
+                const cached = localStorage.getItem('flowerData_cache');
+                if (cached) { flowerData = JSON.parse(cached); syncMessage.innerHTML = `<i class="fas fa-box"></i> 缓存数据 (${flowerData.length}位成员)`; }
+                updatePlaceholder();
+            } finally {
+                isLoading = false;
             }
-            
-            const records = await response.json();
-            console.log('获取到的记录:', records);
-            
-            if (records && records.length > 0) {
-                // 保存记录ID用于后续更新
-                currentRecordId = records[0].id;
-                // 获取data字段
-                flowerData = records[0].data || [];
-                syncMessage.textContent = `✅ 云端已连接 (${flowerData.length}位成员)`;
+        }
+
+        async function saveToCloud() {
+            syncMessage.innerHTML = '<i class="fas fa-cloud-upload-alt fa-fade"></i> 正在同步...';
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/flowers?id=eq.${currentRecordId}`, {
+                    method: 'PATCH',
+                    headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({ data: flowerData })
+                });
+                if (!response.ok) throw new Error('保存失败');
+                syncMessage.innerHTML = `<i class="fas fa-cloud-check"></i> 云端已更新 (${flowerData.length}位成员)`;
+                localStorage.setItem('flowerData_cache', JSON.stringify(flowerData));
+                return true;
+            } catch (error) {
+                syncMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> 网络问题，稍后重试';
+                return false;
+            }
+        }
+
+        function updatePlaceholder() {
+            searchInput.placeholder = queryMode === 'member' ? '输入成员名字…' : '输入花卉名称…';
+            if (flowerData.length > 0) {
+                resultArea.innerHTML = queryMode === 'member' ? 
+                    '<i class="fas fa-user-check"></i> 输入成员名字，查看ta的花卉 ✨' : 
+                    '<i class="fas fa-leaf"></i> 输入花卉，看看哪位成员拥有它 🌿';
             } else {
-                flowerData = [];
-                syncMessage.textContent = `⚠️ 云端无数据 (0位成员)`;
+                resultArea.innerHTML = '<i class="fas fa-database"></i> 暂无数据，请点击刷新或添加记录';
             }
-            
+        }
+
+        byMemberBtn.addEventListener('click', () => {
+            queryMode = 'member';
+            byMemberBtn.classList.add('active'); byFlowerBtn.classList.remove('active');
             updatePlaceholder();
-            localStorage.setItem('flowerData_cache', JSON.stringify(flowerData));
-        } catch (error) {
-            console.error('加载失败:', error);
-            syncMessage.textContent = '❌ 连接失败，使用本地缓存';
-            const cached = localStorage.getItem('flowerData_cache');
-            if (cached) {
-                flowerData = JSON.parse(cached);
-                syncMessage.textContent = `📦 使用缓存 (${flowerData.length}位成员)`;
+        });
+        byFlowerBtn.addEventListener('click', () => {
+            queryMode = 'flower';
+            byFlowerBtn.classList.add('active'); byMemberBtn.classList.remove('active');
+            updatePlaceholder();
+        });
+
+        function performSearch() {
+            const keyword = searchInput.value.trim();
+            if (!keyword) { resultArea.innerHTML = '<i class="fas fa-search"></i> 请输入关键词 🌱'; return; }
+            let html = '';
+            if (queryMode === 'member') {
+                const member = flowerData.find(item => item.name.includes(keyword));
+                if (member) {
+                    const flowers = member.flowers.length > 0 ? member.flowers.join(' · ') : '暂无记录';
+                    html = `<i class="fas fa-user"></i> 成员 <strong class="highlight">${member.name}</strong> 的花卉：<br><i class="fas fa-flower"></i> ${flowers}`;
+                } else { html = `<i class="fas fa-frown"></i> 未找到包含「${keyword}」的成员`; }
+            } else {
+                const members = flowerData.filter(item => item.flowers.some(f => f.includes(keyword)));
+                if (members.length > 0) {
+                    const names = members.map(m => `<strong>${m.name}</strong>`).join(' 、 ');
+                    html = `<i class="fas fa-users"></i> 拥有「${keyword}」的成员：<br>🧑‍🌾 ${names}`;
+                } else { html = `<i class="fas fa-frown"></i> 没有成员拥有「${keyword}」`; }
             }
-            updatePlaceholder();
+            resultArea.innerHTML = html;
+            resultArea.classList.add('fade-in');
+            setTimeout(() => resultArea.classList.remove('fade-in'), 300);
         }
-    }
 
-    async function saveToCloud() {
-        syncMessage.textContent = '☁️ 正在同步到云端...';
-        try {
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/flowers?id=eq.${currentRecordId}`, {
-                method: 'PATCH',
-                headers: {
-                    "apikey": SUPABASE_KEY,
-                    "Authorization": `Bearer ${SUPABASE_KEY}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ data: flowerData })
-            });
+        searchBtn.addEventListener('click', performSearch);
+        searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') performSearch(); });
+
+        addRecordBtn.addEventListener('click', async () => {
+            const memberName = newMemberName.value.trim();
+            const flowerName = newFlowerName.value.trim();
+            if (!memberName || !flowerName) { alert('请填写完整'); return; }
             
-            if (!response.ok) throw new Error('保存失败');
-            syncMessage.textContent = `✅ 云端已更新 (${flowerData.length}位成员)`;
-            localStorage.setItem('flowerData_cache', JSON.stringify(flowerData));
-            return true;
-        } catch (error) {
-            console.error('保存失败:', error);
-            syncMessage.textContent = '⚠️ 网络问题，请稍后重试';
-            return false;
-        }
-    }
-
-    function updatePlaceholder() {
-        searchInput.placeholder = queryMode === 'member' ? '输入成员名字…' : '输入花卉名称…';
-        if (flowerData.length > 0) {
-            resultArea.innerHTML = queryMode === 'member' ? '✨ 输入成员名字，查看ta的花卉 ✨' : '🌿 输入花卉，看看哪位成员拥有它 🌿';
-        } else {
-            resultArea.innerHTML = '⚠️ 暂无数据，请点击刷新或添加记录';
-        }
-    }
-
-    byMemberBtn.addEventListener('click', () => {
-        queryMode = 'member';
-        byMemberBtn.classList.add('active');
-        byFlowerBtn.classList.remove('active');
-        updatePlaceholder();
-    });
-
-    byFlowerBtn.addEventListener('click', () => {
-        queryMode = 'flower';
-        byFlowerBtn.classList.add('active');
-        byMemberBtn.classList.remove('active');
-        updatePlaceholder();
-    });
-
-    function performSearch() {
-        const keyword = searchInput.value.trim();
-        if (!keyword) {
-            resultArea.innerHTML = '⚠️ 请输入关键词 🌱';
-            return;
-        }
-        if (queryMode === 'member') {
-            const member = flowerData.find(item => item.name.includes(keyword));
+            addRecordBtn.disabled = true;
+            addRecordBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 添加中';
+            
+            let member = flowerData.find(m => m.name === memberName);
             if (member) {
-                const flowers = member.flowers.length > 0 ? member.flowers.join(' · ') : '暂无记录';
-                resultArea.innerHTML = `🌸 成员 <strong>${member.name}</strong> 的花卉：<br>🌼 ${flowers}`;
+                if (member.flowers.includes(flowerName)) {
+                    alert(`「${flowerName}」已存在`); addRecordBtn.disabled = false; addRecordBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> 添加到云端'; return;
+                }
+                member.flowers.push(flowerName);
             } else {
-                resultArea.innerHTML = `❌ 未找到包含「${keyword}」的成员`;
+                flowerData.push({ name: memberName, flowers: [flowerName] });
             }
-        } else {
-            const members = flowerData.filter(item => item.flowers.some(f => f.includes(keyword)));
-            if (members.length > 0) {
-                const names = members.map(m => `<strong>${m.name}</strong>`).join(' 、 ');
-                resultArea.innerHTML = `🌺 拥有「${keyword}」的成员：<br>🧑‍🌾 ${names}`;
-            } else {
-                resultArea.innerHTML = `❌ 没有成员拥有「${keyword}」`;
+            const success = await saveToCloud();
+            addRecordBtn.disabled = false;
+            addRecordBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> 添加到云端';
+            if (success) {
+                newMemberName.value = ''; newFlowerName.value = '';
+                syncMessage.innerHTML = `<i class="fas fa-check-circle" style="color:#2e7d32;"></i> 添加成功！ (${flowerData.length}位成员)`;
             }
-        }
-    }
+        });
 
-    searchBtn.addEventListener('click', performSearch);
-    searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') performSearch(); });
-
-    addRecordBtn.addEventListener('click', async () => {
-        const memberName = newMemberName.value.trim();
-        const flowerName = newFlowerName.value.trim();
-        if (!memberName || !flowerName) {
-            alert('请填写成员名字和花卉名称');
-            return;
-        }
-
-        let member = flowerData.find(m => m.name === memberName);
-        if (member) {
-            if (member.flowers.includes(flowerName)) {
-                alert(`「${flowerName}」已经在 ${memberName} 的花卉列表中了`);
-                return;
-            }
-            member.flowers.push(flowerName);
-        } else {
-            flowerData.push({ name: memberName, flowers: [flowerName] });
-        }
-
-        const success = await saveToCloud();
-        if (success) {
-            alert(`✅ 成功添加！${memberName} → ${flowerName}`);
-            newMemberName.value = '';
-            newFlowerName.value = '';
-        } else {
-            alert('❌ 云端同步失败');
-        }
-    });
-
-    refreshDataBtn.addEventListener('click', loadData);
-
-    // 启动
-    loadData();
+        refreshDataBtn.addEventListener('click', loadData);
+        loadData();
+    })();
 </script>
 </body>
 </html>
