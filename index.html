@@ -114,7 +114,7 @@
             transform: translateY(3px);
             box-shadow: 0 2px 0 #245218;
         }
-        /* 统计卡片 */
+        /* 统计卡片 - 双卡 */
         .stats-row {
             display: flex;
             gap: 10px;
@@ -312,11 +312,10 @@
         <button id="searchBtn"><i class="fas fa-search"></i> 查询</button>
     </div>
 
-    <!-- 统计卡片 -->
+    <!-- 统计卡片（双卡） -->
     <div class="stats-row" id="statsPanel">
         <div class="stat-card"><div class="stat-number" id="totalMembers">0</div><div class="stat-label">总成员</div></div>
         <div class="stat-card"><div class="stat-number" id="totalFlowers">0</div><div class="stat-label">花卉种类</div></div>
-        <div class="stat-card"><div class="stat-number" id="avgFlowers">0</div><div class="stat-label">人均花卉</div></div>
     </div>
 
     <div id="resultArea" class="result-area">
@@ -391,7 +390,6 @@
         const refreshDataBtn = document.getElementById('refreshDataBtn');
         const totalMembersSpan = document.getElementById('totalMembers');
         const totalFlowersSpan = document.getElementById('totalFlowers');
-        const avgFlowersSpan = document.getElementById('avgFlowers');
         const logList = document.getElementById('logList');
 
         function addLog(message) {
@@ -416,11 +414,9 @@
         function updateStats() {
             const memberCount = flowerData.length;
             const flowerSet = new Set();
-            let totalFlowerCount = 0;
-            flowerData.forEach(m => { m.flowers.forEach(f => flowerSet.add(f)); totalFlowerCount += m.flowers.length; });
+            flowerData.forEach(m => { m.flowers.forEach(f => flowerSet.add(f)); });
             totalMembersSpan.textContent = memberCount;
             totalFlowersSpan.textContent = flowerSet.size;
-            avgFlowersSpan.textContent = memberCount ? (totalFlowerCount / memberCount).toFixed(1) : '0';
         }
 
         async function loadData() {
