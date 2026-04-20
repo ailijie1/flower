@@ -195,11 +195,9 @@
     const SUPABASE_KEY = "sb_publishable_yIYNCHcT4Z0z-NMcKVmjTQ_6SoHyxwZ";
     // ==================================================
 
-    const TABLE_NAME = "flowers";
-    const API_URL = `${SUPABASE_URL}/rest/v1/${TABLE_NAME}?select=data`;
-
     let flowerData = [];
     let queryMode = 'member';
+    let currentRecordId = 1; // 存储记录ID
 
     const byMemberBtn = document.getElementById('byMemberBtn');
     const byFlowerBtn = document.getElementById('byFlowerBtn');
@@ -215,7 +213,8 @@
     async function loadData() {
         syncMessage.textContent = '📡 正在从云端加载...';
         try {
-            const response = await fetch(API_URL, {
+            // 获取所有记录
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/flowers?select=*`, {
                 headers: {
                     "apikey": SUPABASE_KEY,
                     "Authorization": `Bearer ${SUPABASE_KEY}`
@@ -223,16 +222,17 @@
             });
             
             if (!response.ok) {
-                console.error('响应状态:', response.status);
                 throw new Error('加载失败');
             }
             
-            const data = await response.json();
-            console.log('获取到的数据:', data);
+            const records = await response.json();
+            console.log('获取到的记录:', records);
             
-            // 数据在 data[0].data 里
-            if (data && data.length > 0 && data[0].data) {
-                flowerData = data[0].data;
+            if (records && records.length > 0) {
+                // 保存记录ID用于后续更新
+                currentRecordId = records[0].id;
+                // 获取data字段
+                flowerData = records[0].data || [];
                 syncMessage.textContent = `✅ 云端已连接 (${flowerData.length}位成员)`;
             } else {
                 flowerData = [];
@@ -256,19 +256,7 @@
     async function saveToCloud() {
         syncMessage.textContent = '☁️ 正在同步到云端...';
         try {
-            // 先获取当前记录的 ID
-            const getResponse = await fetch(API_URL, {
-                headers: {
-                    "apikey": SUPABASE_KEY,
-                    "Authorization": `Bearer ${SUPABASE_KEY}`
-                }
-            });
-            const records = await getResponse.json();
-            const recordId = records[0]?.id || 1;
-            
-            const UPDATE_URL = `${SUPABASE_URL}/rest/v1/${TABLE_NAME}?id=eq.${recordId}`;
-            
-            const response = await fetch(UPDATE_URL, {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/flowers?id=eq.${currentRecordId}`, {
                 method: 'PATCH',
                 headers: {
                     "apikey": SUPABASE_KEY,
@@ -361,17 +349,17 @@
 
         const success = await saveToCloud();
         if (success) {
-            alert(`✅ 成功添加！${memberName} → ${flowerName}\n\n云端已同步，其他人刷新即可看到！`);
+            alert(`✅ 成功添加！${memberName} → ${flowerName}`);
             newMemberName.value = '';
             newFlowerName.value = '';
         } else {
-            alert('❌ 云端同步失败，请检查网络后重试');
+            alert('❌ 云端同步失败');
         }
     });
 
     refreshDataBtn.addEventListener('click', loadData);
 
-    // 启动时加载数据
+    // 启动
     loadData();
 </script>
 </body>
