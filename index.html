@@ -104,7 +104,9 @@
         .admin-panel { background: rgba(255,255,255,0.5); border-radius: 20px; padding: 16px; margin-bottom: 18px; }
         .admin-title { font-size: 1.1rem; font-weight: 600; color: #2e5a1e; margin-bottom: 12px; }
         .admin-member-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; background: white; border-radius: 15px; margin-bottom: 8px; }
-        #batchPreview span { display: inline-block; padding: 4px 10px; border-radius: 20px; margin: 4px; font-size: 0.85rem; }
+        .batch-checkbox-item { display: flex; align-items: center; padding: 8px; border-bottom: 1px solid #e0efd5; }
+        .batch-checkbox-item input { margin-right: 12px; width: 18px; height: 18px; cursor: pointer; }
+        .batch-checkbox-item label { flex: 1; cursor: pointer; }
         @media (max-width: 480px) { .flower-grid { grid-template-columns: repeat(2, 1fr); } .container { padding: 20px 16px; } }
     </style>
 </head>
@@ -229,7 +231,7 @@
     </div>
 </div>
 
-<!-- 昵称修改弹窗 -->
+<!-- 弹窗 -->
 <div class="modal-overlay" id="nicknameModal">
     <div class="modal" onclick="event.stopPropagation()">
         <div class="modal-header">
@@ -243,7 +245,6 @@
     </div>
 </div>
 
-<!-- 成为管理员弹窗 -->
 <div class="modal-overlay" id="becomeAdminModal">
     <div class="modal" onclick="event.stopPropagation()">
         <div class="modal-header">
@@ -257,7 +258,6 @@
     </div>
 </div>
 
-<!-- 成员/花卉列表弹窗 -->
 <div class="modal-overlay" id="listModal">
     <div class="modal" onclick="event.stopPropagation()">
         <div class="modal-header">
@@ -271,23 +271,31 @@
     </div>
 </div>
 
-<!-- 批量导入弹窗 -->
+<!-- 批量导入弹窗（图鉴勾选版） -->
 <div class="modal-overlay" id="batchModal">
     <div class="modal" style="max-width:600px;" onclick="event.stopPropagation()">
         <div class="modal-header">
-            <span class="modal-title"><i class="fas fa-file-import"></i> 批量导入花卉</span>
+            <span class="modal-title"><i class="fas fa-file-import"></i> 从图鉴批量导入</span>
             <button class="modal-close" onclick="closeBatchModal()"><i class="fas fa-times"></i></button>
         </div>
         <div class="modal-body">
             <input type="text" id="batchMemberName" class="modal-input" placeholder="成员名字">
-            <p style="color:#5a7e4a; margin-bottom:8px; font-size:0.9rem;">
-                <i class="fas fa-info-circle"></i> 粘贴花名（一行一个，或用逗号/空格分隔）
-            </p>
-            <textarea id="batchFlowersInput" style="width:100%; height:200px; padding:14px; border:1.5px solid #b8daa0; border-radius:16px; font-size:0.9rem;" placeholder="例如：&#10;白百合&#10;康乃馨&#10;铃兰"></textarea>
-            <div id="batchPreview" style="margin-top:12px; max-height:150px; overflow-y:auto;"></div>
+            <div class="filter-tabs" style="margin-bottom:12px;">
+                <button class="filter-tab all active" data-filter="all">全</button>
+                <button class="filter-tab xian" data-filter="仙">仙</button>
+                <button class="filter-tab hua" data-filter="华">华</button>
+                <button class="filter-tab zhen" data-filter="珍">珍</button>
+                <button class="filter-tab pu" data-filter="普">普</button>
+                <button class="filter-tab fan" data-filter="凡">凡</button>
+            </div>
+            <input type="text" id="batchSearchInput" class="modal-search" placeholder="🔍 搜索花卉..." oninput="filterBatchFlowers()">
+            <div id="batchFlowerList" style="max-height:300px; overflow-y:auto; border:1px solid #cde0bd; border-radius:16px; padding:12px; background:rgba(255,255,255,0.5);">加载中...</div>
+            <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center;">
+                <span id="selectedCount">已选 0 种花卉</span>
+                <button class="modal-btn" onclick="selectAllVisible()" style="width:auto; padding:8px 16px; background:#6f9e4c;">全选当前</button>
+            </div>
             <div style="display:flex; gap:10px; margin-top:16px;">
-                <button class="modal-btn" onclick="previewBatchFlowers()" style="flex:1; background:#6f9e4c;"><i class="fas fa-eye"></i> 预览</button>
-                <button class="modal-btn" onclick="executeBatchImport()" style="flex:2;"><i class="fas fa-upload"></i> 导入</button>
+                <button class="modal-btn" onclick="executeBatchImportFromSelection()" style="flex:1;"><i class="fas fa-upload"></i> 导入选中</button>
             </div>
             <div id="batchResult" style="margin-top:12px; font-size:0.9rem;"></div>
         </div>
@@ -314,8 +322,12 @@
     let currentPage = 1;
     let currentFlowersList = [];
     let listModalData = [];
-    let pendingBatchFlowers = [];
     const pageSize = 12;
+
+    // 批量导入相关
+    let allFlowersList = [];
+    let selectedBatchFlowers = new Set();
+    let currentBatchFilter = 'all';
 
     const FLOWER_QUALITY_MAP = {
         "星河映蕊":"仙","福运招财":"仙","花漾春山":"仙","欢云妙舞":"仙","夜梦花庭":"仙","梦幻之心":"仙","杏月・花影雅憩":"仙","仙魅灵狐":"仙","桃月・云汐灼华":"仙","欢雪颂冬":"仙","繁花满筑":"仙","芳华寻蝶":"仙","花宴流芳":"仙","桂月・秋千稚语":"仙","菊月・花间飞鸢":"仙","柳月・溪亭燕语":"仙","梅月・疏影听弦":"仙","焰火迎春":"仙","阳月・芙香盈袖":"仙","有龙则灵":"仙","紫霄云庭":"仙",
@@ -354,6 +366,9 @@
     const listModalContainer = document.getElementById('listModalContainer');
     const listModalSearch = document.getElementById('listModalSearch');
     const batchModal = document.getElementById('batchModal');
+    const batchFlowerList = document.getElementById('batchFlowerList');
+    const batchSearchInput = document.getElementById('batchSearchInput');
+    const selectedCount = document.getElementById('selectedCount');
 
     function getAvatarText(n) { return n ? n.charAt(0).toUpperCase() : '🌸'; }
     function updateUserUI(n) { currentNickname = n || '花友'; userNameSpan.innerHTML = `${currentNickname} <i class="fas fa-pencil-alt"></i>`; userAvatar.textContent = getAvatarText(currentNickname); }
@@ -602,28 +617,112 @@
         if(await saveToCloud()) { addCloudLog(isNew?'新增成员':'添加花卉', mName, fName); document.getElementById('newMemberName').value=''; document.getElementById('newFlowerName').value=''; updateStats(); if(currentMember?.name === mName) renderMemberFlowers(m, currentFilter); }
     };
 
-    // 批量导入
-    window.openBatchModal = () => { batchModal.style.display = 'flex'; document.getElementById('batchMemberName').value = ''; document.getElementById('batchFlowersInput').value = ''; document.getElementById('batchPreview').innerHTML = ''; document.getElementById('batchResult').innerHTML = ''; pendingBatchFlowers = []; };
-    window.closeBatchModal = () => batchModal.style.display = 'none';
-    window.previewBatchFlowers = () => {
-        const input = document.getElementById('batchFlowersInput').value;
-        const flowers = input.split(/[\n,，\s]+/).map(f => f.trim()).filter(f => f.length > 0);
-        pendingBatchFlowers = flowers;
-        const qi = { '仙':'🔴', '华':'🟡', '珍':'🟣', '普':'🔵', '凡':'🟢' };
-        const qc = { '仙':'#ffcdd2', '华':'#ffecb3', '珍':'#e1bee7', '普':'#bbdefb', '凡':'#c8e6c9' };
-        const preview = flowers.map(f => { const q = getFlowerQuality(f); return `<span style="background:${qc[q]}; padding:4px 10px; border-radius:20px; margin:4px; font-size:0.85rem;">${qi[q]} ${f}</span>`; }).join('');
-        document.getElementById('batchPreview').innerHTML = `<p style="margin-bottom:8px;"><strong>识别到 ${flowers.length} 种花：</strong></p>${preview}`;
+    // 批量导入（图鉴勾选版）
+    function buildAllFlowersList() {
+        const map = new Map();
+        flowerData.forEach(m => { ['仙','华','珍','普','凡'].forEach(q => { if(m[q]) m[q].forEach(f => map.set(f, q)); }); });
+        const flowers = Array.from(map.entries()).map(([name, quality]) => ({ name, quality }));
+        const qo = { '仙':1, '华':2, '珍':3, '普':4, '凡':5 };
+        flowers.sort((a,b) => {
+            if(a.quality !== b.quality) return qo[a.quality] - qo[b.quality];
+            if(a.quality === '凡') return getFanRank(a.name) - getFanRank(b.name);
+            return a.name.localeCompare(b.name);
+        });
+        return flowers;
+    }
+
+    window.openBatchModal = () => {
+        batchModal.style.display = 'flex';
+        document.getElementById('batchMemberName').value = '';
+        document.getElementById('batchResult').innerHTML = '';
+        selectedBatchFlowers.clear();
+        allFlowersList = buildAllFlowersList();
+        currentBatchFilter = 'all';
+        document.querySelectorAll('#batchModal .filter-tab').forEach(t => t.classList.remove('active'));
+        document.querySelector('#batchModal .filter-tab.all').classList.add('active');
+        batchSearchInput.value = '';
+        renderBatchFlowerList(allFlowersList);
     };
-    window.executeBatchImport = async () => {
+
+    window.closeBatchModal = () => batchModal.style.display = 'none';
+
+    function renderBatchFlowerList(flowers) {
+        if(!flowers.length) { batchFlowerList.innerHTML = '<div style="text-align:center; padding:20px; color:#7f9f6b;">暂无花卉</div>'; return; }
+        const qi = { '仙':'🔴', '华':'🟡', '珍':'🟣', '普':'🔵', '凡':'🟢' };
+        batchFlowerList.innerHTML = flowers.map(f => {
+            const checked = selectedBatchFlowers.has(f.name) ? 'checked' : '';
+            return `<div class="batch-checkbox-item">
+                <input type="checkbox" id="chk_${f.name}" ${checked} onchange="toggleBatchFlower('${f.name}')">
+                <label for="chk_${f.name}">${qi[f.quality]} ${f.name}</label>
+            </div>`;
+        }).join('');
+        updateSelectedCount();
+    }
+
+    window.toggleBatchFlower = (name) => {
+        selectedBatchFlowers.has(name) ? selectedBatchFlowers.delete(name) : selectedBatchFlowers.add(name);
+        updateSelectedCount();
+    };
+
+    function updateSelectedCount() {
+        selectedCount.textContent = `已选 ${selectedBatchFlowers.size} 种花卉`;
+    }
+
+    window.filterBatchFlowers = () => {
+        const kw = batchSearchInput.value.toLowerCase();
+        let filtered = allFlowersList;
+        if(currentBatchFilter !== 'all') filtered = filtered.filter(f => f.quality === currentBatchFilter);
+        if(kw) filtered = filtered.filter(f => f.name.toLowerCase().includes(kw));
+        renderBatchFlowerList(filtered);
+    };
+
+    window.selectAllVisible = () => {
+        const checkboxes = document.querySelectorAll('#batchFlowerList input[type="checkbox"]');
+        checkboxes.forEach(cb => { selectedBatchFlowers.add(cb.id.replace('chk_', '')); cb.checked = true; });
+        updateSelectedCount();
+    };
+
+    document.querySelectorAll('#batchModal .filter-tab').forEach(t => {
+        t.addEventListener('click', () => {
+            document.querySelectorAll('#batchModal .filter-tab').forEach(x => x.classList.remove('active'));
+            t.classList.add('active');
+            currentBatchFilter = t.dataset.filter;
+            filterBatchFlowers();
+        });
+    });
+
+    window.executeBatchImportFromSelection = async () => {
         const memberName = document.getElementById('batchMemberName').value.trim();
         if(!memberName) { alert('请输入成员名字'); return; }
-        if(pendingBatchFlowers.length === 0) { alert('请先预览花卉'); return; }
-        let member = flowerData.find(m => m.name === memberName); let isNew = false;
-        if(!member) { member = { name: memberName, 仙:[], 华:[], 珍:[], 普:[], 凡:[] }; flowerData.push(member); isNew = true; }
+        if(selectedBatchFlowers.size === 0) { alert('请至少选择一种花卉'); return; }
+        
+        let member = flowerData.find(m => m.name === memberName);
+        let isNew = false;
+        if(!member) {
+            member = { name: memberName, 仙: [], 华: [], 珍: [], 普: [], 凡: [] };
+            flowerData.push(member);
+            isNew = true;
+        }
+        
         let added = 0;
-        for(const f of pendingBatchFlowers) { const q = getFlowerQuality(f); if(!member[q]) member[q] = []; if(!member[q].includes(f)) { member[q].push(f); added++; } }
-        if(await saveToCloud()) { addCloudLog(isNew?'批量新增成员':'批量添加花卉', memberName, `${added}种花`); document.getElementById('batchResult').innerHTML = `<span style="color:#2e7d32;"><i class="fas fa-check-circle"></i> 成功导入 ${added} 种花卉！</span>`; updateStats(); setTimeout(() => closeBatchModal(), 1500); }
-        else { document.getElementById('batchResult').innerHTML = `<span style="color:#d32f2f;">导入失败</span>`; }
+        for(const f of selectedBatchFlowers) {
+            const q = getFlowerQuality(f);
+            if(!member[q]) member[q] = [];
+            if(!member[q].includes(f)) {
+                member[q].push(f);
+                added++;
+            }
+        }
+        
+        if(await saveToCloud()) {
+            addCloudLog(isNew ? '批量新增成员' : '批量添加花卉', memberName, `${added}种花`);
+            document.getElementById('batchResult').innerHTML = `<span style="color:#2e7d32;"><i class="fas fa-check-circle"></i> 成功导入 ${added} 种花卉！</span>`;
+            updateStats();
+            selectedBatchFlowers.clear();
+            setTimeout(() => closeBatchModal(), 1500);
+        } else {
+            document.getElementById('batchResult').innerHTML = `<span style="color:#d32f2f;">导入失败</span>`;
+        }
     };
 
     document.getElementById('refreshDataBtn').onclick = loadData;
