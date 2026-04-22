@@ -301,12 +301,16 @@
             userAvatar.textContent = getAvatarText(currentNickname); 
         }
 
-        async function loadUserProfile() {
-            if(!currentUser) return;
-            const { data } = await supabase.from('profiles').select('nickname').eq('id', currentUser.id).single();
-            if(data) updateUserUI(data.nickname);
-        }
 
+        async function loadUserProfile() {
+        if(!currentUser) return;
+    const { data, error } = await supabase.from('profiles').select('nickname').eq('id', currentUser.id).single();
+    if(data && data.nickname) {
+        updateUserUI(data.nickname);
+    } else {
+        updateUserUI('花友');
+    }
+}
         async function checkAuth() {
             const { data: { session } } = await supabase.auth.getSession();
             if(session) { currentUser = session.user; await loadUserProfile(); showApp(); }
@@ -351,14 +355,15 @@
             nicknameInput.value = currentNickname;
         };
         window.closeNicknameModal = ()=> nicknameModal.style.display = 'none';
-        window.saveNickname = async ()=>{
-            const nickname = nicknameInput.value.trim();
-            if(!nickname) { alert('请输入昵称'); return; }
-            await supabase.from('profiles').upsert({ id: currentUser.id, nickname });
-            updateUserUI(nickname);
-            closeNicknameModal();
-            addCloudLog('修改昵称', null, null);
-        };
+       window.saveNickname = async ()=>{
+    const nickname = nicknameInput.value.trim();
+    if(!nickname) { alert('请输入昵称'); return; }
+    console.log('当前用户ID:', currentUser.id);  // 加这一行
+    await supabase.from('profiles').upsert({ id: currentUser.id, nickname });
+    updateUserUI(nickname);
+    closeNicknameModal();
+    addCloudLog('修改昵称', null, null);
+};
 
         const byMemberBtn = document.getElementById('byMemberBtn');
         const byFlowerBtn = document.getElementById('byFlowerBtn');
