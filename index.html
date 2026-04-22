@@ -30,6 +30,8 @@
             border-radius: 48px 24px 48px 24px;
             box-shadow: 0 20px 40px rgba(30, 60, 20, 0.12);
             border: 1px solid rgba(160, 200, 120, 0.3);
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
         }
         h1 {
             color: #2e5a1e;
@@ -251,7 +253,7 @@
             background: #f0f0f0;
             color: #555;
         }
-        .filter-tab.active { background: #3a7a2e; color: white; }
+        .filter-tab.active { opacity: 1; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
         .filter-tab.all { background: #6b8a58; color: white; }
         .filter-tab.xian { background: #e53935; color: white; }
         .filter-tab.hua { background: #f9a825; color: white; }
@@ -282,7 +284,6 @@
             word-break: break-word;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        /* 品质颜色 */
         .flower-card.xian { background: linear-gradient(135deg, #ffebee, #ffcdd2); border: 1px solid #e53935; color: #b71c1c; }
         .flower-card.hua { background: linear-gradient(135deg, #fff8e1, #ffecb3); border: 1px solid #f9a825; color: #e65100; }
         .flower-card.zhen { background: linear-gradient(135deg, #f3e5f5, #e1bee7); border: 1px solid #8e24aa; color: #4a148c; }
@@ -296,7 +297,10 @@
             border-radius: 30px;
             color: #1e4a1e;
             border: 1px solid #a0c090;
+            cursor: pointer;
+            transition: 0.2s;
         }
+        .member-tag:hover { background: #c8e0b8; }
         .collapsible {
             margin-top: 16px;
             border-top: 1px dashed #a4c28e;
@@ -359,18 +363,9 @@
             cursor: pointer;
             box-shadow: 0 4px 0 #3e6925;
         }
-        .log-list { list-style: none; padding: 8px 0; }
-        .log-item {
-            padding: 10px 0;
-            border-bottom: 1px solid #d0e0c0;
-            display: flex;
-            gap: 10px;
-            font-size: 0.9rem;
-            color: #2e4a1e;
-        }
-        .log-time { color: #7f9f6b; min-width: 65px; }
-        .log-operator { font-weight: 600; color: #3a7a2e; }
         .footer { text-align: center; color: #6b8a58; font-size: 0.8rem; margin-top: 20px; }
+        
+        /* 弹窗 */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -407,6 +402,33 @@
             cursor: pointer;
         }
         .modal-body { padding: 20px 24px; max-height: 50vh; overflow-y: auto; }
+        .modal-search {
+            padding: 12px 16px;
+            border: 1.5px solid #b8daa0;
+            border-radius: 30px;
+            width: 100%;
+            margin-bottom: 16px;
+            outline: none;
+        }
+        .modal-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid #e0efd5;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: 0.15s;
+        }
+        .modal-list-item:hover { background: #f0f8ea; }
+        .modal-item-name { font-weight: 500; color: #1e4a1e; }
+        .modal-item-badge {
+            background: #3a7a2e;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
         .modal-input {
             padding: 14px 18px;
             border: 1.5px solid #b8daa0;
@@ -486,7 +508,6 @@
             </div>
         </div>
 
-        <!-- 品质筛选标签 -->
         <div class="filter-tabs" id="filterTabs" style="display:none;">
             <button class="filter-tab all active" data-filter="all">全</button>
             <button class="filter-tab xian" data-filter="仙">仙</button>
@@ -546,6 +567,20 @@
     </div>
 </div>
 
+<!-- 成员/花卉列表弹窗 -->
+<div class="modal-overlay" id="listModal">
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <span class="modal-title" id="listModalTitle"><i class="fas fa-users"></i> 成员列表</span>
+            <button class="modal-close" onclick="closeListModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <input type="text" class="modal-search" id="listModalSearch" placeholder="🔍 搜索..." oninput="filterListModal()">
+            <div id="listModalContainer"></div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
     (function(){
@@ -561,8 +596,8 @@
         let currentNickname = '花友';
         let currentMember = null;
         let currentFilter = 'all';
+        let listModalData = [];
 
-        // 凡花等级排序（从高到低）
         const FAN_RANK = ["嫩黄晚香玉", "巧克力秋英", "浅紫晚香玉", "淡紫菊苣", "纯白晚香玉", "雪白荼蘼花", "紫百子莲", "盈粉荼蘼花", "圣心百合", "嫣红茶蘼花", "粉白三角梅", "素白九里香", "淡黄三角梅", "勿忘我", "紫红三角梅", "香槟洋桔梗", "黄色丁香花", "浅粉洋桔梗", "紫色丁香花", "嫩绿洋桔梗", "浅橘如意菊", "粉桃花", "淡粉如意菊", "栀子花", "明黄如意菊", "嫩黄风信子", "茉莉花", "粉色风信子", "合欢花", "紫色风信子", "蒲公英", "黄马蹄莲", "风铃花", "非洲菊", "水仙花", "金盏菊", "鹤望兰", "向日葵", "紫马蹄莲", "红马蹄莲", "蓝绣球", "小苍兰", "粉绣球", "山茶花", "紫绣球", "黄玫瑰", "蓝星花", "粉玫瑰", "雏菊", "红玫瑰", "粉百合", "蝴蝶兰", "粉郁金香", "紫罗兰", "黄郁金香", "紫桔梗", "黄百合", "铃兰", "康乃馨", "白百合"];
 
         function getFanRank(flowerName) {
@@ -582,6 +617,10 @@
         const nicknameModal = document.getElementById('nicknameModal');
         const nicknameInput = document.getElementById('nicknameInput');
         const filterTabs = document.getElementById('filterTabs');
+        const listModal = document.getElementById('listModal');
+        const listModalTitle = document.getElementById('listModalTitle');
+        const listModalContainer = document.getElementById('listModalContainer');
+        const listModalSearch = document.getElementById('listModalSearch');
 
         function getAvatarText(name) { return name ? name.charAt(0).toUpperCase() : '🌸'; }
         function updateUserUI(nickname) { currentNickname = nickname || '花友'; userNameSpan.innerHTML = `${currentNickname} <i class="fas fa-pencil-alt"></i>`; userAvatar.textContent = getAvatarText(currentNickname); }
@@ -695,7 +734,6 @@
             if(member.珍) member.珍.forEach(f => flowers.push({name: f, quality: '珍'}));
             if(member.普) member.普.forEach(f => flowers.push({name: f, quality: '普'}));
             if(member.凡) member.凡.forEach(f => flowers.push({name: f, quality: '凡'}));
-            // 排序：仙->华->珍->普->凡，凡内部按等级
             const qualityOrder = { '仙': 1, '华': 2, '珍': 3, '普': 4, '凡': 5 };
             flowers.sort((a, b) => {
                 if(a.quality !== b.quality) return qualityOrder[a.quality] - qualityOrder[b.quality];
@@ -708,7 +746,6 @@
         function renderMemberFlowers(member, filter = 'all') {
             let flowers = getAllFlowersFromMember(member);
             if(filter !== 'all') flowers = flowers.filter(f => f.quality === filter);
-            
             const qualityClass = { '仙': 'xian', '华': 'hua', '珍': 'zhen', '普': 'pu', '凡': 'fan' };
             const html = flowers.map(f => 
                 `<div class="flower-card ${qualityClass[f.quality]}">${f.name}</div>`
@@ -738,7 +775,7 @@
                 });
                 if(members.length) {
                     filterTabs.style.display = 'none';
-                    resultArea.innerHTML = `<div class="member-list">${members.map(m => `<span class="member-tag">${m.name}</span>`).join('')}</div>`;
+                    resultArea.innerHTML = `<div class="member-list">${members.map(m => `<span class="member-tag" onclick="jumpToMember('${m.name}')">${m.name}</span>`).join('')}</div>`;
                 } else {
                     resultArea.innerHTML = '<div style="color:#a00; text-align:center; padding:20px;">❌ 未找到</div>';
                     filterTabs.style.display = 'none';
@@ -746,7 +783,14 @@
             }
         }
 
-        // 筛选标签点击
+        window.jumpToMember = function(name) {
+            queryMode = 'member';
+            byMemberBtn.classList.add('active');
+            byFlowerBtn.classList.remove('active');
+            searchInput.value = name;
+            performSearch();
+        };
+
         document.querySelectorAll('.filter-tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 if(!currentMember) return;
@@ -756,6 +800,72 @@
                 renderMemberFlowers(currentMember, currentFilter);
             });
         });
+
+        // 统计卡片弹窗
+        function showMemberModal() {
+            const members = flowerData.map(m => {
+                const total = (m.仙?.length||0) + (m.华?.length||0) + (m.珍?.length||0) + (m.普?.length||0) + (m.凡?.length||0);
+                return { name: m.name, count: total };
+            }).sort((a,b) => a.name.localeCompare(b.name));
+            listModalData = members;
+            listModalTitle.innerHTML = '<i class="fas fa-users"></i> 成员列表';
+            renderListModal(members);
+            listModal.style.display = 'flex';
+        }
+
+        function showFlowerModal() {
+            const flowerMap = new Map();
+            flowerData.forEach(m => {
+                if(m.仙) m.仙.forEach(f => flowerMap.set(f, (flowerMap.get(f)||0)+1));
+                if(m.华) m.华.forEach(f => flowerMap.set(f, (flowerMap.get(f)||0)+1));
+                if(m.珍) m.珍.forEach(f => flowerMap.set(f, (flowerMap.get(f)||0)+1));
+                if(m.普) m.普.forEach(f => flowerMap.set(f, (flowerMap.get(f)||0)+1));
+                if(m.凡) m.凡.forEach(f => flowerMap.set(f, (flowerMap.get(f)||0)+1));
+            });
+            const flowers = Array.from(flowerMap.entries()).map(([name, count]) => ({ name, count })).sort((a,b) => a.name.localeCompare(b.name));
+            listModalData = flowers;
+            listModalTitle.innerHTML = '<i class="fas fa-flower"></i> 花卉图鉴';
+            renderListModal(flowers);
+            listModal.style.display = 'flex';
+        }
+
+        function renderListModal(items) {
+            if(!items.length) { listModalContainer.innerHTML = '<div style="text-align:center; padding:30px;">暂无数据</div>'; return; }
+            listModalContainer.innerHTML = items.map(item => `
+                <div class="modal-list-item" onclick="jumpToItem('${item.name}')">
+                    <span class="modal-item-name"><i class="fas fa-${listModalData[0].count !== undefined ? 'user' : 'flower'}"></i> ${item.name}</span>
+                    <span class="modal-item-badge">${item.count}</span>
+                </div>
+            `).join('');
+        }
+
+        window.filterListModal = function() {
+            const kw = listModalSearch.value.toLowerCase();
+            const filtered = listModalData.filter(item => item.name.toLowerCase().includes(kw));
+            renderListModal(filtered);
+        };
+
+        window.closeListModal = ()=> listModal.style.display = 'none';
+
+        window.jumpToItem = function(name) {
+            closeListModal();
+            if(listModalTitle.innerHTML.includes('成员')) {
+                queryMode = 'member';
+                byMemberBtn.classList.add('active');
+                byFlowerBtn.classList.remove('active');
+                searchInput.value = name;
+                performSearch();
+            } else {
+                queryMode = 'flower';
+                byFlowerBtn.classList.add('active');
+                byMemberBtn.classList.remove('active');
+                searchInput.value = name;
+                performSearch();
+            }
+        };
+
+        document.getElementById('memberStatsCard').onclick = showMemberModal;
+        document.getElementById('flowerStatsCard').onclick = showFlowerModal;
 
         byMemberBtn.onclick = ()=>{ queryMode='member'; byMemberBtn.classList.add('active'); byFlowerBtn.classList.remove('active'); searchInput.placeholder='输入成员名字…'; filterTabs.style.display='none'; };
         byFlowerBtn.onclick = ()=>{ queryMode='flower'; byFlowerBtn.classList.add('active'); byMemberBtn.classList.remove('active'); searchInput.placeholder='输入花卉名称…'; filterTabs.style.display='none'; };
@@ -773,6 +883,7 @@
                 member = { name: mName, 仙: [], 华: [], 珍: [], 普: [], 凡: [] };
                 flowerData.push(member);
             }
+            if(!member[quality]) member[quality] = [];
             if(!member[quality].includes(fName)) {
                 member[quality].push(fName);
             }
