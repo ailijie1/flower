@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>🌸 花园世界 · 公会花册 Pro</title>
+    <title>🌸 花园世界 · 公会花册</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
@@ -113,21 +113,9 @@
             color: #5a7e4a;
             font-size: 0.9rem;
         }
-        .error-message {
-            color: #d32f2f;
-            text-align: center;
-            font-size: 0.9rem;
-            min-height: 24px;
-        }
-        .success-message {
-            color: #2e7d32;
-            text-align: center;
-            font-size: 0.9rem;
-            min-height: 24px;
-        }
-        .app-container {
-            display: none;
-        }
+        .error-message { color: #d32f2f; text-align: center; font-size: 0.9rem; min-height: 24px; }
+        .success-message { color: #2e7d32; text-align: center; font-size: 0.9rem; min-height: 24px; }
+        .app-container { display: none; }
         .user-bar {
             display: flex;
             align-items: center;
@@ -147,9 +135,7 @@
             background: rgba(255,255,255,0.3);
             transition: 0.2s;
         }
-        .user-profile:hover {
-            background: rgba(255,255,255,0.6);
-        }
+        .user-profile:hover { background: rgba(255,255,255,0.6); }
         .user-avatar {
             width: 40px;
             height: 40px;
@@ -166,11 +152,7 @@
             font-weight: 600;
             color: #2e5a1e;
         }
-        .user-name i {
-            margin-left: 4px;
-            font-size: 0.7rem;
-            opacity: 0.7;
-        }
+        .user-name i { margin-left: 4px; font-size: 0.7rem; opacity: 0.7; }
         .logout-btn {
             padding: 8px 16px;
             background: #d32f2f;
@@ -203,10 +185,7 @@
             align-items: center;
             gap: 6px;
         }
-        .query-btn.active {
-            background: #3a7a2e;
-            color: white;
-        }
+        .query-btn.active { background: #3a7a2e; color: white; }
         .search-box {
             display: flex;
             gap: 8px;
@@ -249,18 +228,37 @@
             cursor: pointer;
             transition: transform 0.2s;
         }
-        .stat-card:hover {
-            transform: translateY(-3px);
+        .stat-card:hover { transform: translateY(-3px); }
+        .stat-number { font-size: 2rem; font-weight: 700; color: #1e5a1e; }
+        .stat-label { font-size: 0.85rem; color: #5a7e4a; }
+        
+        /* 品质筛选标签 */
+        .filter-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #1e5a1e;
-        }
-        .stat-label {
+        .filter-tab {
+            padding: 6px 16px;
+            border-radius: 30px;
             font-size: 0.85rem;
-            color: #5a7e4a;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: 0.2s;
+            background: #f0f0f0;
+            color: #555;
         }
+        .filter-tab.active { background: #3a7a2e; color: white; }
+        .filter-tab.all { background: #6b8a58; color: white; }
+        .filter-tab.xian { background: #e53935; color: white; }
+        .filter-tab.hua { background: #f9a825; color: white; }
+        .filter-tab.zhen { background: #8e24aa; color: white; }
+        .filter-tab.pu { background: #1e88e5; color: white; }
+        .filter-tab.fan { background: #43a047; color: white; }
+        
         .result-area {
             min-height: 160px;
             padding: 16px 12px;
@@ -276,19 +274,22 @@
             gap: 10px;
         }
         .flower-card {
-            background: linear-gradient(135deg, #f6fff0, #eaf5e2);
             padding: 12px 6px;
             text-align: center;
             border-radius: 20px;
-            border: 1px solid #bdd8ae;
             font-size: 0.9rem;
-            color: #1e4a1e;
+            font-weight: 500;
+            word-break: break-word;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        .member-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px 12px;
-        }
+        /* 品质颜色 */
+        .flower-card.xian { background: linear-gradient(135deg, #ffebee, #ffcdd2); border: 1px solid #e53935; color: #b71c1c; }
+        .flower-card.hua { background: linear-gradient(135deg, #fff8e1, #ffecb3); border: 1px solid #f9a825; color: #e65100; }
+        .flower-card.zhen { background: linear-gradient(135deg, #f3e5f5, #e1bee7); border: 1px solid #8e24aa; color: #4a148c; }
+        .flower-card.pu { background: linear-gradient(135deg, #e3f2fd, #bbdefb); border: 1px solid #1e88e5; color: #0d47a1; }
+        .flower-card.fan { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border: 1px solid #43a047; color: #1b5e20; }
+        
+        .member-list { display: flex; flex-wrap: wrap; gap: 8px 12px; }
         .member-tag {
             background: #e0f0d0;
             padding: 6px 16px;
@@ -316,10 +317,7 @@
             overflow: hidden;
             transition: max-height 0.3s ease;
         }
-        .collapse-content.open {
-            max-height: 400px;
-            overflow-y: auto;
-        }
+        .collapse-content.open { max-height: 400px; overflow-y: auto; }
         .form-row {
             display: flex;
             gap: 8px;
@@ -361,10 +359,7 @@
             cursor: pointer;
             box-shadow: 0 4px 0 #3e6925;
         }
-        .log-list {
-            list-style: none;
-            padding: 8px 0;
-        }
+        .log-list { list-style: none; padding: 8px 0; }
         .log-item {
             padding: 10px 0;
             border-bottom: 1px solid #d0e0c0;
@@ -373,20 +368,9 @@
             font-size: 0.9rem;
             color: #2e4a1e;
         }
-        .log-time {
-            color: #7f9f6b;
-            min-width: 65px;
-        }
-        .log-operator {
-            font-weight: 600;
-            color: #3a7a2e;
-        }
-        .footer {
-            text-align: center;
-            color: #6b8a58;
-            font-size: 0.8rem;
-            margin-top: 20px;
-        }
+        .log-time { color: #7f9f6b; min-width: 65px; }
+        .log-operator { font-weight: 600; color: #3a7a2e; }
+        .footer { text-align: center; color: #6b8a58; font-size: 0.8rem; margin-top: 20px; }
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -413,11 +397,7 @@
             align-items: center;
             justify-content: space-between;
         }
-        .modal-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #2e5a1e;
-        }
+        .modal-title { font-size: 1.3rem; font-weight: 700; color: #2e5a1e; }
         .modal-close {
             width: 36px; height: 36px;
             border-radius: 50%;
@@ -426,11 +406,7 @@
             font-size: 1.2rem;
             cursor: pointer;
         }
-        .modal-body {
-            padding: 20px 24px;
-            max-height: 50vh;
-            overflow-y: auto;
-        }
+        .modal-body { padding: 20px 24px; max-height: 50vh; overflow-y: auto; }
         .modal-input {
             padding: 14px 18px;
             border: 1.5px solid #b8daa0;
@@ -448,43 +424,14 @@
             width: 100%;
             cursor: pointer;
         }
-        .modal-search {
-            padding: 12px 16px;
-            border: 1.5px solid #b8daa0;
-            border-radius: 30px;
-            width: 100%;
-            margin-bottom: 16px;
-            outline: none;
-        }
-        .modal-list-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px;
-            border-bottom: 1px solid #e0efd5;
-            cursor: pointer;
-            border-radius: 12px;
-            transition: 0.15s;
-        }
-        .modal-list-item:hover {
-            background: #f0f8ea;
-        }
-        .modal-item-name {
-            font-weight: 500;
-            color: #1e4a1e;
-        }
-        .modal-item-badge {
-            background: #3a7a2e;
-            color: white;
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
+        @media (max-width: 480px) {
+            .flower-grid { grid-template-columns: repeat(2, 1fr); }
+            .container { padding: 20px 16px; }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <!-- 登录界面 -->
     <div id="authContainer" class="auth-container">
         <h1>🌸 花园世界</h1>
         <p class="subtitle">公会专属 · 登录后使用</p>
@@ -509,7 +456,6 @@
         <p class="auth-footer">🌱 需要邀请码？请联系公会管理员</p>
     </div>
 
-    <!-- 主应用 -->
     <div id="appContainer" class="app-container">
         <div class="user-bar">
             <div class="user-profile" id="userProfile">
@@ -540,6 +486,16 @@
             </div>
         </div>
 
+        <!-- 品质筛选标签 -->
+        <div class="filter-tabs" id="filterTabs" style="display:none;">
+            <button class="filter-tab all active" data-filter="all">全</button>
+            <button class="filter-tab xian" data-filter="仙">仙</button>
+            <button class="filter-tab hua" data-filter="华">华</button>
+            <button class="filter-tab zhen" data-filter="珍">珍</button>
+            <button class="filter-tab pu" data-filter="普">普</button>
+            <button class="filter-tab fan" data-filter="凡">凡</button>
+        </div>
+
         <div id="resultArea" class="result-area">
             <div style="color:#5a7e4a; text-align:center; padding:20px;">
                 <i class="fas fa-hand-pointer"></i> 输入关键词查询
@@ -555,23 +511,15 @@
                 <div class="form-row">
                     <input type="text" id="newMemberName" class="form-input" placeholder="成员名字">
                     <input type="text" id="newFlowerName" class="form-input" placeholder="花卉名称">
+                    <select id="newFlowerQuality" class="form-input" style="max-width:100px;">
+                        <option value="仙">🔴 仙</option>
+                        <option value="华">🟡 华</option>
+                        <option value="珍">🟣 珍</option>
+                        <option value="普">🔵 普</option>
+                        <option value="凡" selected>🟢 凡</option>
+                    </select>
                     <button class="add-btn" id="addRecordBtn"><i class="fas fa-cloud-upload-alt"></i> 添加</button>
                 </div>
-            </div>
-        </div>
-
-        <div class="collapsible">
-            <div class="collapse-header" onclick="toggleCollapse('logPanel')">
-                <i class="fas fa-history" style="color:#6f9e4c;"></i> 云端更新日志
-                <i class="fas fa-chevron-down" id="logIcon" style="margin-left:auto;"></i>
-            </div>
-            <div id="logPanel" class="collapse-content">
-                <div style="display:flex; justify-content:flex-end; margin-bottom:8px;">
-                    <button class="refresh-btn" style="padding:4px 12px;" onclick="event.stopPropagation(); loadCloudLogs()">
-                        <i class="fas fa-sync-alt"></i> 刷新
-                    </button>
-                </div>
-                <ul class="log-list" id="logList"></ul>
             </div>
         </div>
 
@@ -598,20 +546,6 @@
     </div>
 </div>
 
-<!-- 成员/花卉列表弹窗 -->
-<div class="modal-overlay" id="listModal">
-    <div class="modal" onclick="event.stopPropagation()">
-        <div class="modal-header">
-            <span class="modal-title" id="listModalTitle"><i class="fas fa-users"></i> 成员列表</span>
-            <button class="modal-close" onclick="closeListModal()"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="modal-body">
-            <input type="text" class="modal-search" id="listModalSearch" placeholder="🔍 搜索..." oninput="filterListModal()">
-            <div id="listModalContainer"></div>
-        </div>
-    </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
     (function(){
@@ -623,12 +557,19 @@
         
         let flowerData = [];
         let queryMode = 'member';
-        let currentRecordId = 1;
         let currentUser = null;
         let currentNickname = '花友';
-        let listModalData = [];
+        let currentMember = null;
+        let currentFilter = 'all';
 
-        // DOM
+        // 凡花等级排序（从高到低）
+        const FAN_RANK = ["嫩黄晚香玉", "巧克力秋英", "浅紫晚香玉", "淡紫菊苣", "纯白晚香玉", "雪白荼蘼花", "紫百子莲", "盈粉荼蘼花", "圣心百合", "嫣红茶蘼花", "粉白三角梅", "素白九里香", "淡黄三角梅", "勿忘我", "紫红三角梅", "香槟洋桔梗", "黄色丁香花", "浅粉洋桔梗", "紫色丁香花", "嫩绿洋桔梗", "浅橘如意菊", "粉桃花", "淡粉如意菊", "栀子花", "明黄如意菊", "嫩黄风信子", "茉莉花", "粉色风信子", "合欢花", "紫色风信子", "蒲公英", "黄马蹄莲", "风铃花", "非洲菊", "水仙花", "金盏菊", "鹤望兰", "向日葵", "紫马蹄莲", "红马蹄莲", "蓝绣球", "小苍兰", "粉绣球", "山茶花", "紫绣球", "黄玫瑰", "蓝星花", "粉玫瑰", "雏菊", "红玫瑰", "粉百合", "蝴蝶兰", "粉郁金香", "紫罗兰", "黄郁金香", "紫桔梗", "黄百合", "铃兰", "康乃馨", "白百合"];
+
+        function getFanRank(flowerName) {
+            const idx = FAN_RANK.indexOf(flowerName);
+            return idx === -1 ? 999 : idx;
+        }
+
         const authContainer = document.getElementById('authContainer');
         const appContainer = document.getElementById('appContainer');
         const loginTab = document.getElementById('loginTab');
@@ -640,10 +581,7 @@
         const userAvatar = document.getElementById('userAvatar');
         const nicknameModal = document.getElementById('nicknameModal');
         const nicknameInput = document.getElementById('nicknameInput');
-        const listModal = document.getElementById('listModal');
-        const listModalTitle = document.getElementById('listModalTitle');
-        const listModalContainer = document.getElementById('listModalContainer');
-        const listModalSearch = document.getElementById('listModalSearch');
+        const filterTabs = document.getElementById('filterTabs');
 
         function getAvatarText(name) { return name ? name.charAt(0).toUpperCase() : '🌸'; }
         function updateUserUI(nickname) { currentNickname = nickname || '花友'; userNameSpan.innerHTML = `${currentNickname} <i class="fas fa-pencil-alt"></i>`; userAvatar.textContent = getAvatarText(currentNickname); }
@@ -691,7 +629,6 @@
         loginTab.onclick = ()=>{ loginTab.classList.add('active'); registerTab.classList.remove('active'); document.getElementById('loginForm').style.display='flex'; document.getElementById('registerForm').style.display='none'; };
         registerTab.onclick = ()=>{ registerTab.classList.add('active'); loginTab.classList.remove('active'); document.getElementById('registerForm').style.display='flex'; document.getElementById('loginForm').style.display='none'; };
 
-        // 昵称修改
         document.getElementById('userProfile').onclick = ()=>{
             nicknameModal.style.display = 'flex';
             nicknameInput.value = currentNickname;
@@ -703,10 +640,8 @@
             await supabase.from('profiles').upsert({ id: currentUser.id, nickname });
             updateUserUI(nickname);
             closeNicknameModal();
-            addCloudLog('修改昵称');
         };
 
-        // 花卉系统
         const byMemberBtn = document.getElementById('byMemberBtn');
         const byFlowerBtn = document.getElementById('byFlowerBtn');
         const searchInput = document.getElementById('searchInput');
@@ -715,130 +650,141 @@
         const addRecordBtn = document.getElementById('addRecordBtn');
         const newMemberName = document.getElementById('newMemberName');
         const newFlowerName = document.getElementById('newFlowerName');
+        const newFlowerQuality = document.getElementById('newFlowerQuality');
         const syncMessage = document.getElementById('syncMessage');
         const refreshDataBtn = document.getElementById('refreshDataBtn');
         const totalMembersSpan = document.getElementById('totalMembers');
         const totalFlowersSpan = document.getElementById('totalFlowers');
-        const logList = document.getElementById('logList');
-
-        async function addCloudLog(action, memberName=null, flowerName=null) {
-            try { await fetch(`${SUPABASE_URL}/rest/v1/flower_logs`, { method:'POST', headers:{"apikey":SUPABASE_KEY,"Authorization":`Bearer ${SUPABASE_KEY}`,"Content-Type":"application/json"}, body:JSON.stringify({action, member_name:memberName, flower_name:flowerName, operator:currentNickname}) }); } catch(e){}
-        }
-
-        async function loadCloudLogs() {
-            try {
-                const res = await fetch(`${SUPABASE_URL}/rest/v1/flower_logs?select=*&order=created_at.desc&limit=30`, { headers:{"apikey":SUPABASE_KEY,"Authorization":`Bearer ${SUPABASE_KEY}`} });
-                const logs = await res.json();
-                logList.innerHTML = logs.length ? logs.map(log=>{
-                    const time = new Date(log.created_at).toLocaleTimeString('zh-CN',{hour12:false,hour:'2-digit',minute:'2-digit'});
-                    return `<li class="log-item"><span class="log-time">${time}</span> <span class="log-operator">${log.operator||'未知'}</span> ${log.action}${log.member_name?'：'+log.member_name:''}${log.flower_name?' → '+log.flower_name:''}</li>`;
-                }).join('') : '<li class="log-item">暂无日志</li>';
-            } catch(e) {}
-        }
 
         function updateStats() {
             totalMembersSpan.textContent = flowerData.length;
-            totalFlowersSpan.textContent = new Set(flowerData.flatMap(m=>m.flowers)).size;
+            const flowerSet = new Set();
+            flowerData.forEach(m => {
+                if(m.仙) m.仙.forEach(f => flowerSet.add(f));
+                if(m.华) m.华.forEach(f => flowerSet.add(f));
+                if(m.珍) m.珍.forEach(f => flowerSet.add(f));
+                if(m.普) m.普.forEach(f => flowerSet.add(f));
+                if(m.凡) m.凡.forEach(f => flowerSet.add(f));
+            });
+            totalFlowersSpan.textContent = flowerSet.size;
         }
 
         async function loadData() {
             try {
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/flowers?select=*`, { headers:{"apikey":SUPABASE_KEY,"Authorization":`Bearer ${SUPABASE_KEY}`} });
                 const records = await res.json();
-                if(records.length) { currentRecordId = records[0].id; flowerData = records[0].data || []; syncMessage.innerHTML = `✅ 云端 ${flowerData.length}位成员`; }
+                if(records.length) { flowerData = records[0].data || []; syncMessage.innerHTML = `✅ 云端 ${flowerData.length}位成员`; }
                 updateStats();
             } catch(e) {}
         }
 
         async function saveToCloud() {
             try {
-                await fetch(`${SUPABASE_URL}/rest/v1/flowers?id=eq.${currentRecordId}`, { method:'PATCH', headers:{"apikey":SUPABASE_KEY,"Authorization":`Bearer ${SUPABASE_KEY}`,"Content-Type":"application/json"}, body:JSON.stringify({data:flowerData}) });
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/flowers?select=id`, { headers:{"apikey":SUPABASE_KEY,"Authorization":`Bearer ${SUPABASE_KEY}`} });
+                const records = await res.json();
+                const recordId = records[0]?.id || 1;
+                await fetch(`${SUPABASE_URL}/rest/v1/flowers?id=eq.${recordId}`, { method:'PATCH', headers:{"apikey":SUPABASE_KEY,"Authorization":`Bearer ${SUPABASE_KEY}`,"Content-Type":"application/json"}, body:JSON.stringify({data:flowerData}) });
                 syncMessage.innerHTML = `✅ 已同步`; updateStats(); return true;
             } catch(e) { return false; }
         }
 
+        function getAllFlowersFromMember(member) {
+            const flowers = [];
+            if(member.仙) member.仙.forEach(f => flowers.push({name: f, quality: '仙'}));
+            if(member.华) member.华.forEach(f => flowers.push({name: f, quality: '华'}));
+            if(member.珍) member.珍.forEach(f => flowers.push({name: f, quality: '珍'}));
+            if(member.普) member.普.forEach(f => flowers.push({name: f, quality: '普'}));
+            if(member.凡) member.凡.forEach(f => flowers.push({name: f, quality: '凡'}));
+            // 排序：仙->华->珍->普->凡，凡内部按等级
+            const qualityOrder = { '仙': 1, '华': 2, '珍': 3, '普': 4, '凡': 5 };
+            flowers.sort((a, b) => {
+                if(a.quality !== b.quality) return qualityOrder[a.quality] - qualityOrder[b.quality];
+                if(a.quality === '凡') return getFanRank(a.name) - getFanRank(b.name);
+                return a.name.localeCompare(b.name);
+            });
+            return flowers;
+        }
+
+        function renderMemberFlowers(member, filter = 'all') {
+            let flowers = getAllFlowersFromMember(member);
+            if(filter !== 'all') flowers = flowers.filter(f => f.quality === filter);
+            
+            const qualityClass = { '仙': 'xian', '华': 'hua', '珍': 'zhen', '普': 'pu', '凡': 'fan' };
+            const html = flowers.map(f => 
+                `<div class="flower-card ${qualityClass[f.quality]}">${f.name}</div>`
+            ).join('');
+            resultArea.innerHTML = `<div class="flower-grid">${html}</div>`;
+        }
+
         function performSearch() {
             const kw = searchInput.value.trim(); if(!kw) return;
-            if(queryMode==='member') {
-                const m = flowerData.find(m=>m.name.includes(kw));
-                resultArea.innerHTML = m ? `<div class="flower-grid">${m.flowers.map(f=>`<div class="flower-card">${f}</div>`).join('')}</div>` : '❌ 未找到';
+            if(queryMode === 'member') {
+                const m = flowerData.find(m => m.name.includes(kw));
+                if(m) {
+                    currentMember = m;
+                    filterTabs.style.display = 'flex';
+                    document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.remove('active'));
+                    document.querySelector('.filter-tab.all').classList.add('active');
+                    currentFilter = 'all';
+                    renderMemberFlowers(m, 'all');
+                } else {
+                    resultArea.innerHTML = '<div style="color:#a00; text-align:center; padding:20px;">❌ 未找到</div>';
+                    filterTabs.style.display = 'none';
+                }
             } else {
-                const members = flowerData.filter(m=>m.flowers.some(f=>f.includes(kw)));
-                resultArea.innerHTML = members.length ? `<div class="member-list">${members.map(m=>`<span class="member-tag">${m.name}</span>`).join('')}</div>` : '❌ 未找到';
+                const members = flowerData.filter(m => {
+                    const allFlowers = [...(m.仙||[]), ...(m.华||[]), ...(m.珍||[]), ...(m.普||[]), ...(m.凡||[])];
+                    return allFlowers.some(f => f.includes(kw));
+                });
+                if(members.length) {
+                    filterTabs.style.display = 'none';
+                    resultArea.innerHTML = `<div class="member-list">${members.map(m => `<span class="member-tag">${m.name}</span>`).join('')}</div>`;
+                } else {
+                    resultArea.innerHTML = '<div style="color:#a00; text-align:center; padding:20px;">❌ 未找到</div>';
+                    filterTabs.style.display = 'none';
+                }
             }
         }
 
-        byMemberBtn.onclick = ()=>{ queryMode='member'; byMemberBtn.classList.add('active'); byFlowerBtn.classList.remove('active'); };
-        byFlowerBtn.onclick = ()=>{ queryMode='flower'; byFlowerBtn.classList.add('active'); byMemberBtn.classList.remove('active'); };
+        // 筛选标签点击
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                if(!currentMember) return;
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentFilter = tab.dataset.filter;
+                renderMemberFlowers(currentMember, currentFilter);
+            });
+        });
+
+        byMemberBtn.onclick = ()=>{ queryMode='member'; byMemberBtn.classList.add('active'); byFlowerBtn.classList.remove('active'); searchInput.placeholder='输入成员名字…'; filterTabs.style.display='none'; };
+        byFlowerBtn.onclick = ()=>{ queryMode='flower'; byFlowerBtn.classList.add('active'); byMemberBtn.classList.remove('active'); searchInput.placeholder='输入花卉名称…'; filterTabs.style.display='none'; };
         searchBtn.onclick = performSearch;
         searchInput.onkeydown = e => { if(e.key==='Enter') performSearch(); };
 
         addRecordBtn.onclick = async ()=>{
-            const mName = newMemberName.value.trim(), fName = newFlowerName.value.trim();
+            const mName = newMemberName.value.trim();
+            const fName = newFlowerName.value.trim();
+            const quality = newFlowerQuality.value;
             if(!mName||!fName) return;
-            let member = flowerData.find(m=>m.name===mName);
-            member ? member.flowers.push(fName) : flowerData.push({name:mName, flowers:[fName]});
-            if(await saveToCloud()) { await addCloudLog('添加花卉', mName, fName); newMemberName.value=''; newFlowerName.value=''; }
+            
+            let member = flowerData.find(m => m.name === mName);
+            if(!member) {
+                member = { name: mName, 仙: [], 华: [], 珍: [], 普: [], 凡: [] };
+                flowerData.push(member);
+            }
+            if(!member[quality].includes(fName)) {
+                member[quality].push(fName);
+            }
+            if(await saveToCloud()) { newMemberName.value=''; newFlowerName.value=''; updateStats(); }
         };
 
         refreshDataBtn.onclick = loadData;
         window.toggleCollapse = (id)=>{
-            const panel = document.getElementById(id), icon = document.getElementById(id==='addPanel'?'addIcon':'logIcon');
+            const panel = document.getElementById(id), icon = document.getElementById('addIcon');
             panel.classList.toggle('open'); icon.classList.toggle('fa-chevron-down'); icon.classList.toggle('fa-chevron-up');
-            if(id==='logPanel' && panel.classList.contains('open')) loadCloudLogs();
         };
 
-        // 统计卡片弹窗
-        function showMemberModal() {
-            const members = flowerData.map(m=>({ name:m.name, count:m.flowers.length })).sort((a,b)=>a.name.localeCompare(b.name));
-            listModalData = members;
-            listModalTitle.innerHTML = '<i class="fas fa-users"></i> 成员列表';
-            renderListModal(members);
-            listModal.style.display = 'flex';
-        }
-
-        function showFlowerModal() {
-            const flowerMap = new Map();
-            flowerData.forEach(m=>m.flowers.forEach(f=>flowerMap.set(f, (flowerMap.get(f)||0)+1)));
-            const flowers = Array.from(flowerMap.entries()).map(([name,count])=>({ name, count })).sort((a,b)=>a.name.localeCompare(b.name));
-            listModalData = flowers;
-            listModalTitle.innerHTML = '<i class="fas fa-flower"></i> 花卉图鉴';
-            renderListModal(flowers);
-            listModal.style.display = 'flex';
-        }
-
-        function renderListModal(items) {
-            if(!items.length) { listModalContainer.innerHTML = '<div style="text-align:center; padding:30px;">暂无数据</div>'; return; }
-            listModalContainer.innerHTML = items.map(item=>`
-                <div class="modal-list-item" onclick="jumpToItem('${item.name}')">
-                    <span class="modal-item-name"><i class="fas fa-${listModalData[0].count !== undefined ? 'user' : 'flower'}"></i> ${item.name}</span>
-                    <span class="modal-item-badge">${item.count}</span>
-                </div>
-            `).join('');
-        }
-
-        window.filterListModal = function() {
-            const kw = listModalSearch.value.toLowerCase();
-            const filtered = listModalData.filter(item=>item.name.toLowerCase().includes(kw));
-            renderListModal(filtered);
-        };
-
-        window.closeListModal = ()=> listModal.style.display = 'none';
-
-        window.jumpToItem = function(name) {
-            closeListModal();
-            if(listModalTitle.innerHTML.includes('成员')) {
-                const member = flowerData.find(m=>m.name===name);
-                if(member) { queryMode='member'; byMemberBtn.click(); searchInput.value = name; performSearch(); }
-            } else {
-                queryMode='flower'; byFlowerBtn.click(); searchInput.value = name; performSearch();
-            }
-        };
-
-        document.getElementById('memberStatsCard').onclick = showMemberModal;
-        document.getElementById('flowerStatsCard').onclick = showFlowerModal;
-
-        // 启动
         checkAuth();
         document.getElementById('addPanel').classList.add('open');
         document.getElementById('addIcon').classList.add('fa-chevron-up');
