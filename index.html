@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>🌸 花园世界 · 公会花册 Pro+</title>
+    <title>🌸 花园世界 · 公会花册 Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif; }
         body { background: linear-gradient(145deg, #e8f5e9 0%, #c8e6c9 100%); min-height: 100vh; padding: 20px 16px; display: flex; align-items: flex-start; justify-content: center; }
@@ -81,7 +80,6 @@
         .form-input { flex: 1; min-width: 140px; padding: 12px 16px; border: 1.5px solid #b8daa0; border-radius: 40px; background: white; }
         .add-btn { padding: 12px 24px; background: #e68900; color: white; border: none; border-radius: 40px; font-weight: 600; cursor: pointer; box-shadow: 0 5px 0 #b26500; }
         .batch-btn { padding: 6px 16px; background: #9c27b0; color: white; border: none; border-radius: 40px; font-size: 0.8rem; cursor: pointer; box-shadow: 0 4px 0 #6a1b9a; }
-        .ocr-btn { padding: 6px 16px; background: #2196f3; color: white; border: none; border-radius: 40px; font-size: 0.8rem; cursor: pointer; box-shadow: 0 4px 0 #1565c0; }
         .sync-status { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; color: #3e6a2e; font-size: 0.9rem; }
         .refresh-btn { padding: 8px 18px; background: #6f9e4c; color: white; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 0 #3e6925; }
         .log-list { list-style: none; padding: 8px 0; }
@@ -109,7 +107,6 @@
         .batch-checkbox-item { display: flex; align-items: center; padding: 8px; border-bottom: 1px solid #e0efd5; }
         .batch-checkbox-item input { margin-right: 12px; width: 18px; height: 18px; cursor: pointer; }
         .batch-checkbox-item label { flex: 1; cursor: pointer; }
-        #libraryStatus { margin-top: 8px; font-size: 0.85rem; color: #5a7e4a; }
         @media (max-width: 480px) { .flower-grid { grid-template-columns: repeat(2, 1fr); } .container { padding: 20px 16px; } }
     </style>
 </head>
@@ -199,8 +196,6 @@
             <div class="collapse-header" onclick="toggleCollapse('addPanel')">
                 <i class="fas fa-plus-circle" style="color:#e68900;"></i> 添加花卉记录
                 <button class="batch-btn" onclick="event.stopPropagation(); openBatchModal()"><i class="fas fa-file-import"></i> 批量导入</button>
-                <button class="ocr-btn" onclick="event.stopPropagation(); openLibraryModal()"><i class="fas fa-book"></i> 图鉴</button>
-                <button class="ocr-btn" onclick="event.stopPropagation(); openMatchModal()" style="background:#e65100; box-shadow:0 4px 0 #b71c1c;"><i class="fas fa-camera"></i> 识别</button>
                 <i class="fas fa-chevron-down" id="addIcon" style="margin-left:auto;"></i>
             </div>
             <div id="addPanel" class="collapse-content">
@@ -236,62 +231,75 @@
     </div>
 </div>
 
-<!-- 弹窗：昵称 -->
+<!-- 弹窗 -->
 <div class="modal-overlay" id="nicknameModal">
-    <div class="modal"><div class="modal-header"><span class="modal-title"><i class="fas fa-user-edit"></i> 修改昵称</span><button class="modal-close" onclick="closeNicknameModal()"><i class="fas fa-times"></i></button></div>
-    <div class="modal-body"><input type="text" id="nicknameInput" class="modal-input" placeholder="输入新昵称" maxlength="12"><button class="modal-btn" onclick="saveNickname()">保存</button></div></div>
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <span class="modal-title"><i class="fas fa-user-edit"></i> 修改昵称</span>
+            <button class="modal-close" onclick="closeNicknameModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <input type="text" id="nicknameInput" class="modal-input" placeholder="输入新昵称" maxlength="12">
+            <button class="modal-btn" onclick="saveNickname()">保存</button>
+        </div>
+    </div>
 </div>
 
-<!-- 弹窗：成为管理员 -->
 <div class="modal-overlay" id="becomeAdminModal">
-    <div class="modal"><div class="modal-header"><span class="modal-title"><i class="fas fa-key"></i> 成为管理员</span><button class="modal-close" onclick="closeBecomeAdminModal()"><i class="fas fa-times"></i></button></div>
-    <div class="modal-body"><input type="text" id="adminInviteCode" class="modal-input" placeholder="输入管理员邀请码"><button class="modal-btn" onclick="becomeAdmin()">验证</button></div></div>
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <span class="modal-title"><i class="fas fa-key"></i> 成为管理员</span>
+            <button class="modal-close" onclick="closeBecomeAdminModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <input type="text" id="adminInviteCode" class="modal-input" placeholder="输入管理员邀请码">
+            <button class="modal-btn" onclick="becomeAdmin()">验证</button>
+        </div>
+    </div>
 </div>
 
-<!-- 弹窗：成员/花卉列表 -->
 <div class="modal-overlay" id="listModal">
-    <div class="modal"><div class="modal-header"><span class="modal-title" id="listModalTitle"><i class="fas fa-users"></i> 成员列表</span><button class="modal-close" onclick="closeListModal()"><i class="fas fa-times"></i></button></div>
-    <div class="modal-body"><input type="text" class="modal-search" id="listModalSearch" placeholder="🔍 搜索..." oninput="filterListModal()"><div id="listModalContainer"></div></div></div>
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <span class="modal-title" id="listModalTitle"><i class="fas fa-users"></i> 成员列表</span>
+            <button class="modal-close" onclick="closeListModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <input type="text" class="modal-search" id="listModalSearch" placeholder="🔍 搜索..." oninput="filterListModal()">
+            <div id="listModalContainer"></div>
+        </div>
+    </div>
 </div>
 
-<!-- 弹窗：批量导入 -->
+<!-- 批量导入弹窗（图鉴勾选版） -->
 <div class="modal-overlay" id="batchModal">
-    <div class="modal" style="max-width:600px;"><div class="modal-header"><span class="modal-title"><i class="fas fa-file-import"></i> 从图鉴批量导入</span><button class="modal-close" onclick="closeBatchModal()"><i class="fas fa-times"></i></button></div>
-    <div class="modal-body">
-        <input type="text" id="batchMemberName" class="modal-input" placeholder="成员名字">
-        <div class="filter-tabs" style="margin-bottom:12px;"><button class="filter-tab all active" data-filter="all">全</button><button class="filter-tab xian" data-filter="仙">仙</button><button class="filter-tab hua" data-filter="华">华</button><button class="filter-tab zhen" data-filter="珍">珍</button><button class="filter-tab pu" data-filter="普">普</button><button class="filter-tab fan" data-filter="凡">凡</button></div>
-        <input type="text" id="batchSearchInput" class="modal-search" placeholder="🔍 搜索花卉..." oninput="filterBatchFlowers()">
-        <div id="batchFlowerList" style="max-height:300px; overflow-y:auto; border:1px solid #cde0bd; border-radius:16px; padding:12px; background:rgba(255,255,255,0.5);">加载中...</div>
-        <div style="margin-top:12px; display:flex; justify-content:space-between;"><span id="selectedCount">已选 0 种花卉</span><button class="modal-btn" onclick="selectAllVisible()" style="width:auto; padding:8px 16px; background:#6f9e4c;">全选当前</button></div>
-        <button class="modal-btn" onclick="executeBatchImportFromSelection()" style="margin-top:16px;"><i class="fas fa-upload"></i> 导入选中</button>
-        <div id="batchResult" style="margin-top:12px; font-size:0.9rem;"></div>
-    </div></div>
-</div>
-
-<!-- 弹窗：图鉴库管理 -->
-<div class="modal-overlay" id="libraryModal">
-    <div class="modal"><div class="modal-header"><span class="modal-title"><i class="fas fa-book"></i> 花卉图鉴库</span><button class="modal-close" onclick="closeLibraryModal()"><i class="fas fa-times"></i></button></div>
-    <div class="modal-body">
-        <p style="margin-bottom:16px;">上传包含花卉样本的 ZIP 文件，文件名即花名。</p>
-        <input type="file" id="libraryZipInput" accept=".zip" style="display:none;">
-        <button class="modal-btn" onclick="document.getElementById('libraryZipInput').click()" style="background:#9c27b0;"><i class="fas fa-upload"></i> 上传图鉴库 (ZIP)</button>
-        <div id="libraryStatus"></div>
-        <div id="libraryCount" style="margin-top:12px; font-weight:600;"></div>
-    </div></div>
-</div>
-
-<!-- 弹窗：截图识别 -->
-<div class="modal-overlay" id="matchModal">
-    <div class="modal" style="max-width:600px;"><div class="modal-header"><span class="modal-title"><i class="fas fa-camera"></i> 截图识别</span><button class="modal-close" onclick="closeMatchModal()"><i class="fas fa-times"></i></button></div>
-    <div class="modal-body">
-        <input type="file" id="screenshotInput" accept="image/*" style="display:none;">
-        <button class="modal-btn" onclick="document.getElementById('screenshotInput').click()" style="background:#e65100;"><i class="fas fa-image"></i> 选择截图</button>
-        <img id="screenshotPreview" style="max-width:100%; max-height:200px; margin:16px 0; display:none; border-radius:12px;">
-        <div id="matchLoading" style="display:none; text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> 识别中...</div>
-        <div id="matchResult"></div>
-        <div id="matchedFlowers" style="margin-top:16px;"></div>
-        <button class="modal-btn" id="importMatchedBtn" onclick="importMatchedFlowers()" style="display:none; margin-top:16px;"><i class="fas fa-download"></i> 导入选中</button>
-    </div></div>
+    <div class="modal" style="max-width:600px;" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <span class="modal-title"><i class="fas fa-file-import"></i> 从图鉴批量导入</span>
+            <button class="modal-close" onclick="closeBatchModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <input type="text" id="batchMemberName" class="modal-input" placeholder="成员名字">
+            <div class="filter-tabs" style="margin-bottom:12px;">
+                <button class="filter-tab all active" data-filter="all">全</button>
+                <button class="filter-tab xian" data-filter="仙">仙</button>
+                <button class="filter-tab hua" data-filter="华">华</button>
+                <button class="filter-tab zhen" data-filter="珍">珍</button>
+                <button class="filter-tab pu" data-filter="普">普</button>
+                <button class="filter-tab fan" data-filter="凡">凡</button>
+            </div>
+            <input type="text" id="batchSearchInput" class="modal-search" placeholder="🔍 搜索花卉..." oninput="filterBatchFlowers()">
+            <div id="batchFlowerList" style="max-height:300px; overflow-y:auto; border:1px solid #cde0bd; border-radius:16px; padding:12px; background:rgba(255,255,255,0.5);">加载中...</div>
+            <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center;">
+                <span id="selectedCount">已选 0 种花卉</span>
+                <button class="modal-btn" onclick="selectAllVisible()" style="width:auto; padding:8px 16px; background:#6f9e4c;">全选当前</button>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:16px;">
+                <button class="modal-btn" onclick="executeBatchImportFromSelection()" style="flex:1;"><i class="fas fa-upload"></i> 导入选中</button>
+            </div>
+            <div id="batchResult" style="margin-top:12px; font-size:0.9rem;"></div>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -316,14 +324,10 @@
     let listModalData = [];
     const pageSize = 12;
 
+    // 批量导入相关
     let allFlowersList = [];
     let selectedBatchFlowers = new Set();
     let currentBatchFilter = 'all';
-    
-    // 图鉴库
-    let flowerLibrary = new Map();
-    let matchedFlowers = [];
-    let selectedMatchedFlowers = new Set();
 
     const FLOWER_QUALITY_MAP = {
         "星河映蕊":"仙","福运招财":"仙","花漾春山":"仙","欢云妙舞":"仙","夜梦花庭":"仙","梦幻之心":"仙","杏月・花影雅憩":"仙","仙魅灵狐":"仙","桃月・云汐灼华":"仙","欢雪颂冬":"仙","繁花满筑":"仙","芳华寻蝶":"仙","花宴流芳":"仙","桂月・秋千稚语":"仙","菊月・花间飞鸢":"仙","柳月・溪亭燕语":"仙","梅月・疏影听弦":"仙","焰火迎春":"仙","阳月・芙香盈袖":"仙","有龙则灵":"仙","紫霄云庭":"仙",
@@ -365,15 +369,6 @@
     const batchFlowerList = document.getElementById('batchFlowerList');
     const batchSearchInput = document.getElementById('batchSearchInput');
     const selectedCount = document.getElementById('selectedCount');
-    const libraryModal = document.getElementById('libraryModal');
-    const libraryStatus = document.getElementById('libraryStatus');
-    const libraryCount = document.getElementById('libraryCount');
-    const matchModal = document.getElementById('matchModal');
-    const screenshotPreview = document.getElementById('screenshotPreview');
-    const matchLoading = document.getElementById('matchLoading');
-    const matchResult = document.getElementById('matchResult');
-    const matchedFlowersDiv = document.getElementById('matchedFlowers');
-    const importMatchedBtn = document.getElementById('importMatchedBtn');
 
     function getAvatarText(n) { return n ? n.charAt(0).toUpperCase() : '🌸'; }
     function updateUserUI(n) { currentNickname = n || '花友'; userNameSpan.innerHTML = `${currentNickname} <i class="fas fa-pencil-alt"></i>`; userAvatar.textContent = getAvatarText(currentNickname); }
@@ -622,7 +617,7 @@
         if(await saveToCloud()) { addCloudLog(isNew?'新增成员':'添加花卉', mName, fName); document.getElementById('newMemberName').value=''; document.getElementById('newFlowerName').value=''; updateStats(); if(currentMember?.name === mName) renderMemberFlowers(m, currentFilter); }
     };
 
-    // 批量导入
+    // 批量导入（图鉴勾选版）
     function buildAllFlowersList() {
         const map = new Map();
         flowerData.forEach(m => { ['仙','华','珍','普','凡'].forEach(q => { if(m[q]) m[q].forEach(f => map.set(f, q)); }); });
@@ -648,18 +643,31 @@
         batchSearchInput.value = '';
         renderBatchFlowerList(allFlowersList);
     };
+
     window.closeBatchModal = () => batchModal.style.display = 'none';
+
     function renderBatchFlowerList(flowers) {
         if(!flowers.length) { batchFlowerList.innerHTML = '<div style="text-align:center; padding:20px; color:#7f9f6b;">暂无花卉</div>'; return; }
         const qi = { '仙':'🔴', '华':'🟡', '珍':'🟣', '普':'🔵', '凡':'🟢' };
         batchFlowerList.innerHTML = flowers.map(f => {
             const checked = selectedBatchFlowers.has(f.name) ? 'checked' : '';
-            return `<div class="batch-checkbox-item"><input type="checkbox" id="chk_${f.name}" ${checked} onchange="toggleBatchFlower('${f.name}')"><label for="chk_${f.name}">${qi[f.quality]} ${f.name}</label></div>`;
+            return `<div class="batch-checkbox-item">
+                <input type="checkbox" id="chk_${f.name}" ${checked} onchange="toggleBatchFlower('${f.name}')">
+                <label for="chk_${f.name}">${qi[f.quality]} ${f.name}</label>
+            </div>`;
         }).join('');
         updateSelectedCount();
     }
-    window.toggleBatchFlower = (name) => { selectedBatchFlowers.has(name) ? selectedBatchFlowers.delete(name) : selectedBatchFlowers.add(name); updateSelectedCount(); };
-    function updateSelectedCount() { selectedCount.textContent = `已选 ${selectedBatchFlowers.size} 种花卉`; }
+
+    window.toggleBatchFlower = (name) => {
+        selectedBatchFlowers.has(name) ? selectedBatchFlowers.delete(name) : selectedBatchFlowers.add(name);
+        updateSelectedCount();
+    };
+
+    function updateSelectedCount() {
+        selectedCount.textContent = `已选 ${selectedBatchFlowers.size} 种花卉`;
+    }
+
     window.filterBatchFlowers = () => {
         const kw = batchSearchInput.value.toLowerCase();
         let filtered = allFlowersList;
@@ -667,108 +675,54 @@
         if(kw) filtered = filtered.filter(f => f.name.toLowerCase().includes(kw));
         renderBatchFlowerList(filtered);
     };
+
     window.selectAllVisible = () => {
         const checkboxes = document.querySelectorAll('#batchFlowerList input[type="checkbox"]');
         checkboxes.forEach(cb => { selectedBatchFlowers.add(cb.id.replace('chk_', '')); cb.checked = true; });
         updateSelectedCount();
     };
+
     document.querySelectorAll('#batchModal .filter-tab').forEach(t => {
         t.addEventListener('click', () => {
             document.querySelectorAll('#batchModal .filter-tab').forEach(x => x.classList.remove('active'));
-            t.classList.add('active'); currentBatchFilter = t.dataset.filter; filterBatchFlowers();
+            t.classList.add('active');
+            currentBatchFilter = t.dataset.filter;
+            filterBatchFlowers();
         });
     });
+
     window.executeBatchImportFromSelection = async () => {
         const memberName = document.getElementById('batchMemberName').value.trim();
         if(!memberName) { alert('请输入成员名字'); return; }
         if(selectedBatchFlowers.size === 0) { alert('请至少选择一种花卉'); return; }
-        let member = flowerData.find(m => m.name === memberName); let isNew = false;
-        if(!member) { member = { name: memberName, 仙:[], 华:[], 珍:[], 普:[], 凡:[] }; flowerData.push(member); isNew = true; }
-        let added = 0;
-        for(const f of selectedBatchFlowers) { const q = getFlowerQuality(f); if(!member[q]) member[q] = []; if(!member[q].includes(f)) { member[q].push(f); added++; } }
-        if(await saveToCloud()) { addCloudLog(isNew?'批量新增成员':'批量添加花卉', memberName, `${added}种花`); document.getElementById('batchResult').innerHTML = `<span style="color:#2e7d32;"><i class="fas fa-check-circle"></i> 成功导入 ${added} 种花卉！</span>`; updateStats(); selectedBatchFlowers.clear(); setTimeout(() => closeBatchModal(), 1500); }
-        else { document.getElementById('batchResult').innerHTML = `<span style="color:#d32f2f;">导入失败</span>`; }
-    };
-
-    // 图鉴库
-    window.openLibraryModal = () => { libraryModal.style.display = 'flex'; };
-    window.closeLibraryModal = () => libraryModal.style.display = 'none';
-    document.getElementById('libraryZipInput').addEventListener('change', async (e) => {
-        const file = e.target.files[0]; if(!file) return;
-        libraryStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 正在解压...';
-        try {
-            const zip = await JSZip.loadAsync(file);
-            const imageFiles = Object.keys(zip.files).filter(f => f.match(/\.(png|jpg|jpeg)$/i) && !zip.files[f].dir);
-            flowerLibrary.clear();
-            for(const filename of imageFiles) {
-                const flowerName = filename.replace(/\.[^/.]+$/, "").replace(/.*[\\/]/, '');
-                const blob = await zip.files[filename].async('blob');
-                const img = new Image(); img.src = URL.createObjectURL(blob);
-                await new Promise(r => { img.onload = r; });
-                flowerLibrary.set(flowerName, img);
-            }
-            libraryStatus.innerHTML = '✅ 图鉴库加载成功！';
-            libraryCount.innerHTML = `📚 已加载 ${flowerLibrary.size} 种花卉`;
-        } catch(err) { libraryStatus.innerHTML = `❌ 加载失败: ${err.message}`; }
-    });
-
-    // 截图识别
-    window.openMatchModal = () => { 
-        if(flowerLibrary.size === 0) { alert('请先上传图鉴库'); return; }
-        matchModal.style.display = 'flex'; screenshotPreview.style.display = 'none'; matchResult.innerHTML = ''; matchedFlowersDiv.innerHTML = ''; importMatchedBtn.style.display = 'none'; selectedMatchedFlowers.clear();
-    };
-    window.closeMatchModal = () => matchModal.style.display = 'none';
-    document.getElementById('screenshotInput').addEventListener('change', async (e) => {
-        const file = e.target.files[0]; if(!file) return;
-        const reader = new FileReader();
-        reader.onload = ev => { screenshotPreview.src = ev.target.result; screenshotPreview.style.display = 'block'; };
-        reader.readAsDataURL(file);
-        matchLoading.style.display = 'block'; matchResult.innerHTML = '正在识别...';
-        const img = new Image(); img.src = URL.createObjectURL(file);
-        await new Promise(r => { img.onload = r; });
-        const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-        matchedFlowers = [];
-        const libraryArray = Array.from(flowerLibrary);
-        for(let [flowerName, templateImg] of libraryArray) {
-            canvas.width = img.width; canvas.height = img.height; ctx.drawImage(img, 0, 0);
-            const tw = templateImg.width, th = templateImg.height;
-            if(tw > img.width || th > img.height) continue;
-            let bestMatch = 0;
-            for(let y = 0; y <= img.height - th; y += 30) {
-                for(let x = 0; x <= img.width - tw; x += 30) {
-                    let match = 0, total = 0;
-                    for(let ty = 0; ty < th; ty += 5) {
-                        for(let tx = 0; tx < tw; tx += 5) {
-                            const tp = ctx.getImageData(tx, ty, 1, 1).data;
-                            const sp = ctx.getImageData(x+tx, y+ty, 1, 1).data;
-                            if(Math.abs(tp[0]-sp[0])+Math.abs(tp[1]-sp[1])+Math.abs(tp[2]-sp[2]) < 60) match++;
-                            total++;
-                        }
-                    }
-                    const sim = match / total; if(sim > bestMatch) bestMatch = sim;
-                }
-            }
-            if(bestMatch > 0.2) matchedFlowers.push(flowerName);
+        
+        let member = flowerData.find(m => m.name === memberName);
+        let isNew = false;
+        if(!member) {
+            member = { name: memberName, 仙: [], 华: [], 珍: [], 普: [], 凡: [] };
+            flowerData.push(member);
+            isNew = true;
         }
-        matchLoading.style.display = 'none';
-        if(matchedFlowers.length) {
-            matchResult.innerHTML = `✅ 匹配到 ${matchedFlowers.length} 种花卉`;
-            matchedFlowersDiv.innerHTML = matchedFlowers.map(f => `<span class="flower-tag" onclick="toggleMatchedFlower('${f}')" id="match_${f}">${f}</span>`).join('');
-            importMatchedBtn.style.display = 'block';
-        } else { matchResult.innerHTML = '⚠️ 未匹配到花卉'; }
-    });
-    window.toggleMatchedFlower = (f) => {
-        const el = document.getElementById(`match_${f}`);
-        selectedMatchedFlowers.has(f) ? (selectedMatchedFlowers.delete(f), el.classList.remove('selected')) : (selectedMatchedFlowers.add(f), el.classList.add('selected'));
-    };
-    window.importMatchedFlowers = async () => {
-        if(selectedMatchedFlowers.size === 0) { alert('请选择花卉'); return; }
-        const memberName = prompt('这些花卉属于哪位成员？'); if(!memberName) return;
-        let member = flowerData.find(m => m.name === memberName); let isNew = false;
-        if(!member) { member = { name: memberName, 仙:[], 华:[], 珍:[], 普:[], 凡:[] }; flowerData.push(member); isNew = true; }
+        
         let added = 0;
-        for(const f of selectedMatchedFlowers) { const q = getFlowerQuality(f); if(!member[q]) member[q] = []; if(!member[q].includes(f)) { member[q].push(f); added++; } }
-        if(await saveToCloud()) { addCloudLog(isNew?'识别新增成员':'识别添加花卉', memberName, `${added}种花`); alert(`成功导入 ${added} 种花卉！`); closeMatchModal(); updateStats(); }
+        for(const f of selectedBatchFlowers) {
+            const q = getFlowerQuality(f);
+            if(!member[q]) member[q] = [];
+            if(!member[q].includes(f)) {
+                member[q].push(f);
+                added++;
+            }
+        }
+        
+        if(await saveToCloud()) {
+            addCloudLog(isNew ? '批量新增成员' : '批量添加花卉', memberName, `${added}种花`);
+            document.getElementById('batchResult').innerHTML = `<span style="color:#2e7d32;"><i class="fas fa-check-circle"></i> 成功导入 ${added} 种花卉！</span>`;
+            updateStats();
+            selectedBatchFlowers.clear();
+            setTimeout(() => closeBatchModal(), 1500);
+        } else {
+            document.getElementById('batchResult').innerHTML = `<span style="color:#d32f2f;">导入失败</span>`;
+        }
     };
 
     document.getElementById('refreshDataBtn').onclick = loadData;
