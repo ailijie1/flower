@@ -51,7 +51,7 @@
         .form-input { flex: 1; padding: 12px 16px; border: 1.5px solid #b8daa0; border-radius: 40px; background: white; }
         .add-btn { padding: 12px 24px; background: #e68900; color: white; border: none; border-radius: 40px; font-weight: 600; cursor: pointer; }
         .sync-status { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; color: #3e6a2e; }
-        .refresh-btn { padding: 8px 18px; background: #6f9e4c; color: white; border: none; border-radius: 30px; cursor: pointer; }
+        .refresh-btn { padding: 8px 18px; background: #6f9e4c; color: white; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 0 #3e6925; }
         .footer { text-align: center; color: #6b8a58; font-size: 0.8rem; margin-top: 20px; }
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; }
         .modal { background: white; max-width: 500px; width: 100%; max-height: 70vh; border-radius: 32px; overflow: hidden; }
@@ -69,7 +69,6 @@
 </head>
 <body>
 <div class="container">
-    <!-- 登录/注册界面 -->
     <div id="authContainer" class="auth-container">
         <h1>🌸 花园世界</h1>
         <p class="subtitle">多公会系统 · 邀请码登录</p>
@@ -93,110 +92,54 @@
         <p class="auth-footer">🌱 需要邀请码？请联系公会会长</p>
     </div>
 
-    <!-- 主应用 -->
     <div id="appContainer" class="app-container">
         <div class="user-bar">
-            <div class="user-info">
-                <i class="fas fa-user-circle"></i>
-                <span id="displayName">花友</span>
-                <span class="guild-badge" id="guildBadge">gh001</span>
-            </div>
-            <div>
-                <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> 退出</button>
-            </div>
+            <div class="user-info"><i class="fas fa-user-circle"></i><span id="displayName">花友</span><span class="guild-badge" id="guildBadge">gh001</span></div>
+            <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> 退出</button>
         </div>
-
-        <!-- 会长工具栏 -->
-        <div id="ownerToolbar" style="display:none; margin-bottom:16px; padding:12px; background:rgba(255,215,0,0.2); border-radius:20px;">
-            <div style="display:flex; gap:8px; align-items:center;">
-                <i class="fas fa-crown" style="color:#f9a825;"></i>
-                <span style="font-weight:600;">会长工具</span>
-                <button class="refresh-btn" onclick="openInviteModal()" style="margin-left:auto;"><i class="fas fa-key"></i> 生成邀请码</button>
-            </div>
+        <div id="ownerToolbar" style="display:none;margin-bottom:16px;padding:12px;background:rgba(255,215,0,0.2);border-radius:20px;align-items:center;gap:8px;">
+            <i class="fas fa-crown" style="color:#f9a825;"></i><span style="font-weight:600;">会长工具</span>
+            <button class="refresh-btn" onclick="openInviteModal()" style="margin-left:auto;"><i class="fas fa-key"></i> 生成邀请码</button>
         </div>
-
         <div class="btn-group">
             <button class="query-btn active" id="byMemberBtn"><i class="fas fa-user"></i> 查成员</button>
             <button class="query-btn" id="byFlowerBtn"><i class="fas fa-flower"></i> 查花卉</button>
         </div>
-
         <div class="search-box">
-            <input type="text" id="searchInput" placeholder="输入成员名字…">
-            <button id="searchBtn"><i class="fas fa-search"></i> 查询</button>
+            <input type="text" id="searchInput" placeholder="输入成员名字…"><button id="searchBtn"><i class="fas fa-search"></i> 查询</button>
         </div>
-
         <div class="stats-row">
-            <div class="stat-card" id="memberStatsCard">
-                <div class="stat-number" id="totalMembers">0</div>
-                <div class="stat-label">总成员</div>
-            </div>
-            <div class="stat-card" id="flowerStatsCard">
-                <div class="stat-number" id="totalFlowers">0</div>
-                <div class="stat-label">花卉种类</div>
-            </div>
+            <div class="stat-card"><div class="stat-number" id="totalMembers">0</div><div class="stat-label">总成员</div></div>
+            <div class="stat-card"><div class="stat-number" id="totalFlowers">0</div><div class="stat-label">花卉种类</div></div>
         </div>
-
-        <div id="resultArea" class="result-area">
-            <div style="color:#5a7e4a; text-align:center; padding:20px;">
-                <i class="fas fa-hand-pointer"></i> 输入关键词查询
-            </div>
-        </div>
-
+        <div id="resultArea" class="result-area"><div style="color:#5a7e4a;text-align:center;padding:20px;">输入关键词查询</div></div>
         <div class="collapsible">
-            <div class="collapse-header" onclick="toggleCollapse('addPanel')">
-                <i class="fas fa-plus-circle" style="color:#e68900;"></i> 添加花卉记录
-                <i class="fas fa-chevron-down" id="addIcon" style="margin-left:auto;"></i>
-            </div>
-            <div id="addPanel" class="collapse-content">
-                <div class="form-row">
-                    <input type="text" id="newMemberName" class="form-input" placeholder="成员名字">
-                    <input type="text" id="newFlowerName" class="form-input" placeholder="花卉名称">
-                    <button class="add-btn" id="addRecordBtn"><i class="fas fa-cloud-upload-alt"></i> 添加</button>
-                </div>
-            </div>
+            <div class="collapse-header" onclick="toggleCollapse('addPanel')"><i class="fas fa-plus-circle" style="color:#e68900;"></i> 添加花卉记录<i class="fas fa-chevron-down" id="addIcon" style="margin-left:auto;"></i></div>
+            <div id="addPanel" class="collapse-content"><div class="form-row"><input type="text" id="newMemberName" class="form-input" placeholder="成员名字"><input type="text" id="newFlowerName" class="form-input" placeholder="花卉名称"><button class="add-btn" id="addRecordBtn">添加</button></div></div>
         </div>
-
-        <div class="sync-status">
-            <span id="syncMessage"><i class="fas fa-sync fa-spin"></i> 连接中</span>
-            <button class="refresh-btn" id="refreshDataBtn"><i class="fas fa-sync-alt"></i> 刷新</button>
-        </div>
-
-        <p class="footer"><i class="fas fa-lock"></i> 仅限公会成员 · 数据隔离</p>
+        <div class="sync-status"><span id="syncMessage">连接中...</span><button class="refresh-btn" id="refreshDataBtn">刷新</button></div>
+        <p class="footer">仅限公会成员 · 数据隔离</p>
     </div>
 </div>
-
-<!-- 邀请码弹窗 -->
 <div class="modal-overlay" id="inviteModal">
-    <div class="modal">
-        <div class="modal-header">
-            <span class="modal-title"><i class="fas fa-key"></i> 生成邀请码</span>
-            <button class="modal-close" onclick="closeInviteModal()"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="modal-body">
-            <p style="margin-bottom:12px;">邀请码有效期10分钟，每个码只能用1次</p>
-            <button class="modal-btn" onclick="generateInviteCode()"><i class="fas fa-plus"></i> 生成新邀请码</button>
-            <div id="inviteCodeList" style="margin-top:16px;"></div>
-        </div>
-    </div>
+    <div class="modal"><div class="modal-header"><span class="modal-title">🔑 生成邀请码</span><button class="modal-close" onclick="closeInviteModal()">✕</button></div>
+    <div class="modal-body"><p>邀请码有效期10分钟，每个码只能用1次</p><button class="modal-btn" onclick="generateInviteCode()">+ 生成新邀请码</button><div id="inviteCodeList" style="margin-top:16px;"></div></div></div>
 </div>
 
 <script>
 (function(){
     const SUPABASE_URL = "https://amngvhgusyipxnnkejzp.supabase.co";
     const SUPABASE_KEY = "sb_publishable_yIYNCHcT4Z0z-NMcKVmjTQ_6SoHyxwZ";
-    
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     
-    let currentUser = null;
-    let currentProfile = null;
-    let flowerData = [];
-    let queryMode = 'member';
+    let currentUser = null, currentProfile = null, flowerData = [], queryMode = 'member';
 
-    // DOM
     const authContainer = document.getElementById('authContainer');
     const appContainer = document.getElementById('appContainer');
     const loginTab = document.getElementById('loginTab');
     const registerTab = document.getElementById('registerTab');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
     const loginBtn = document.getElementById('loginBtn');
     const registerBtn = document.getElementById('registerBtn');
     const logoutBtn = document.getElementById('logoutBtn');
@@ -204,283 +147,132 @@
     const guildBadge = document.getElementById('guildBadge');
     const ownerToolbar = document.getElementById('ownerToolbar');
     const inviteModal = document.getElementById('inviteModal');
+    const inviteCodeList = document.getElementById('inviteCodeList');
     const totalMembersSpan = document.getElementById('totalMembers');
     const totalFlowersSpan = document.getElementById('totalFlowers');
     const syncMessage = document.getElementById('syncMessage');
     const resultArea = document.getElementById('resultArea');
 
-    // 检查登录状态
     async function checkAuth() {
         const { data: { session } } = await supabase.auth.getSession();
-        if(session) {
-            currentUser = session.user;
-            await loadProfile();
-            showApp();
-        } else {
-            showAuth();
-        }
+        if(session) { currentUser = session.user; await loadProfile(); showApp(); }
+        else { showAuth(); }
     }
-
     async function loadProfile() {
-        const { data } = await supabase.from('profiles').select('*, guilds(*)').eq('id', currentUser.id).single();
+        const { data } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
         if(data) {
             currentProfile = data;
             displayName.textContent = data.nickname || data.email?.split('@')[0] || '花友';
             guildBadge.textContent = data.guild_id || 'gh001';
-            // 判断是否是会长（第一个注册的人，或者后续可以设置）
-            const isOwner = data.role === 'owner';
-            ownerToolbar.style.display = isOwner ? 'block' : 'none';
+            ownerToolbar.style.display = data.role === 'owner' ? 'flex' : 'none';
         }
         await loadGuildData();
     }
-
     async function loadGuildData() {
         const guildId = currentProfile?.guild_id || 'gh001';
         const { data } = await supabase.from('flowers').select('data').eq('guild_id', guildId).single();
-        if(data?.data) {
-            flowerData = data.data;
-            updateStats();
-        }
-        syncMessage.innerHTML = `✅ 已连接 · ${guildId}`;
+        if(data?.data) { flowerData = data.data; updateStats(); }
+        syncMessage.textContent = `✅ 已连接 · ${guildId}`;
     }
-
     function updateStats() {
         totalMembersSpan.textContent = flowerData.length;
-        const flowerSet = new Set();
-        flowerData.forEach(m => {
-            ['仙','华','珍','普','凡'].forEach(q => { if(m[q]) m[q].forEach(f => flowerSet.add(f)); });
-        });
-        totalFlowersSpan.textContent = flowerSet.size;
+        const s = new Set();
+        flowerData.forEach(m => { ['仙','华','珍','普','凡'].forEach(q => { if(m[q]) m[q].forEach(f => s.add(f)); }); });
+        totalFlowersSpan.textContent = s.size;
     }
-
     function showAuth() { authContainer.style.display = 'block'; appContainer.style.display = 'none'; }
     function showApp() { authContainer.style.display = 'none'; appContainer.style.display = 'block'; }
 
-    // 登录
     loginBtn.onclick = async () => {
         const email = document.getElementById('loginEmail').value.trim();
         const password = document.getElementById('loginPassword').value;
         const err = document.getElementById('loginError');
-        if(!email||!password) { err.textContent = '请填写完整'; return; }
-        err.textContent = ''; loginBtn.textContent = '登录中...'; loginBtn.disabled = true;
+        if(!email||!password) { err.textContent='请填写完整'; return; }
+        err.textContent=''; loginBtn.textContent='登录中...'; loginBtn.disabled=true;
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        loginBtn.textContent = '登录'; loginBtn.disabled = false;
-        if(error) { err.textContent = '邮箱或密码错误'; }
+        loginBtn.textContent='登录'; loginBtn.disabled=false;
+        if(error) { err.textContent='邮箱或密码错误'; }
         else { currentUser = data.user; await loadProfile(); showApp(); }
     };
 
-    // 注册（带邀请码验证 + IP限制）
     registerBtn.onclick = async () => {
         const email = document.getElementById('registerEmail').value.trim();
         const password = document.getElementById('registerPassword').value;
-        const inviteCode = document.getElementById('inviteCode').value.trim();
+        const code = document.getElementById('inviteCode').value.trim();
         const err = document.getElementById('registerError');
-        
-        if(!email||!password||!inviteCode) { err.textContent = '请填写所有字段'; return; }
-        if(password.length < 6) { err.textContent = '密码至少6位'; return; }
-        
-        err.textContent = ''; registerBtn.textContent = '验证中...'; registerBtn.disabled = true;
-        
-        // 1. 验证邀请码
-        const { data: codeData, error: codeError } = await supabase
-            .from('invite_codes')
-            .select('*')
-            .eq('code', inviteCode)
-            .eq('is_active', true)
-            .lt('used_count', 1)
-            .single();
-            
-        if(codeError || !codeData) {
-            err.textContent = '邀请码无效或已过期';
-            registerBtn.textContent = '注册'; registerBtn.disabled = false;
-            return;
-        }
-        
-        // 检查是否过期
-        if(new Date(codeData.expires_at) < new Date()) {
-            await supabase.from('invite_codes').update({ is_active: false }).eq('code', inviteCode);
-            err.textContent = '邀请码已过期';
-            registerBtn.textContent = '注册'; registerBtn.disabled = false;
-            return;
-        }
-        
-        // 2. 获取IP（通过免费API）
-        let ip = 'unknown';
-        try {
-            const ipRes = await fetch('https://api.ipify.org?format=json');
-            const ipData = await ipRes.json();
-            ip = ipData.ip;
-        } catch(e) { console.log('获取IP失败'); }
-        
-        // 3. 检查IP限制
-        const today = new Date().toISOString().split('T')[0];
-        const { count } = await supabase
-            .from('ip_registrations')
-            .select('*', { count: 'exact', head: true })
-            .eq('ip_address', ip)
-            .gte('registered_at', today);
-            
-        if(count >= 3) {
-            err.textContent = '今日注册次数已达上限';
-            registerBtn.textContent = '注册'; registerBtn.disabled = false;
-            return;
-        }
-        
-        // 4. 注册用户
-        registerBtn.textContent = '注册中...';
+        if(!email||!password||!code) { err.textContent='请填写所有字段'; return; }
+        if(password.length<6) { err.textContent='密码至少6位'; return; }
+        err.textContent=''; registerBtn.textContent='验证中...'; registerBtn.disabled=true;
+        const { data: codeData, error: codeError } = await supabase.from('invite_codes').select('*').eq('code',code).eq('is_active',true).single();
+        if(codeError||!codeData) { err.textContent='邀请码无效'; registerBtn.textContent='注册'; registerBtn.disabled=false; return; }
+        if(new Date(codeData.expires_at) < new Date()) { err.textContent='邀请码已过期'; registerBtn.textContent='注册'; registerBtn.disabled=false; return; }
         const { data: userData, error: signUpError } = await supabase.auth.signUp({ email, password });
-        
-        if(signUpError) {
-            err.textContent = signUpError.message;
-            registerBtn.textContent = '注册'; registerBtn.disabled = false;
-            return;
-        }
-        
-        // 5. 创建 profile，绑定公会
-        const guildId = codeData.guild_id;
-        await supabase.from('profiles').insert({
-            id: userData.user.id,
-            nickname: email.split('@')[0],
-            guild_id: guildId,
-            role: 'member'
-        });
-        
-        // 6. 记录IP
-        await supabase.from('ip_registrations').insert({ ip_address: ip });
-        
-        // 7. 消耗邀请码
-        await supabase.from('invite_codes')
-            .update({ used_count: 1, is_active: false })
-            .eq('code', inviteCode);
-        
-        alert(`注册成功！欢迎加入 ${guildId}`);
+        if(signUpError) { err.textContent=signUpError.message; registerBtn.textContent='注册'; registerBtn.disabled=false; return; }
+        await supabase.from('profiles').insert({ id: userData.user.id, nickname: email.split('@')[0], guild_id: codeData.guild_id, role: 'member' });
+        await supabase.from('invite_codes').update({ used_count: 1, is_active: false }).eq('code', code);
+        alert(`注册成功！欢迎加入 ${codeData.guild_id}`);
         loginTab.click();
-        registerBtn.textContent = '注册'; registerBtn.disabled = false;
+        registerBtn.textContent='注册'; registerBtn.disabled=false;
     };
 
-    // 退出
-loginTab.onclick = () => { 
-    loginTab.classList.add('active'); 
-    registerTab.classList.remove('active'); 
-    document.getElementById('loginForm').style.display = 'flex'; 
-    document.getElementById('registerForm').style.display = 'none'; 
-};
+    logoutBtn.onclick = async () => { await supabase.auth.signOut(); showAuth(); };
+    loginTab.onclick = () => { loginTab.classList.add('active'); registerTab.classList.remove('active'); loginForm.style.display='flex'; registerForm.style.display='none'; };
+    registerTab.onclick = () => { registerTab.classList.add('active'); loginTab.classList.remove('active'); registerForm.style.display='flex'; loginForm.style.display='none'; };
 
-registerTab.onclick = () => { 
-    registerTab.classList.add('active'); 
-    loginTab.classList.remove('active'); 
-    document.getElementById('registerForm').style.display = 'flex'; 
-    document.getElementById('loginForm').style.display = 'none'; 
-};
-    // 邀请码
-    window.openInviteModal = async () => { 
-        inviteModal.style.display = 'flex'; 
-          await loadInviteCodes();
-          };
-    window.closeInviteModal = () => inviteModal.style.display = 'none';
-    
+    window.openInviteModal = async () => { inviteModal.style.display='flex'; await loadInviteCodes(); };
+    window.closeInviteModal = () => inviteModal.style.display='none';
+
     async function loadInviteCodes() {
         const guildId = currentProfile?.guild_id;
-        const { data } = await supabase.from('invite_codes')
-            .select('*')
-            .eq('guild_id', guildId)
-            .eq('is_active', true)
-            .order('created_at', { ascending: false });
-        
-        const container = document.getElementById('inviteCodeList');
-        if(!data?.length) {
-            container.innerHTML = '<p style="color:#7f9f6b;">暂无有效邀请码</p>';
-            return;
-        }
-        container.innerHTML = data.map(c => `
-            <div class="invite-code-box">
-                <div style="display:flex; align-items:center; justify-content:center;">
-                    <span class="invite-code">${c.code}</span>
-                    <button class="copy-btn" onclick="copyCode('${c.code}')"><i class="fas fa-copy"></i></button>
-                </div>
-                <p style="font-size:0.8rem; margin-top:8px;">过期: ${new Date(c.expires_at).toLocaleTimeString()}</p>
-            </div>
-        `).join('');
+        const { data } = await supabase.from('invite_codes').select('*').eq('guild_id',guildId).eq('is_active',true).order('created_at',{ascending:false});
+        if(!data?.length) { inviteCodeList.innerHTML='<p style="color:#7f9f6b;">暂无有效邀请码</p>'; return; }
+        inviteCodeList.innerHTML = data.map(c => `<div class="invite-code-box"><div style="display:flex;align-items:center;justify-content:center;"><span class="invite-code">${c.code}</span><button class="copy-btn" onclick="copyCode('${c.code}')">📋</button></div><p style="font-size:0.8rem;margin-top:8px;">过期: ${new Date(c.expires_at).toLocaleTimeString()}</p></div>`).join('');
     }
-       window.generateInviteCode = async () => {
+
+    window.generateInviteCode = async () => {
         const guildId = currentProfile?.guild_id || 'gh001';
         const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
         let random = '';
-        for(let i=0; i<8; i++) random += chars.charAt(Math.floor(Math.random() * chars.length));
+        for(let i=0;i<8;i++) random += chars.charAt(Math.floor(Math.random()*chars.length));
         const code = `${guildId}_${random}`;
-        
-        console.log('尝试插入:', code, guildId, currentUser.id);
-        
-        const { data, error } = await supabase.from('invite_codes').insert({
-            code: code,
-            guild_id: guildId,
-            type: 'member',
-            created_by: currentUser.id,
-            expires_at: new Date(Date.now() + 10*60*1000).toISOString()
-        }).select();
-        
-        if(error) {
-            console.error('插入失败:', error);
-            alert('错误: ' + error.message + ' | ' + error.details);
-        } else {
-            console.log('插入成功:', data);
-            await loadInviteCodes();
-        }
-    };
-        
+        const { error } = await supabase.from('invite_codes').insert({ code, guild_id:guildId, type:'member', created_by:currentUser.id, expires_at: new Date(Date.now()+10*60*1000).toISOString() });
+        if(error) { alert('生成失败: '+error.message); return; }
         await loadInviteCodes();
     };
-    
-    window.copyCode = (code) => {
-        navigator.clipboard?.writeText(code);
-        alert('邀请码已复制！');
-    };
 
-    // 花卉查询（简化版）
-    const searchBtn = document.getElementById('searchBtn');
-    const searchInput = document.getElementById('searchInput');
+    window.copyCode = (code) => { navigator.clipboard?.writeText(code); alert('已复制!'); };
+
     const byMemberBtn = document.getElementById('byMemberBtn');
     const byFlowerBtn = document.getElementById('byFlowerBtn');
-    
-    byMemberBtn.onclick = () => { queryMode = 'member'; byMemberBtn.classList.add('active'); byFlowerBtn.classList.remove('active'); };
-    byFlowerBtn.onclick = () => { queryMode = 'flower'; byFlowerBtn.classList.add('active'); byMemberBtn.classList.remove('active'); };
-    
+    const searchBtn = document.getElementById('searchBtn');
+    const searchInput = document.getElementById('searchInput');
+    byMemberBtn.onclick = () => { queryMode='member'; byMemberBtn.classList.add('active'); byFlowerBtn.classList.remove('active'); };
+    byFlowerBtn.onclick = () => { queryMode='flower'; byFlowerBtn.classList.add('active'); byMemberBtn.classList.remove('active'); };
+
     function getFlowerQuality(f) {
         const map = { "星河映蕊":"仙","福运招财":"仙","花漾春山":"仙","宝珠玉兰":"华","纸鸢探春":"华","琼台玉露":"华","冰蓝矮牵牛":"珍","白百合":"凡","康乃馨":"凡","铃兰":"凡" };
         return map[f] || '凡';
     }
-    
+
     searchBtn.onclick = () => {
-        const kw = searchInput.value.trim();
-        if(!kw) return;
-        if(queryMode === 'member') {
-            const m = flowerData.find(m => m.name.includes(kw));
-            if(m) {
-                const flowers = [];
-                ['仙','华','珍','普','凡'].forEach(q => { if(m[q]) m[q].forEach(f => flowers.push({name:f, quality:q})); });
-                const qc = { '仙':'xian', '华':'hua', '珍':'zhen', '普':'pu', '凡':'fan' };
-                resultArea.innerHTML = `<div class="flower-grid">${flowers.map(f => `<div class="flower-card ${qc[f.quality]}">${f.name}</div>`).join('')}</div>`;
-            } else {
-                resultArea.innerHTML = '<div style="color:#a00; text-align:center;">❌ 未找到</div>';
-            }
+        const kw = searchInput.value.trim(); if(!kw) return;
+        if(queryMode==='member') {
+            const m = flowerData.find(m=>m.name.includes(kw));
+            if(m) { const fs=[]; ['仙','华','珍','普','凡'].forEach(q=>{ if(m[q]) m[q].forEach(f=>fs.push({name:f,quality:q})); }); const qc={仙:'xian',华:'hua',珍:'zhen',普:'pu',凡:'fan'}; resultArea.innerHTML=`<div class="flower-grid">${fs.map(f=>`<div class="flower-card ${qc[f.quality]}">${f.name}</div>`).join('')}</div>`; }
+            else { resultArea.innerHTML='<div style="color:#a00;text-align:center;">❌ 未找到</div>'; }
         } else {
-            const members = flowerData.filter(m => ['仙','华','珍','普','凡'].some(q => m[q]?.includes(kw)));
-            if(members.length) {
-                resultArea.innerHTML = `<div>${members.map(m => `<span class="member-tag" style="display:inline-block; background:#e0f0d0; padding:6px 16px; border-radius:30px; margin:4px;">${m.name}</span>`).join('')}</div>`;
-            } else {
-                resultArea.innerHTML = '<div style="color:#a00; text-align:center;">❌ 未找到</div>';
-            }
+            const ms = flowerData.filter(m=>['仙','华','珍','普','凡'].some(q=>m[q]?.includes(kw)));
+            resultArea.innerHTML = ms.length ? ms.map(m=>`<span style="display:inline-block;background:#e0f0d0;padding:6px 16px;border-radius:30px;margin:4px;">${m.name}</span>`).join('') : '<div style="color:#a00;text-align:center;">❌ 未找到</div>';
         }
     };
-    
-    // 添加花卉
+
     document.getElementById('addRecordBtn').onclick = async () => {
         const mName = document.getElementById('newMemberName').value.trim();
         const fName = document.getElementById('newFlowerName').value.trim();
         if(!mName||!fName) return;
         const q = getFlowerQuality(fName);
-        let m = flowerData.find(m => m.name === mName);
-        if(!m) { m = { name: mName, 仙:[], 华:[], 珍:[], 普:[], 凡:[] }; flowerData.push(m); }
+        let m = flowerData.find(m=>m.name===mName);
+        if(!m) { m = { name:mName, 仙:[],华:[],珍:[],普:[],凡:[] }; flowerData.push(m); }
         if(!m[q]) m[q] = [];
         if(!m[q].includes(fName)) { m[q].push(fName); }
         await saveGuildData();
@@ -488,26 +280,17 @@ registerTab.onclick = () => {
         document.getElementById('newFlowerName').value = '';
         updateStats();
     };
-    
+
     async function saveGuildData() {
         const guildId = currentProfile?.guild_id || 'gh001';
-        const { data } = await supabase.from('flowers').select('id').eq('guild_id', guildId).single();
-        if(data) {
-            await supabase.from('flowers').update({ data: flowerData }).eq('id', data.id);
-        }
-        syncMessage.innerHTML = `✅ 已保存 · ${guildId}`;
+        const { data } = await supabase.from('flowers').select('id').eq('guild_id',guildId).single();
+        if(data) { await supabase.from('flowers').update({ data:flowerData }).eq('id',data.id); }
+        syncMessage.textContent = `✅ 已保存 · ${guildId}`;
     }
-    
-    document.getElementById('refreshDataBtn').onclick = loadGuildData;
-    window.toggleCollapse = (id) => {
-        const p = document.getElementById(id);
-        const i = document.getElementById('addIcon');
-        p.classList.toggle('open');
-        i.classList.toggle('fa-chevron-down');
-        i.classList.toggle('fa-chevron-up');
-    };
 
-    // 启动
+    document.getElementById('refreshDataBtn').onclick = loadGuildData;
+    window.toggleCollapse = (id) => { const p=document.getElementById(id), i=document.getElementById('addIcon'); p.classList.toggle('open'); i.classList.toggle('fa-chevron-down'); i.classList.toggle('fa-chevron-up'); };
+
     checkAuth();
     document.getElementById('addPanel').classList.add('open');
     document.getElementById('addIcon').classList.add('fa-chevron-up');
