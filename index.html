@@ -394,21 +394,31 @@
             </div>
         `).join('');
     }
-    
-    window.generateInviteCode = async () => {
-        const guildId = currentProfile?.guild_id;
+       window.generateInviteCode = async () => {
+        const guildId = currentProfile?.guild_id || 'gh001';
         const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
         let random = '';
         for(let i=0; i<8; i++) random += chars.charAt(Math.floor(Math.random() * chars.length));
         const code = `${guildId}_${random}`;
         
-        await supabase.from('invite_codes').insert({
+        console.log('尝试插入:', code, guildId, currentUser.id);
+        
+        const { data, error } = await supabase.from('invite_codes').insert({
             code: code,
             guild_id: guildId,
             type: 'member',
             created_by: currentUser.id,
             expires_at: new Date(Date.now() + 10*60*1000).toISOString()
-        });
+        }).select();
+        
+        if(error) {
+            console.error('插入失败:', error);
+            alert('错误: ' + error.message + ' | ' + error.details);
+        } else {
+            console.log('插入成功:', data);
+            await loadInviteCodes();
+        }
+    };
         
         await loadInviteCodes();
     };
