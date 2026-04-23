@@ -33,8 +33,10 @@
         #searchInput { flex: 1; padding: 12px; border: none; background: transparent; outline: none; }
         #searchBtn { padding: 12px 24px; background: #3a7a2e; color: white; border: none; border-radius: 40px; font-weight: 600; cursor: pointer; }
         .stats-row { display: flex; gap: 10px; margin-bottom: 18px; }
-        .stat-card { flex: 1; background: linear-gradient(135deg, #f0f8ea, #e0efd5); padding: 16px; border-radius: 20px; text-align: center; cursor: pointer; }
+        .stat-card { flex: 1; background: linear-gradient(135deg, #f0f8ea, #e0efd5); padding: 16px; border-radius: 20px; text-align: center; cursor: pointer; transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-3px); }
         .stat-number { font-size: 2rem; font-weight: 700; color: #1e5a1e; }
+        .stat-label { font-size: 0.85rem; color: #5a7e4a; }
         .result-area { min-height: 160px; padding: 16px; background: rgba(255,255,255,0.7); border-radius: 24px; border: 1px solid #cde0bd; margin-bottom: 18px; }
         .flower-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .flower-card { padding: 12px 6px; text-align: center; border-radius: 20px; font-size: 0.9rem; cursor: pointer; }
@@ -52,6 +54,10 @@
         .add-btn { padding: 12px 24px; background: #e68900; color: white; border: none; border-radius: 40px; font-weight: 600; cursor: pointer; }
         .sync-status { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; color: #3e6a2e; }
         .refresh-btn { padding: 8px 18px; background: #6f9e4c; color: white; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 0 #3e6925; }
+        .log-list { list-style: none; padding: 8px 0; }
+        .log-item { padding: 10px 0; border-bottom: 1px solid #d0e0c0; display: flex; gap: 10px; font-size: 0.9rem; color: #2e4a1e; }
+        .log-time { color: #7f9f6b; min-width: 65px; }
+        .log-operator { font-weight: 600; color: #3a7a2e; }
         .footer { text-align: center; color: #6b8a58; font-size: 0.8rem; margin-top: 20px; }
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; }
         .modal { background: white; max-width: 500px; width: 100%; max-height: 70vh; border-radius: 32px; overflow: hidden; }
@@ -59,6 +65,11 @@
         .modal-title { font-size: 1.3rem; font-weight: 700; color: #2e5a1e; }
         .modal-close { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.5); border: none; cursor: pointer; }
         .modal-body { padding: 20px 24px; max-height: 50vh; overflow-y: auto; }
+        .modal-search { padding: 12px 16px; border: 1.5px solid #b8daa0; border-radius: 30px; width: 100%; margin-bottom: 16px; outline: none; }
+        .modal-list-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid #e0efd5; cursor: pointer; border-radius: 12px; transition: 0.15s; }
+        .modal-list-item:hover { background: #f0f8ea; }
+        .modal-item-name { font-weight: 500; color: #1e4a1e; }
+        .modal-item-badge { background: #3a7a2e; color: white; padding: 2px 10px; border-radius: 20px; font-size: 0.75rem; }
         .modal-input { padding: 14px 18px; border: 1.5px solid #b8daa0; border-radius: 40px; width: 100%; margin-bottom: 16px; }
         .modal-btn { padding: 14px; background: #3a7a2e; color: white; border: none; border-radius: 40px; font-weight: 600; width: 100%; cursor: pointer; }
         .invite-code-box { background: #f0f8ea; padding: 16px; border-radius: 20px; text-align: center; margin: 16px 0; }
@@ -109,21 +120,31 @@
             <input type="text" id="searchInput" placeholder="输入成员名字…"><button id="searchBtn"><i class="fas fa-search"></i> 查询</button>
         </div>
         <div class="stats-row">
-            <div class="stat-card"><div class="stat-number" id="totalMembers">0</div><div class="stat-label">总成员</div></div>
-            <div class="stat-card"><div class="stat-number" id="totalFlowers">0</div><div class="stat-label">花卉种类</div></div>
+            <div class="stat-card" id="memberStatsCard"><div class="stat-number" id="totalMembers">0</div><div class="stat-label">总成员 <i class="fas fa-chevron-right"></i></div></div>
+            <div class="stat-card" id="flowerStatsCard"><div class="stat-number" id="totalFlowers">0</div><div class="stat-label">花卉种类 <i class="fas fa-chevron-right"></i></div></div>
         </div>
         <div id="resultArea" class="result-area"><div style="color:#5a7e4a;text-align:center;padding:20px;">输入关键词查询</div></div>
         <div class="collapsible">
             <div class="collapse-header" onclick="toggleCollapse('addPanel')"><i class="fas fa-plus-circle" style="color:#e68900;"></i> 添加花卉记录<i class="fas fa-chevron-down" id="addIcon" style="margin-left:auto;"></i></div>
             <div id="addPanel" class="collapse-content"><div class="form-row"><input type="text" id="newMemberName" class="form-input" placeholder="成员名字"><input type="text" id="newFlowerName" class="form-input" placeholder="花卉名称"><button class="add-btn" id="addRecordBtn">添加</button></div></div>
         </div>
+        <div class="collapsible">
+            <div class="collapse-header" onclick="toggleCollapse('logPanel')"><i class="fas fa-history" style="color:#6f9e4c;"></i> 云端更新日志<i class="fas fa-chevron-down" id="logIcon" style="margin-left:auto;"></i></div>
+            <div id="logPanel" class="collapse-content"><div style="display:flex;justify-content:flex-end;margin-bottom:8px;"><button class="refresh-btn" onclick="loadCloudLogs()">刷新</button></div><ul class="log-list" id="logList"></ul></div>
+        </div>
         <div class="sync-status"><span id="syncMessage">连接中...</span><button class="refresh-btn" id="refreshDataBtn">刷新</button></div>
         <p class="footer">仅限公会成员 · 数据隔离</p>
     </div>
 </div>
+
 <div class="modal-overlay" id="inviteModal">
     <div class="modal"><div class="modal-header"><span class="modal-title">🔑 生成邀请码</span><button class="modal-close" onclick="closeInviteModal()">✕</button></div>
     <div class="modal-body"><p>邀请码有效期10分钟，每个码只能用1次</p><button class="modal-btn" onclick="generateInviteCode()">+ 生成新邀请码</button><div id="inviteCodeList" style="margin-top:16px;"></div></div></div>
+</div>
+
+<div class="modal-overlay" id="listModal">
+    <div class="modal"><div class="modal-header"><span class="modal-title" id="listModalTitle">成员列表</span><button class="modal-close" onclick="closeListModal()">✕</button></div>
+    <div class="modal-body"><input type="text" class="modal-search" id="listModalSearch" placeholder="🔍 搜索..." oninput="filterListModal()"><div id="listModalContainer"></div></div></div>
 </div>
 
 <script>
@@ -132,7 +153,18 @@
     const SUPABASE_KEY = "sb_publishable_yIYNCHcT4Z0z-NMcKVmjTQ_6SoHyxwZ";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     
-    let currentUser = null, currentProfile = null, flowerData = [], queryMode = 'member';
+    let currentUser = null, currentProfile = null, flowerData = [], queryMode = 'member', listModalData = [];
+
+    const FLOWER_QUALITY_MAP = {
+        "星河映蕊":"仙","福运招财":"仙","花漾春山":"仙","欢云妙舞":"仙","夜梦花庭":"仙","梦幻之心":"仙","杏月・花影雅憩":"仙","仙魅灵狐":"仙","桃月・云汐灼华":"仙","欢雪颂冬":"仙","繁花满筑":"仙","芳华寻蝶":"仙","花宴流芳":"仙","桂月・秋千稚语":"仙","菊月・花间飞鸢":"仙","柳月・溪亭燕语":"仙","梅月・疏影听弦":"仙","焰火迎春":"仙","阳月・芙香盈袖":"仙","有龙则灵":"仙","紫霄云庭":"仙",
+        "宝珠玉兰":"华","纸鸢探春":"华","琼台玉露":"华","金缠腰":"华","马上有福":"华","柿柿如意":"华","珠宝之心":"华","冰蓝蝶舞玫瑰":"华","夜蓝香息":"华","玉兰栖香":"华","橙光拂晓月季":"华","火耀金丹":"华","粉樱蝶舞玫瑰":"华",
+        "冰蓝矮牵牛":"珍","绯色腊梅":"珍","波叶金桂":"珍","朱砂丹桂":"珍","青山银桂":"珍","飞黄玉兰":"珍","棉花小熊":"珍","轮生冬青":"珍","晴蓝耧斗菜":"珍","桃绯姜荷花":"珍","雅梨黄棣棠":"珍","梦紫郁金香":"珍","松绿立金花":"珍","伯利恒之星":"珍","粉鹤芋":"珍","粉红木槿花":"珍","明黄松虫草":"珍","粉樱月见草":"珍","碧落月见草":"珍","香槟玫瑰":"珍","曼珠沙华":"珍",
+        "淡粉矮牵牛":"普","明黄矮牵牛":"普","浅粉乒乓菊":"普","浅橘乒乓菊":"普","浅白乒乓菊":"普","红鹤芋":"普","白鹤芋":"普","薄藤铁线莲":"普","香水百合":"普","凤梨花":"普","迎春花":"普","正红大丽花":"普","金钟连翘":"普","薄粉蕙兰":"普","淡茜蜀葵花":"普","水红落新妇":"普","浅紫落新妇":"普","浅蓝落新妇":"普","忽地笑":"普","紫矢车菊":"普","粉矢车菊":"普","蓝矢车菊":"普","粉月季":"普","玉白梨花":"普","富贵竹":"普","安眠薰衣草":"普",
+        "白百合":"凡","康乃馨":"凡","铃兰":"凡","黄百合":"凡","紫桔梗":"凡","黄郁金香":"凡","紫罗兰":"凡","粉郁金香":"凡","蝴蝶兰":"凡","粉百合":"凡","红玫瑰":"凡","雏菊":"凡","粉玫瑰":"凡","蓝星花":"凡","黄玫瑰":"凡","紫绣球":"凡","山茶花":"凡","粉绣球":"凡","小苍兰":"凡","蓝绣球":"凡","红马蹄莲":"凡","紫马蹄莲":"凡","向日葵":"凡","鹤望兰":"凡","金盏菊":"凡","水仙花":"凡","非洲菊":"凡","风铃花":"凡","黄马蹄莲":"凡","蒲公英":"凡","紫色风信子":"凡","合欢花":"凡","粉色风信子":"凡","茉莉花":"凡","嫩黄风信子":"凡","明黄如意菊":"凡","栀子花":"凡"
+    };
+    const FAN_RANK = ["嫩黄晚香玉","巧克力秋英","浅紫晚香玉","淡紫菊苣","纯白晚香玉","雪白荼蘼花","紫百子莲","盈粉荼蘼花","圣心百合","嫣红茶蘼花","粉白三角梅","素白九里香","淡黄三角梅","勿忘我","紫红三角梅","香槟洋桔梗","黄色丁香花","浅粉洋桔梗","紫色丁香花","嫩绿洋桔梗","浅橘如意菊","粉桃花","淡粉如意菊","栀子花","明黄如意菊","嫩黄风信子","茉莉花","粉色风信子","合欢花","紫色风信子","蒲公英","黄马蹄莲","风铃花","非洲菊","水仙花","金盏菊","鹤望兰","向日葵","紫马蹄莲","红马蹄莲","蓝绣球","小苍兰","粉绣球","山茶花","紫绣球","黄玫瑰","蓝星花","粉玫瑰","雏菊","红玫瑰","粉百合","蝴蝶兰","粉郁金香","紫罗兰","黄郁金香","紫桔梗","黄百合","铃兰","康乃馨","白百合"];
+    function getFanRank(f) { const i = FAN_RANK.indexOf(f); return i === -1 ? 999 : i; }
+    function getFlowerQuality(f) { return FLOWER_QUALITY_MAP[f] || '凡'; }
 
     const authContainer = document.getElementById('authContainer');
     const appContainer = document.getElementById('appContainer');
@@ -152,6 +184,11 @@
     const totalFlowersSpan = document.getElementById('totalFlowers');
     const syncMessage = document.getElementById('syncMessage');
     const resultArea = document.getElementById('resultArea');
+    const logList = document.getElementById('logList');
+    const listModal = document.getElementById('listModal');
+    const listModalTitle = document.getElementById('listModalTitle');
+    const listModalContainer = document.getElementById('listModalContainer');
+    const listModalSearch = document.getElementById('listModalSearch');
 
     async function checkAuth() {
         const { data: { session } } = await supabase.auth.getSession();
@@ -221,14 +258,12 @@
 
     window.openInviteModal = async () => { inviteModal.style.display='flex'; await loadInviteCodes(); };
     window.closeInviteModal = () => inviteModal.style.display='none';
-
     async function loadInviteCodes() {
         const guildId = currentProfile?.guild_id;
         const { data } = await supabase.from('invite_codes').select('*').eq('guild_id',guildId).eq('is_active',true).order('created_at',{ascending:false});
         if(!data?.length) { inviteCodeList.innerHTML='<p style="color:#7f9f6b;">暂无有效邀请码</p>'; return; }
         inviteCodeList.innerHTML = data.map(c => `<div class="invite-code-box"><div style="display:flex;align-items:center;justify-content:center;"><span class="invite-code">${c.code}</span><button class="copy-btn" onclick="copyCode('${c.code}')">📋</button></div><p style="font-size:0.8rem;margin-top:8px;">过期: ${new Date(c.expires_at).toLocaleTimeString()}</p></div>`).join('');
     }
-
     window.generateInviteCode = async () => {
         const guildId = currentProfile?.guild_id || 'gh001';
         const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
@@ -239,8 +274,22 @@
         if(error) { alert('生成失败: '+error.message); return; }
         await loadInviteCodes();
     };
-
     window.copyCode = (code) => { navigator.clipboard?.writeText(code); alert('已复制!'); };
+
+    async function addCloudLog(a,m,f) {
+        try { await fetch(`${SUPABASE_URL}/rest/v1/flower_logs`, { method:'POST', headers:{"apikey":SUPABASE_KEY,"Authorization":`Bearer ${SUPABASE_KEY}`,"Content-Type":"application/json"}, body:JSON.stringify({action:a, member_name:m, flower_name:f, operator:displayName.textContent, guild_id: currentProfile?.guild_id || 'gh001'}) }); } catch(e){}
+    }
+    window.loadCloudLogs = async () => {
+        const guildId = currentProfile?.guild_id || 'gh001';
+        try {
+            const r = await fetch(`${SUPABASE_URL}/rest/v1/flower_logs?select=*&guild_id=eq.${guildId}&order=created_at.desc&limit=30`, { headers:{"apikey":SUPABASE_KEY,"Authorization":`Bearer ${SUPABASE_KEY}`} });
+            const l = await r.json();
+            logList.innerHTML = l.length ? l.map(log => {
+                const t = new Date(log.created_at).toLocaleTimeString('zh-CN',{hour12:false,hour:'2-digit',minute:'2-digit'});
+                return `<li class="log-item"><span class="log-time">${t}</span> <span class="log-operator">${log.operator||'未知'}</span> ${log.action}${log.member_name?'：'+log.member_name:''}${log.flower_name?' → '+log.flower_name:''}</li>`;
+            }).join('') : '<li class="log-item">暂无日志</li>';
+        } catch(e) {}
+    };
 
     const byMemberBtn = document.getElementById('byMemberBtn');
     const byFlowerBtn = document.getElementById('byFlowerBtn');
@@ -249,20 +298,16 @@
     byMemberBtn.onclick = () => { queryMode='member'; byMemberBtn.classList.add('active'); byFlowerBtn.classList.remove('active'); };
     byFlowerBtn.onclick = () => { queryMode='flower'; byFlowerBtn.classList.add('active'); byMemberBtn.classList.remove('active'); };
 
-    function getFlowerQuality(f) {
-        const map = { "星河映蕊":"仙","福运招财":"仙","花漾春山":"仙","宝珠玉兰":"华","纸鸢探春":"华","琼台玉露":"华","冰蓝矮牵牛":"珍","白百合":"凡","康乃馨":"凡","铃兰":"凡" };
-        return map[f] || '凡';
-    }
-
     searchBtn.onclick = () => {
         const kw = searchInput.value.trim(); if(!kw) return;
         if(queryMode==='member') {
             const m = flowerData.find(m=>m.name.includes(kw));
-            if(m) { const fs=[]; ['仙','华','珍','普','凡'].forEach(q=>{ if(m[q]) m[q].forEach(f=>fs.push({name:f,quality:q})); }); const qc={仙:'xian',华:'hua',珍:'zhen',普:'pu',凡:'fan'}; resultArea.innerHTML=`<div class="flower-grid">${fs.map(f=>`<div class="flower-card ${qc[f.quality]}">${f.name}</div>`).join('')}</div>`; }
+            if(m) { const fs=[]; ['仙','华','珍','普','凡'].forEach(q=>{ if(m[q]) m[q].forEach(f=>fs.push({name:f,quality:q})); }); const qc={仙:'xian',华:'hua',珍:'zhen',普:'pu',凡:'fan'}; resultArea.innerHTML=`<div class="flower-grid">${fs.map(f=>`<div class="flower-card ${qc[f.quality]}">${f.name}</div>`).join('')}</div>`; addCloudLog('查询成员', m.name); }
             else { resultArea.innerHTML='<div style="color:#a00;text-align:center;">❌ 未找到</div>'; }
         } else {
             const ms = flowerData.filter(m=>['仙','华','珍','普','凡'].some(q=>m[q]?.includes(kw)));
             resultArea.innerHTML = ms.length ? ms.map(m=>`<span style="display:inline-block;background:#e0f0d0;padding:6px 16px;border-radius:30px;margin:4px;">${m.name}</span>`).join('') : '<div style="color:#a00;text-align:center;">❌ 未找到</div>';
+            if(ms.length) addCloudLog('查询花卉', null, kw);
         }
     };
 
@@ -272,13 +317,15 @@
         if(!mName||!fName) return;
         const q = getFlowerQuality(fName);
         let m = flowerData.find(m=>m.name===mName);
-        if(!m) { m = { name:mName, 仙:[],华:[],珍:[],普:[],凡:[] }; flowerData.push(m); }
+        let isNew = false;
+        if(!m) { m = { name:mName, 仙:[],华:[],珍:[],普:[],凡:[] }; flowerData.push(m); isNew = true; }
         if(!m[q]) m[q] = [];
         if(!m[q].includes(fName)) { m[q].push(fName); }
         await saveGuildData();
         document.getElementById('newMemberName').value = '';
         document.getElementById('newFlowerName').value = '';
         updateStats();
+        addCloudLog(isNew?'新增成员':'添加花卉', mName, fName);
     };
 
     async function saveGuildData() {
@@ -288,8 +335,35 @@
         syncMessage.textContent = `✅ 已保存 · ${guildId}`;
     }
 
+    // 统计卡片弹窗
+    function showMemberModal() {
+        const ms = flowerData.map(m => ({ name: m.name, count: (m.仙?.length||0)+(m.华?.length||0)+(m.珍?.length||0)+(m.普?.length||0)+(m.凡?.length||0) })).sort((a,b)=>a.name.localeCompare(b.name));
+        listModalData = ms; listModalTitle.innerHTML = '<i class="fas fa-users"></i> 成员列表'; renderListModal(ms); listModal.style.display = 'flex';
+    }
+    function showFlowerModal() {
+        const map = new Map();
+        flowerData.forEach(m => { ['仙','华','珍','普','凡'].forEach(q => { if(m[q]) m[q].forEach(f => map.set(f, (map.get(f)||0)+1)); }); });
+        const fs = Array.from(map.entries()).map(([n,c]) => { const q = getFlowerQuality(n); return { name:n, count:c, quality:q, qo:{仙:1,华:2,珍:3,普:4,凡:5}[q]||5 }; }).sort((a,b)=> { if(a.qo!==b.qo) return a.qo-b.qo; if(a.quality==='凡') return getFanRank(a.name)-getFanRank(b.name); return a.name.localeCompare(b.name); });
+        listModalData = fs; listModalTitle.innerHTML = '<i class="fas fa-flower"></i> 花卉图鉴'; renderListModal(fs); listModal.style.display = 'flex';
+    }
+    function renderListModal(items) {
+        if(!items.length) { listModalContainer.innerHTML = '<div style="text-align:center;padding:30px;">暂无数据</div>'; return; }
+        const qi = { '仙':'🔴', '华':'🟡', '珍':'🟣', '普':'🔵', '凡':'🟢' };
+        listModalContainer.innerHTML = items.map(i => `<div class="modal-list-item" onclick="jumpToItem('${i.name}')"><span class="modal-item-name">${qi[i.quality]||'⚪'} ${i.name}</span><span class="modal-item-badge">${i.count}</span></div>`).join('');
+    }
+    window.filterListModal = () => { const kw = listModalSearch.value.toLowerCase(); renderListModal(listModalData.filter(i => i.name.toLowerCase().includes(kw))); };
+    window.closeListModal = () => listModal.style.display = 'none';
+    window.jumpToItem = (n) => { closeListModal(); if(listModalTitle.innerHTML.includes('成员')) { queryMode='member'; byMemberBtn.click(); searchInput.value=n; searchBtn.click(); } else { queryMode='flower'; byFlowerBtn.click(); searchInput.value=n; searchBtn.click(); } };
+
+    document.getElementById('memberStatsCard').onclick = showMemberModal;
+    document.getElementById('flowerStatsCard').onclick = showFlowerModal;
+
     document.getElementById('refreshDataBtn').onclick = loadGuildData;
-    window.toggleCollapse = (id) => { const p=document.getElementById(id), i=document.getElementById('addIcon'); p.classList.toggle('open'); i.classList.toggle('fa-chevron-down'); i.classList.toggle('fa-chevron-up'); };
+    window.toggleCollapse = (id) => { 
+        const p=document.getElementById(id), i=document.getElementById(id==='addPanel'?'addIcon':'logIcon'); 
+        p.classList.toggle('open'); i.classList.toggle('fa-chevron-down'); i.classList.toggle('fa-chevron-up'); 
+        if(id==='logPanel' && p.classList.contains('open')) loadCloudLogs(); 
+    };
 
     checkAuth();
     document.getElementById('addPanel').classList.add('open');
