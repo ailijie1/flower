@@ -11,7 +11,7 @@
         
         /* 花园背景 */
         body {
-            background: url('https://raw.githubusercontent.com/ailijie1/flower/main/0c409209019dde5093066982bc500ca0.jpg') center/cover no-repeat fixed;
+            background: linear-gradient(180deg, #fce4ec 0%, #f8bbd0 40%, #f48fb1 70%, #e91e63 100%);
             min-height: 100vh;
             padding: 20px 16px;
             display: flex;
@@ -20,84 +20,7 @@
             position: relative;
             overflow-x: hidden;
         }
-        
-        /* 漂浮花瓣动画 */
-        .petal {
-            position: fixed;
-            pointer-events: none;
-            z-index: 0;
-            animation: petalFall linear infinite;
-        }
-        @keyframes petalFall {
-            0% { transform: translateY(-5vh) rotate(0deg) scale(1); opacity: 0.8; }
-            25% { transform: translateY(25vh) rotate(90deg) scale(0.9); opacity: 0.6; }
-            50% { transform: translateY(50vh) rotate(180deg) scale(1.1); opacity: 0.7; }
-            75% { transform: translateY(75vh) rotate(270deg) scale(0.8); opacity: 0.5; }
-            100% { transform: translateY(105vh) rotate(360deg) scale(1); opacity: 0; }
-        }
-        
-        /* 底部花丛 */
-        .garden-floor {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 80px;
-            pointer-events: none;
-            z-index: 0;
-            background: linear-gradient(0deg, rgba(76,175,80,0.3) 0%, rgba(129,199,132,0.1) 50%, transparent 100%);
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-around;
-            padding-bottom: 5px;
-            font-size: 28px;
-        }
-        .garden-floor span {
-            animation: sway 2s ease-in-out infinite;
-            display: inline-block;
-        }
-        .garden-floor span:nth-child(odd) { animation-delay: 0.5s; }
-        .garden-floor span:nth-child(3n) { animation-delay: 1s; }
-        @keyframes sway {
-            0%, 100% { transform: rotate(-3deg); }
-            50% { transform: rotate(3deg); }
-        }
-        
-        /* 顶部藤蔓 */
-        .vine-top {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 40px;
-            pointer-events: none;
-            z-index: 0;
-            display: flex;
-            justify-content: space-between;
-            padding: 5px 20px 0;
-            font-size: 22px;
-            opacity: 0.6;
-        }
-        
-        /* 发光萤火虫 */
-        .firefly {
-            position: fixed;
-            pointer-events: none;
-            z-index: 0;
-            width: 6px;
-            height: 6px;
-            background: #fff9c4;
-            border-radius: 50%;
-            box-shadow: 0 0 8px 4px rgba(255,235,59,0.5);
-            animation: fireflyFloat 4s ease-in-out infinite;
-        }
-        @keyframes fireflyFloat {
-            0%, 100% { transform: translate(0, 0); opacity: 0.3; }
-            25% { transform: translate(30px, -20px); opacity: 0.8; }
-            50% { transform: translate(-20px, -40px); opacity: 0.5; }
-            75% { transform: translate(10px, -60px); opacity: 0.9; }
-        }
-        
+
         .container {
             max-width: 750px;
             width: 100%;
