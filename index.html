@@ -3,24 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>🌸 花园世界 · 图鉴版</title>
+    <title>🌸 花园世界 </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif; }
         
-        /* 花园背景 */
+        /* 淡雅粉色背景 */
         body {
-            background: linear-gradient(180deg, #fce4ec 0%, #f8bbd0 40%, #f48fb1 70%, #e91e63 100%);
+            background: linear-gradient(180deg, #fef0f4 0%, #fde0e8 40%, #fbcad4 70%, #f8b0c0 100%);
             min-height: 100vh;
             padding: 20px 16px;
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             justify-content: center;
-            position: relative;
-            overflow-x: hidden;
         }
-
+        
         .container {
             max-width: 750px;
             width: 100%;
@@ -29,63 +27,43 @@
             backdrop-filter: blur(15px);
             padding: 28px 22px;
             border-radius: 48px 24px 48px 24px;
-            box-shadow: 0 20px 40px rgba(30,60,20,0.12), 0 0 60px rgba(129,199,132,0.1);
-            border: 1px solid rgba(160,200,120,0.4);
+            box-shadow: 0 20px 40px rgba(180,120,140,0.15);
+            border: 1px solid rgba(220,180,190,0.4);
             max-height: calc(100vh - 40px);
             overflow-y: auto;
             position: relative;
             z-index: 1;
         }
         
-        /* 卡片装饰 */
-        .container::before {
-            content: "🌿";
-            position: absolute;
-            top: -15px;
-            left: 20px;
-            font-size: 28px;
-            z-index: 2;
-            animation: sway 3s ease-in-out infinite;
-        }
-        .container::after {
-            content: "🌺";
-            position: absolute;
-            top: -15px;
-            right: 20px;
-            font-size: 28px;
-            z-index: 2;
-            animation: sway 3s ease-in-out infinite 0.5s;
-        }
-        
-        h1 { color: #2e5a1e; text-align: center; font-weight: 600; font-size: 2rem; margin-bottom: 6px; }
-        .subtitle { text-align: center; color: #5a7e4a; margin-bottom: 20px; font-size: 0.95rem; border-bottom: 1px dashed #a4c28e; padding-bottom: 14px; }
+        h1 { color: #5a3a4a; text-align: center; font-weight: 600; font-size: 2rem; margin-bottom: 6px; }
+        .subtitle { text-align: center; color: #8a6a7a; margin-bottom: 20px; font-size: 0.95rem; border-bottom: 1px dashed #d4b8c4; padding-bottom: 14px; }
         
         .auth-container { max-width: 400px; margin: 0 auto; }
-        .auth-tabs { display: flex; gap: 10px; margin-bottom: 24px; background: rgba(230,245,210,0.6); padding: 5px; border-radius: 50px; }
-        .auth-tab { flex: 1; padding: 12px; border: none; background: transparent; color: #3a5e2a; border-radius: 40px; font-size: 1rem; font-weight: 600; cursor: pointer; }
-        .auth-tab.active { background: #3a7a2e; color: white; }
+        .auth-tabs { display: flex; gap: 10px; margin-bottom: 24px; background: rgba(250,230,235,0.6); padding: 5px; border-radius: 50px; }
+        .auth-tab { flex: 1; padding: 12px; border: none; background: transparent; color: #6a3a5a; border-radius: 40px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+        .auth-tab.active { background: #c48a9a; color: white; }
         .auth-form { display: flex; flex-direction: column; gap: 16px; }
-        .auth-input { padding: 14px 18px; border: 1.5px solid #b8daa0; border-radius: 40px; font-size: 1rem; background: white; outline: none; }
-        .auth-btn { padding: 14px; background: #3a7a2e; color: white; border: none; border-radius: 40px; font-weight: 600; cursor: pointer; box-shadow: 0 5px 0 #245218; font-size: 1.1rem; }
-        .auth-footer { text-align: center; margin-top: 16px; color: #5a7e4a; font-size: 0.9rem; }
+        .auth-input { padding: 14px 18px; border: 1.5px solid #e0c0cc; border-radius: 40px; font-size: 1rem; background: white; outline: none; }
+        .auth-btn { padding: 14px; background: #c48a9a; color: white; border: none; border-radius: 40px; font-weight: 600; cursor: pointer; box-shadow: 0 5px 0 #a06a7a; font-size: 1.1rem; }
+        .auth-footer { text-align: center; margin-top: 16px; color: #8a6a7a; font-size: 0.9rem; }
         .error-message { color: #d32f2f; text-align: center; font-size: 0.9rem; min-height: 24px; }
         .app-container { display: none; }
-        .user-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; padding: 8px 16px; background: rgba(230,245,210,0.5); border-radius: 50px; }
+        .user-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; padding: 8px 16px; background: rgba(250,230,235,0.5); border-radius: 50px; }
         .user-info { display: flex; align-items: center; gap: 8px; }
-        .guild-badge { background: #3a7a2e; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .guild-badge { background: #c48a9a; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
         .logout-btn { padding: 8px 16px; background: #d32f2f; color: white; border: none; border-radius: 30px; cursor: pointer; }
         .btn-group { display: flex; justify-content: center; gap: 10px; margin-bottom: 18px; }
-        .query-btn { padding: 10px 24px; border: none; background: #e0f0d0; color: #3a5e2a; border-radius: 40px; font-weight: 600; cursor: pointer; }
-        .query-btn.active { background: #3a7a2e; color: white; }
-        .search-box { display: flex; gap: 8px; margin-bottom: 18px; background: white; padding: 6px 6px 6px 18px; border-radius: 50px; border: 1.5px solid #b8daa0; }
+        .query-btn { padding: 10px 24px; border: none; background: #f8e0e8; color: #6a3a5a; border-radius: 40px; font-weight: 600; cursor: pointer; }
+        .query-btn.active { background: #c48a9a; color: white; }
+        .search-box { display: flex; gap: 8px; margin-bottom: 18px; background: white; padding: 6px 6px 6px 18px; border-radius: 50px; border: 1.5px solid #e0c0cc; }
         #searchInput { flex: 1; padding: 12px; border: none; background: transparent; outline: none; }
-        #searchBtn { padding: 12px 24px; background: #3a7a2e; color: white; border: none; border-radius: 40px; font-weight: 600; cursor: pointer; }
+        #searchBtn { padding: 12px 24px; background: #c48a9a; color: white; border: none; border-radius: 40px; font-weight: 600; cursor: pointer; }
         .stats-row { display: flex; gap: 10px; margin-bottom: 18px; }
-        .stat-card { flex: 1; background: linear-gradient(135deg, #f0f8ea, #e0efd5); padding: 16px; border-radius: 20px; text-align: center; cursor: pointer; transition: transform 0.2s; }
+        .stat-card { flex: 1; background: linear-gradient(135deg, #fef0f4, #fde0e8); padding: 16px; border-radius: 20px; text-align: center; cursor: pointer; transition: transform 0.2s; }
         .stat-card:hover { transform: translateY(-3px); }
-        .stat-number { font-size: 2rem; font-weight: 700; color: #1e5a1e; }
-        .stat-label { font-size: 0.85rem; color: #5a7e4a; }
-        .result-area { min-height: 160px; padding: 16px; background: rgba(255,255,255,0.7); border-radius: 24px; border: 1px solid #cde0bd; margin-bottom: 18px; }
+        .stat-number { font-size: 2rem; font-weight: 700; color: #5a3a4a; }
+        .stat-label { font-size: 0.85rem; color: #8a6a7a; }
+        .result-area { min-height: 160px; padding: 16px; background: rgba(255,255,255,0.7); border-radius: 24px; border: 1px solid #e8d0d8; margin-bottom: 18px; }
         .flower-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .flower-card { padding: 12px 6px; text-align: center; border-radius: 20px; font-size: 0.9rem; cursor: pointer; position: relative; }
         .flower-card.xian { background: #ffcdd2; border: 1px solid #e53935; color: #b71c1c; }
@@ -95,69 +73,65 @@
         .flower-card.fan { background: #c8e6c9; border: 1px solid #43a047; color: #1b5e20; }
         .delete-btn { position: absolute; top: -4px; right: -4px; width: 20px; height: 20px; background: #d32f2f; color: white; border-radius: 50%; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; border: none; }
         .member-delete-btn { background: #d32f2f; color: white; border: none; padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; cursor: pointer; }
-        .flower-result-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: white; border-radius: 16px; margin-bottom: 8px; cursor: pointer; border: 1px solid #cde0bd; transition: 0.15s; }
-        .flower-result-item:hover { background: #f0f8ea; }
+        .flower-result-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: white; border-radius: 16px; margin-bottom: 8px; cursor: pointer; border: 1px solid #e8d0d8; transition: 0.15s; }
+        .flower-result-item:hover { background: #fef0f4; }
         .flower-result-item.xian { border-left: 4px solid #e53935; }
         .flower-result-item.hua { border-left: 4px solid #f9a825; }
         .flower-result-item.zhen { border-left: 4px solid #8e24aa; }
         .flower-result-item.pu { border-left: 4px solid #1e88e5; }
         .flower-result-item.fan { border-left: 4px solid #43a047; }
-        .flower-count-badge { background: #3a7a2e; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+        .flower-count-badge { background: #c48a9a; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
         .pagination { display: flex; justify-content: center; align-items: center; gap: 20px; margin-top: 16px; }
-        .page-btn { padding: 8px 18px; background: #eaf0e4; border: 1px solid #9bb88a; border-radius: 30px; cursor: pointer; color: #2e5a1e; font-weight: 500; }
+        .page-btn { padding: 8px 18px; background: #f8e0e8; border: 1px solid #d4b8c4; border-radius: 30px; cursor: pointer; color: #6a3a5a; font-weight: 500; }
         .page-btn.disabled { opacity: 0.4; pointer-events: none; }
-        .page-info { color: #3e6a2e; font-weight: 500; }
+        .page-info { color: #6a3a5a; font-weight: 500; }
         .filter-tabs { display: flex; gap: 5px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center; }
         .filter-tab { padding: 6px 16px; border-radius: 30px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: 0.2s; background: #f0f0f0; color: #555; }
         .filter-tab.active { opacity: 1; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-        .filter-tab.all { background: #6b8a58; color: white; }
+        .filter-tab.all { background: #c48a9a; color: white; }
         .filter-tab.xian { background: #e53935; color: white; }
         .filter-tab.hua { background: #f9a825; color: white; }
         .filter-tab.zhen { background: #8e24aa; color: white; }
         .filter-tab.pu { background: #1e88e5; color: white; }
         .filter-tab.fan { background: #43a047; color: white; }
-        .batch-checkbox-item { display: flex; align-items: center; padding: 8px; border-bottom: 1px solid #e0efd5; }
+        .batch-checkbox-item { display: flex; align-items: center; padding: 8px; border-bottom: 1px solid #e8d0d8; }
         .batch-checkbox-item input { margin-right: 12px; width: 18px; height: 18px; cursor: pointer; }
         .batch-checkbox-item label { flex: 1; cursor: pointer; }
-        .collapsible { margin-top: 16px; border-top: 1px dashed #a4c28e; padding-top: 16px; }
-        .collapse-header { display: flex; align-items: center; gap: 10px; cursor: pointer; color: #2e5a1e; font-weight: 600; padding: 8px 0; }
+        .collapsible { margin-top: 16px; border-top: 1px dashed #d4b8c4; padding-top: 16px; }
+        .collapse-header { display: flex; align-items: center; gap: 10px; cursor: pointer; color: #6a3a5a; font-weight: 600; padding: 8px 0; }
         .collapse-content { max-height: 0; overflow: hidden; transition: max-height 0.3s; }
         .collapse-content.open { max-height: 400px; overflow-y: auto; }
         .form-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-        .form-input { flex: 1; padding: 12px 16px; border: 1.5px solid #b8daa0; border-radius: 40px; background: white; }
+        .form-input { flex: 1; padding: 12px 16px; border: 1.5px solid #e0c0cc; border-radius: 40px; background: white; }
         .add-btn { padding: 12px 24px; background: #e68900; color: white; border: none; border-radius: 40px; font-weight: 600; cursor: pointer; }
         .batch-btn { padding: 6px 16px; background: #9c27b0; color: white; border: none; border-radius: 40px; font-size: 0.8rem; cursor: pointer; box-shadow: 0 4px 0 #6a1b9a; }
-        .sync-status { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; color: #3e6a2e; }
-        .refresh-btn { padding: 8px 18px; background: #6f9e4c; color: white; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 0 #3e6925; }
+        .sync-status { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; color: #8a6a7a; }
+        .refresh-btn { padding: 8px 18px; background: #c48a9a; color: white; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 0 #a06a7a; }
         .log-list { list-style: none; padding: 8px 0; }
-        .log-item { padding: 10px 0; border-bottom: 1px solid #d0e0c0; display: flex; gap: 10px; font-size: 0.9rem; color: #2e4a1e; }
-        .log-time { color: #7f9f6b; min-width: 65px; }
-        .log-operator { font-weight: 600; color: #3a7a2e; }
-        .footer { text-align: center; color: #6b8a58; font-size: 0.8rem; margin-top: 20px; }
+        .log-item { padding: 10px 0; border-bottom: 1px solid #e8d0d8; display: flex; gap: 10px; font-size: 0.9rem; color: #5a3a4a; }
+        .log-time { color: #8a6a7a; min-width: 65px; }
+        .log-operator { font-weight: 600; color: #c48a9a; }
+        .footer { text-align: center; color: #8a6a7a; font-size: 0.8rem; margin-top: 20px; }
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; }
         .modal { background: white; max-width: 500px; width: 100%; max-height: 70vh; border-radius: 32px; overflow: hidden; }
-        .modal-header { padding: 20px 24px; background: linear-gradient(135deg, #e8f5e9, #c8e6c9); display: flex; align-items: center; justify-content: space-between; }
-        .modal-title { font-size: 1.3rem; font-weight: 700; color: #2e5a1e; }
+        .modal-header { padding: 20px 24px; background: linear-gradient(135deg, #fef0f4, #fde0e8); display: flex; align-items: center; justify-content: space-between; }
+        .modal-title { font-size: 1.3rem; font-weight: 700; color: #5a3a4a; }
         .modal-close { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.5); border: none; cursor: pointer; }
         .modal-body { padding: 20px 24px; max-height: 50vh; overflow-y: auto; }
-        .modal-search { padding: 12px 16px; border: 1.5px solid #b8daa0; border-radius: 30px; width: 100%; margin-bottom: 16px; outline: none; }
-        .modal-list-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid #e0efd5; cursor: pointer; border-radius: 12px; transition: 0.15s; }
-        .modal-list-item:hover { background: #f0f8ea; }
-        .modal-item-name { font-weight: 500; color: #1e4a1e; cursor: pointer; flex: 1; }
-        .modal-item-badge { background: #3a7a2e; color: white; padding: 2px 10px; border-radius: 20px; font-size: 0.75rem; margin: 0 8px; }
-        .modal-input { padding: 14px 18px; border: 1.5px solid #b8daa0; border-radius: 40px; width: 100%; margin-bottom: 16px; }
-        .modal-btn { padding: 14px; background: #3a7a2e; color: white; border: none; border-radius: 40px; font-weight: 600; width: 100%; cursor: pointer; }
-        .invite-code-box { background: #f0f8ea; padding: 16px; border-radius: 20px; text-align: center; margin: 16px 0; }
-        .invite-code { font-size: 1.5rem; font-weight: 700; font-family: monospace; color: #2e5a1e; }
-        .copy-btn { background: #6f9e4c; color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; margin-left: 10px; }
+        .modal-search { padding: 12px 16px; border: 1.5px solid #e0c0cc; border-radius: 30px; width: 100%; margin-bottom: 16px; outline: none; }
+        .modal-list-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid #e8d0d8; cursor: pointer; border-radius: 12px; transition: 0.15s; }
+        .modal-list-item:hover { background: #fef0f4; }
+        .modal-item-name { font-weight: 500; color: #5a3a4a; cursor: pointer; flex: 1; }
+        .modal-item-badge { background: #c48a9a; color: white; padding: 2px 10px; border-radius: 20px; font-size: 0.75rem; margin: 0 8px; }
+        .modal-input { padding: 14px 18px; border: 1.5px solid #e0c0cc; border-radius: 40px; width: 100%; margin-bottom: 16px; }
+        .modal-btn { padding: 14px; background: #c48a9a; color: white; border: none; border-radius: 40px; font-weight: 600; width: 100%; cursor: pointer; }
+        .invite-code-box { background: #fef0f4; padding: 16px; border-radius: 20px; text-align: center; margin: 16px 0; }
+        .invite-code { font-size: 1.5rem; font-weight: 700; font-family: monospace; color: #5a3a4a; }
+        .copy-btn { background: #c48a9a; color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; margin-left: 10px; }
         @media (max-width: 480px) { .flower-grid { grid-template-columns: repeat(2, 1fr); } }
     </style>
 </head>
 <body>
-
-<!-- 花园背景装饰 -->
-<div id="gardenDecorations"></div>
-
 <div class="container">
     <div id="authContainer" class="auth-container">
         <h1>🌸 花园世界</h1>
@@ -173,9 +147,9 @@
         <div class="btn-group"><button class="query-btn active" id="byMemberBtn"><i class="fas fa-user"></i> 查成员</button><button class="query-btn" id="byFlowerBtn"><i class="fas fa-flower"></i> 查花卉</button></div>
         <div class="search-box"><input type="text" id="searchInput" placeholder="输入成员名字或花卉名称…"><button id="searchBtn"><i class="fas fa-search"></i> 查询</button></div>
         <div class="stats-row"><div class="stat-card" id="memberStatsCard"><div class="stat-number" id="totalMembers">0</div><div class="stat-label">总成员 <i class="fas fa-chevron-right"></i></div></div><div class="stat-card" id="flowerStatsCard"><div class="stat-number" id="totalFlowers">0</div><div class="stat-label">花卉种类 <i class="fas fa-chevron-right"></i></div></div></div>
-        <div id="resultArea" class="result-area"><div style="color:#5a7e4a;text-align:center;padding:20px;">输入关键词查询</div></div>
+        <div id="resultArea" class="result-area"><div style="color:#8a6a7a;text-align:center;padding:20px;">输入关键词查询</div></div>
         <div class="collapsible"><div class="collapse-header" onclick="toggleCollapse('addPanel')"><i class="fas fa-plus-circle" style="color:#e68900;"></i> 添加花卉记录<button class="batch-btn" onclick="event.stopPropagation();openBatchModal()"><i class="fas fa-file-import"></i> 批量导入</button><i class="fas fa-chevron-down" id="addIcon" style="margin-left:auto;"></i></div><div id="addPanel" class="collapse-content"><div class="form-row"><input type="text" id="newMemberName" class="form-input" placeholder="成员名字"><input type="text" id="newFlowerName" class="form-input" placeholder="花卉名称"><button class="add-btn" id="addRecordBtn">添加</button></div></div></div>
-        <div class="collapsible"><div class="collapse-header" onclick="toggleCollapse('logPanel')"><i class="fas fa-history" style="color:#6f9e4c;"></i> 云端更新日志<i class="fas fa-chevron-down" id="logIcon" style="margin-left:auto;"></i></div><div id="logPanel" class="collapse-content"><div style="display:flex;justify-content:flex-end;margin-bottom:8px;"><button class="refresh-btn" onclick="loadCloudLogs()">刷新</button></div><ul class="log-list" id="logList"></ul></div></div>
+        <div class="collapsible"><div class="collapse-header" onclick="toggleCollapse('logPanel')"><i class="fas fa-history" style="color:#c48a9a;"></i> 云端更新日志<i class="fas fa-chevron-down" id="logIcon" style="margin-left:auto;"></i></div><div id="logPanel" class="collapse-content"><div style="display:flex;justify-content:flex-end;margin-bottom:8px;"><button class="refresh-btn" onclick="loadCloudLogs()">刷新</button></div><ul class="log-list" id="logList"></ul></div></div>
         <div class="sync-status"><span id="syncMessage">连接中...</span><button class="refresh-btn" id="refreshDataBtn">刷新</button></div>
         <p class="footer">仅限公会成员 · 数据隔离</p>
     </div>
@@ -183,7 +157,7 @@
 
 <div class="modal-overlay" id="inviteModal"><div class="modal"><div class="modal-header"><span class="modal-title">🔑 生成邀请码</span><button class="modal-close" onclick="closeInviteModal()">✕</button></div><div class="modal-body"><p>邀请码有效期10分钟</p><button class="modal-btn" onclick="generateInviteCode()">+ 生成新邀请码</button><div id="inviteCodeList" style="margin-top:16px;"></div></div></div></div>
 <div class="modal-overlay" id="listModal"><div class="modal"><div class="modal-header"><span class="modal-title" id="listModalTitle">列表</span><button class="modal-close" onclick="closeListModal()">✕</button></div><div class="modal-body"><input type="text" class="modal-search" id="listModalSearch" placeholder="🔍 搜索..." oninput="filterListModal()"><div id="listModalContainer"></div></div></div></div>
-<div class="modal-overlay" id="batchModal"><div class="modal" style="max-width:600px;"><div class="modal-header"><span class="modal-title"><i class="fas fa-file-import"></i> 从图鉴批量导入</span><button class="modal-close" onclick="closeBatchModal()">✕</button></div><div class="modal-body"><input type="text" id="batchMemberName" class="modal-input" placeholder="成员名字"><div class="filter-tabs" style="margin-bottom:12px;"><button class="filter-tab all active" data-filter="all">全</button><button class="filter-tab xian" data-filter="仙">仙</button><button class="filter-tab hua" data-filter="华">华</button><button class="filter-tab zhen" data-filter="珍">珍</button><button class="filter-tab pu" data-filter="普">普</button><button class="filter-tab fan" data-filter="凡">凡</button></div><input type="text" id="batchSearchInput" class="modal-search" placeholder="🔍 搜索花卉..." oninput="filterBatchFlowers()"><div id="batchFlowerList" style="max-height:300px;overflow-y:auto;border:1px solid #cde0bd;border-radius:16px;padding:12px;background:rgba(255,255,255,0.5);">加载中...</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;"><span id="selectedCount">已选 0 种花卉</span><button class="modal-btn" onclick="selectAllVisible()" style="width:auto;padding:8px 16px;background:#6f9e4c;">全选当前</button></div><button class="modal-btn" onclick="executeBatchImport()" style="margin-top:16px;"><i class="fas fa-upload"></i> 导入选中</button><div id="batchResult" style="margin-top:12px;font-size:0.9rem;"></div></div></div></div>
+<div class="modal-overlay" id="batchModal"><div class="modal" style="max-width:600px;"><div class="modal-header"><span class="modal-title"><i class="fas fa-file-import"></i> 从图鉴批量导入</span><button class="modal-close" onclick="closeBatchModal()">✕</button></div><div class="modal-body"><input type="text" id="batchMemberName" class="modal-input" placeholder="成员名字"><div class="filter-tabs" style="margin-bottom:12px;"><button class="filter-tab all active" data-filter="all">全</button><button class="filter-tab xian" data-filter="仙">仙</button><button class="filter-tab hua" data-filter="华">华</button><button class="filter-tab zhen" data-filter="珍">珍</button><button class="filter-tab pu" data-filter="普">普</button><button class="filter-tab fan" data-filter="凡">凡</button></div><input type="text" id="batchSearchInput" class="modal-search" placeholder="🔍 搜索花卉..." oninput="filterBatchFlowers()"><div id="batchFlowerList" style="max-height:300px;overflow-y:auto;border:1px solid #e8d0d8;border-radius:16px;padding:12px;background:rgba(255,255,255,0.5);">加载中...</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;"><span id="selectedCount">已选 0 种花卉</span><button class="modal-btn" onclick="selectAllVisible()" style="width:auto;padding:8px 16px;background:#c48a9a;">全选当前</button></div><button class="modal-btn" onclick="executeBatchImport()" style="margin-top:16px;"><i class="fas fa-upload"></i> 导入选中</button><div id="batchResult" style="margin-top:12px;font-size:0.9rem;"></div></div></div></div>
 
 <script>
 (function(){
@@ -273,49 +247,6 @@
     window.selectAllVisible=()=>{const checkboxes=document.querySelectorAll('#batchFlowerList input[type="checkbox"]');checkboxes.forEach(cb=>{selectedBatchFlowers.add(cb.id.replace('chk_',''));cb.checked=true;});updateSelectedCount();};
     document.querySelectorAll('#batchModal .filter-tab').forEach(t=>{t.addEventListener('click',()=>{document.querySelectorAll('#batchModal .filter-tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');currentBatchFilter=t.dataset.filter;filterBatchFlowers();});});
     window.executeBatchImport=async()=>{const memberName=document.getElementById('batchMemberName').value.trim();if(!memberName){alert('请输入成员名字');return;}if(selectedBatchFlowers.size===0){alert('请至少选择一种花卉');return;}let member=flowerData.find(m=>m.name===memberName);let isNew=false;if(!member){member={name:memberName,仙:[],华:[],珍:[],普:[],凡:[]};flowerData.push(member);isNew=true;}let added=0;for(const f of selectedBatchFlowers){const q=getFlowerQuality(f);if(!member[q])member[q]=[];if(!member[q].includes(f)){member[q].push(f);added++;}}if(await saveGuildData()){addCloudLog(isNew?'批量新增成员':'批量添加花卉',memberName,`${added}种花`);document.getElementById('batchResult').innerHTML=`<span style="color:#2e7d32;">成功导入 ${added} 种花卉！</span>`;updateStats();selectedBatchFlowers.clear();setTimeout(()=>closeBatchModal(),1500);}else{document.getElementById('batchResult').innerHTML='<span style="color:#d32f2f;">导入失败</span>';}};
-
-    // ========== 花园背景装饰 ==========
-    (function createGardenDecorations(){
-        const container = document.body;
-        // 漂浮花瓣
-        const petals = ['🌸','🌺','🌷','💮','🏵️','🌼','🍂','🍃','🌿','💐'];
-        for(let i=0;i<15;i++){
-            const petal = document.createElement('span');
-            petal.className = 'petal';
-            petal.textContent = petals[Math.floor(Math.random()*petals.length)];
-            petal.style.left = Math.random()*100+'%';
-            petal.style.animationDuration = (8+Math.random()*12)+'s';
-            petal.style.animationDelay = (Math.random()*10)+'s';
-            petal.style.fontSize = (16+Math.random()*16)+'px';
-            container.appendChild(petal);
-        }
-        // 底部花丛
-        const floor = document.createElement('div');
-        floor.className = 'garden-floor';
-        const flowers = ['🌻','🌹','🌷','🌺','🌸','💐','🌾','🌿','🍀','🌼','🌱','🪻'];
-        for(let i=0;i<12;i++){
-            const f = document.createElement('span');
-            f.textContent = flowers[Math.floor(Math.random()*flowers.length)];
-            f.style.fontSize = (20+Math.random()*16)+'px';
-            floor.appendChild(f);
-        }
-        container.appendChild(floor);
-        // 顶部藤蔓
-        const vine = document.createElement('div');
-        vine.className = 'vine-top';
-        vine.innerHTML = '🌿🍃🌱🌿🍃🌱🌿🍃🌱🌿🍃🌱';
-        container.appendChild(vine);
-        // 萤火虫
-        for(let i=0;i<5;i++){
-            const ff = document.createElement('div');
-            ff.className = 'firefly';
-            ff.style.left = (5+Math.random()*90)+'%';
-            ff.style.top = (10+Math.random()*60)+'%';
-            ff.style.animationDuration = (3+Math.random()*4)+'s';
-            ff.style.animationDelay = (Math.random()*3)+'s';
-            container.appendChild(ff);
-        }
-    })();
 
     checkAuth();
     document.getElementById('addPanel').classList.add('open');
