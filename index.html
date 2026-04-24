@@ -133,23 +133,25 @@
 <div class="modal-overlay" id="batchModal"><div class="modal" style="max-width:600px;"><div class="modal-header"><span class="modal-title"><i class="fas fa-file-import"></i> 从图鉴批量导入</span><button class="modal-close" onclick="closeBatchModal()">✕</button></div><div class="modal-body"><input type="text" id="batchMemberName" class="modal-input" placeholder="成员名字"><div class="filter-tabs" style="margin-bottom:12px;"><button class="filter-tab all active" data-filter="all">全</button><button class="filter-tab xian" data-filter="仙">仙</button><button class="filter-tab hua" data-filter="华">华</button><button class="filter-tab zhen" data-filter="珍">珍</button><button class="filter-tab pu" data-filter="普">普</button><button class="filter-tab fan" data-filter="凡">凡</button></div><input type="text" id="batchSearchInput" class="modal-search" placeholder="🔍 搜索花卉..." oninput="filterBatchFlowers()"><div id="batchFlowerList" style="max-height:300px;overflow-y:auto;border:1px solid #cde0bd;border-radius:16px;padding:12px;background:rgba(255,255,255,0.5);">加载中...</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;"><span id="selectedCount">已选 0 种花卉</span><button class="modal-btn" onclick="selectAllVisible()" style="width:auto;padding:8px 16px;background:#6f9e4c;">全选当前</button></div><button class="modal-btn" onclick="executeBatchImport()" style="margin-top:16px;"><i class="fas fa-upload"></i> 导入选中</button><div id="batchResult" style="margin-top:12px;font-size:0.9rem;"></div></div></div></div>
 <script>
 (function(){
-    const SUPABASE_URL = "https://amngvhgusyipxnnkejzp.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_yIYNCHcT4Z0z-NMcKVmjTQ_6SoHyxwZ";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const SUPABASE_URL="https://amngvhgusyipxnnkejzp.supabase.co";
+    const SUPABASE_KEY="sb_publishable_yIYNCHcT4Z0z-NMcKVmjTQ_6SoHyxwZ";
+    const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
     let currentUser=null,currentProfile=null,flowerData=[],queryMode='member',listModalData=[];
     let allFlowersList=[],selectedBatchFlowers=new Set(),currentBatchFilter='all';
-    let currentPage=1,currentFlowersList=[];
+    let currentPage=1,currentFlowersList=[],currentMemberName='';
     const pageSize=12;
-    const FLOWER_QUALITY_MAP = {
-        "繁花满筑":"仙","芳华寻蝶":"仙","福运招财":"仙","桂月・秋千稚语":"仙","花宴流芳":"仙","花漾春山":"仙","欢雪颂冬":"仙","欢云妙舞":"仙","葭月・栖舟泛漪":"仙","菊月・花间飞鸢":"仙","柳月・溪亭燕语":"仙","梅月・疏影听弦":"仙","梦幻之心":"仙","桃月・云汐灼华":"仙","仙魅灵狐":"仙","星夜奇遇":"仙","杏月・花影雅憩":"仙","焰火迎春":"仙","阳月・芙香盈袖":"仙","夜梦花庭":"仙","有龙则灵":"仙","紫霄云庭":"仙","星河映蕊":"仙",
-        "宝珠玉兰":"华","星槎仙舟":"华","瑶枝桂影":"华","灵松照夜":"华","冰蓝蝶舞玫瑰":"华","粉樱蝶舞玫瑰":"华","红香妃腊梅":"华","玉玲珑腊梅":"华","紫曜牡丹":"华","幽蓝逐影":"华","桃影浮澜":"华","白灵逐浪":"华","杏色春衫":"华","瑶光牡丹":"华","霁澜牡丹":"华","仙女散花":"华","珠匣粉芙蓉":"华","珠匣橘芙蓉":"华","珠匣紫芙蓉":"华","姑苏雨蒙":"华","竹映金辉":"华","映粉云光月季":"华","沐光映黄月季":"华","橙光拂晓月季":"华","玉兔揽辉":"华","鹤寄星河":"华","紫灵福禄":"华","花笼星语":"华","花笼流芳":"华","花笼琼光":"华","捣蛋幽幽":"华","欢闹南瓜":"华","馥香花饼":"华","芳蕊琼浆":"华","火耀金丹":"华","琼台玉露":"华","霓光映树":"华","恬梦圣铃":"华","元气破蛋":"华","梦蝶花章":"华","蝶影梅书":"华","鸢花芳集":"华","金缠腰":"华","曜绯帝王花":"华","琉蓝帝王花":"华","霞晖帝王花":"华","漱玉雪莲":"华","星泽幽昙":"华","虹霞仙芝":"华","花露甜粥":"华","夜蓝香息":"华","玫瑰小熊":"华","马上有财":"华","马上有福":"华","马上柿橙":"华","灵瑞仙桃":"华","柿柿如意":"华","鱼灯映岁":"华","甜绒羊羊":"华","葡萄紫牡丹菊":"华","落霞橙牡丹菊":"华","寻蜜之心":"华","珠宝之心":"华","玉兰栖香":"华","纸鸢探春":"华",
-        "赤焰火焰兰":"珍","玫瑰粉银莲":"珍","棉花小熊":"珍","粉红木槿花":"珍","梦紫郁金香":"珍","冰蓝矮牵牛":"珍","轮生冬青":"珍","粉樱月见草":"珍","碧落月见草":"珍","绯色腊梅":"珍","香槟玫瑰":"珍","曼珠沙华":"珍","浅绀紫藤花":"珍","黑蕊白银莲":"珍","青碧华珊":"珍","伯利恒之星":"珍","月影摇光":"珍","绀紫飞燕草":"珍","轻紫大花葱":"珍","蓝叶苏铁":"珍","鸳鸯茉莉":"珍","蜜合月见草":"珍","金白德鸢":"珍","鹅黄铁筷花":"珍","褐红铁筷花":"珍","朱柿长寿花":"珍","半见长寿花":"珍","雾粉麦冬花":"珍","藤黄露薇花":"珍","莹白露薇花":"珍","奶桃大丽花":"珍","黑曜大丽花":"珍","明黄跳舞兰":"珍","白粉蕙兰":"珍","浅黄绿绒蒿":"珍","幽蓝绿绒蒿":"珍","毛蕊紫银莲":"珍","暮粉紫藤花":"珍","霁蓝紫藤花":"珍","黛紫虞美人":"珍","薄红虞美人":"珍","橙黄虞美人":"珍","幻紫铁线莲":"珍","甜橙美女樱":"珍","浅韵美女樱":"珍","粉鹤芋":"珍","曼陀罗华":"珍","金橙海葵":"珍","波叶金桂":"珍","朱砂丹桂":"珍","青山银桂":"珍","粉紫华珊":"珍","橘霞华珊":"珍","焰绯海葵":"珍","柔蓝飞燕草":"珍","桃夭飞燕草":"珍","落霞灯笼花":"珍","紫晶灯笼花":"珍","粉黛德鸢":"珍","杏绯德鸢":"珍","黛紫玉兰":"珍","飞黄玉兰":"珍","粉菲铁筷花":"珍","藕粉长寿花":"珍","霜色麦冬花":"珍","粉米露薇花":"珍","轻紫格桑花":"珍","烟粉格桑花":"珍","秋枫跳舞兰":"珍","樱红跳舞兰":"珍","银白雪柳":"珍","淡粉雪柳":"珍","春绿蕙兰":"珍","黛紫绿绒蒿":"珍","橙心剑兰":"珍","霜白海葵":"珍","碧落夹竹桃":"珍","粉胭海棠花":"珍","火蕊朱顶红":"珍","粉羽朱顶红":"珍","橘光朱顶红":"珍","胭脂芍药":"珍","云锦芍药":"珍","桃云木香花":"珍","春晓木香花":"珍","盈粉芍药":"珍","纯白木香花":"珍","夕岚蔷薇花":"珍","晴山蔷薇花":"珍","黄莺蔷薇花":"珍","白茜剑兰":"珍","芋紫剑兰":"珍","星耀灵蕊":"珍","暮山耧斗菜":"珍","晴蓝耧斗菜":"珍","丹红耧斗菜":"珍","橘焰冠华":"珍","岚岫紫云英":"珍","彤云六初花":"珍","缃桃六初花":"珍","碧玉六初花":"珍","玛瑙石榴花":"珍","冰蓝黑种草":"珍","粉韵石竹花":"珍","赤晖石竹花":"珍","紫晕石竹花":"珍","紫苑番红花":"珍","双辉忍冬":"珍","玉紫雪割草":"珍","瑶晖缅栀子":"珍","蜜桃花毛茛":"珍","奶黄花毛茛":"珍","橙霞花毛茛":"珍","桃绯姜荷花":"珍","白玉姜荷花":"珍","朝晖姜荷花":"珍","明黄凌霄花":"珍","朱红凌霄花":"珍","白紫凌霄花":"珍","粉米茶梅花":"珍","雅梨黄棣棠":"珍","明黄松虫草":"珍","熏紫松虫草":"珍","柔粉松虫草":"珍","绛橙嘉兰":"珍","纱粉嘉兰":"珍","焰红嘉兰":"珍","黛紫洋紫荆":"珍","宫灯百合":"珍","缃黄瑞香花":"珍","素雪瑞香花":"珍","烟紫瑞香花":"珍","松绿立金花":"珍","杏黄立金花":"珍","珊粉立金花":"珍","天荷繁星":"珍","雅致西风莲":"珍","丹红龙面花":"珍","澄蓝龙面花":"珍","蜜粉龙面花":"珍","蜜黄大岩桐":"珍","绛粉大岩桐":"珍","银白耀星花":"珍","重瓣紫灯花":"珍",
-        "淡粉矮牵牛":"普","浅粉乒乓菊":"普","凤梨花":"普","紫麦冬花":"普","水红落新妇":"普","紫矢车菊":"普","银白翠珠":"普","明黄矮牵牛":"普","浅橘乒乓菊":"普","浅白乒乓菊":"普","红鹤芋":"普","白鹤芋":"普","薄藤铁线莲":"普","浅蓝落新妇":"普","霜白谷鸢尾":"普","桃粉谷鸢尾":"普","汀蓝兔狸藻":"普","碧白石斛兰":"普","紫荷包牡丹":"普","香水百合":"普","迎春花":"普","正红大丽花":"普","金钟连翘":"普","薄粉蕙兰":"普","淡茜蜀葵花":"普","丹红蜀葵花":"普","金盏蜀葵花":"普","殷红灯笼花":"普","月白格桑花":"普","浅粉夹竹桃":"普","丹紫夹竹桃":"普","浅紫落新妇":"普","橘红海棠花":"普","黄色海棠花":"普","绿叶苏铁":"普","绯雪杰奎琳":"普","桃夭杰奎琳":"普","碧落杰奎琳":"普","杏黄杜鹃":"普","紫红杜鹃":"普","淡粉非洲堇":"普","轻紫非洲堇":"普","嫣红杜鹃":"普","玫红非洲堇":"普","忽地笑":"普","白色满天星":"普","粉色满天星":"普","蓝色满天星":"普","粉矢车菊":"普","蓝矢车菊":"普","轻紫翠珠":"普","盈粉翠珠":"普","紫晶玉簪花":"普","素雪玉簪花":"普","霜蓝玉簪花":"普","鹅黄报春花":"普","绛红报春花":"普","桃粉报春花":"普","橘粉忘忧草":"普","轻紫忘忧草":"普","杏白忘忧草":"普","粉白酢浆草":"普","黄白酢浆草":"普","橙黄酢浆草":"普","朱橙魔杖花":"普","雾粉千鸟花":"普","嫩黄马齿苋":"普","白花马齿苋":"普","淡粉马齿苋":"普","霞粉铁线莲":"普","圣诞一品红":"普","雾白香豌豆":"普","梦蓝香豌豆":"普","薰紫香豌豆":"普","星蓝婆婆纳":"普","浅粉婆婆纳":"普","霜白婆婆纳":"普","火焰针垫花":"普","蜜黄针垫花":"普","冰蓝谷鸢尾":"普","霜白垂筒花":"普","橘红垂筒花":"普","明黄垂筒花":"普","粉月季":"普","安眠薰衣草":"普","橙黄君子兰":"普","粉白君子兰":"普","嫩黄君子兰":"普","富贵竹":"普","浅粉仙客来":"普","淡紫仙客来":"普","浅蓝仙客来":"普","月白兔狸藻":"普","嫣粉石斛兰":"普","柔紫石斛兰":"普","粉荷包牡丹":"普","玉白梨花":"普",
-        "白百合":"凡","康乃馨":"凡","铃兰":"凡","黄百合":"凡","紫桔梗":"凡","黄郁金香":"凡","紫罗兰":"凡","粉郁金香":"凡","蝴蝶兰":"凡","粉百合":"凡","红玫瑰":"凡","雏菊":"凡","粉玫瑰":"凡","蓝星花":"凡","黄玫瑰":"凡","紫绣球":"凡","山茶花":"凡","粉绣球":"凡","小苍兰":"凡","蓝绣球":"凡","红马蹄莲":"凡","紫马蹄莲":"凡","向日葵":"凡","鹤望兰":"凡","金盏菊":"凡","水仙花":"凡","非洲菊":"凡","风铃花":"凡","黄马蹄莲":"凡","蒲公英":"凡","紫色风信子":"凡","合欢花":"凡","粉色风信子":"凡","茉莉花":"凡","嫩黄风信子":"凡","明黄如意菊":"凡","栀子花":"凡","淡粉如意菊":"凡","粉桃花":"凡","浅橘如意菊":"凡","嫩绿洋桔梗":"凡","紫色丁香花":"凡","浅粉洋桔梗":"凡","黄色丁香花":"凡","香槟洋桔梗":"凡","紫红三角梅":"凡","勿忘我":"凡","淡黄三角梅":"凡","素白九里香":"凡","粉白三角梅":"凡","嫣红茶蘼花":"凡","圣心百合":"凡","盈粉荼蘼花":"凡","紫百子莲":"凡","雪白荼蘼花":"凡","纯白晚香玉":"凡","淡紫菊苣":"凡","浅紫晚香玉":"凡","巧克力秋英":"凡","嫩黄晚香玉":"凡"
+    const FLOWER_QUALITY_MAP={
+"繁花满筑":"仙","芳华寻蝶":"仙","福运招财":"仙","桂月・秋千稚语":"仙","花宴流芳":"仙","花漾春山":"仙","欢雪颂冬":"仙","欢云妙舞":"仙","葭月・栖舟泛漪":"仙","菊月・花间飞鸢":"仙","柳月・溪亭燕语":"仙","梅月・疏影听弦":"仙","梦幻之心":"仙","桃月・云汐灼华":"仙","仙魅灵狐":"仙","星夜奇遇":"仙","杏月・花影雅憩":"仙","焰火迎春":"仙","阳月・芙香盈袖":"仙","夜梦花庭":"仙","有龙则灵":"仙","紫霄云庭":"仙","星河映蕊":"仙",
+"宝珠玉兰":"华","星槎仙舟":"华","瑶枝桂影":"华","灵松照夜":"华","冰蓝蝶舞玫瑰":"华","粉樱蝶舞玫瑰":"华","红香妃腊梅":"华","玉玲珑腊梅":"华","紫曜牡丹":"华","幽蓝逐影":"华","桃影浮澜":"华","白灵逐浪":"华","杏色春衫":"华","瑶光牡丹":"华","霁澜牡丹":"华","仙女散花":"华","珠匣粉芙蓉":"华","珠匣橘芙蓉":"华","珠匣紫芙蓉":"华","姑苏雨蒙":"华","竹映金辉":"华","映粉云光月季":"华","沐光映黄月季":"华","橙光拂晓月季":"华","玉兔揽辉":"华","鹤寄星河":"华","紫灵福禄":"华","花笼星语":"华","花笼流芳":"华","花笼琼光":"华","捣蛋幽幽":"华","欢闹南瓜":"华","馥香花饼":"华","芳蕊琼浆":"华","火耀金丹":"华","琼台玉露":"华","霓光映树":"华","恬梦圣铃":"华","元气破蛋":"华","梦蝶花章":"华","蝶影梅书":"华","鸢花芳集":"华","金缠腰":"华","曜绯帝王花":"华","琉蓝帝王花":"华","霞晖帝王花":"华","漱玉雪莲":"华","星泽幽昙":"华","虹霞仙芝":"华","花露甜粥":"华","夜蓝香息":"华","玫瑰小熊":"华","马上有财":"华","马上有福":"华","马上柿橙":"华","灵瑞仙桃":"华","柿柿如意":"华","鱼灯映岁":"华","甜绒羊羊":"华","葡萄紫牡丹菊":"华","落霞橙牡丹菊":"华","寻蜜之心":"华","珠宝之心":"华","玉兰栖香":"华","纸鸢探春":"华",
+"赤焰火焰兰":"珍","玫瑰粉银莲":"珍","棉花小熊":"珍","粉红木槿花":"珍","梦紫郁金香":"珍","冰蓝矮牵牛":"珍","轮生冬青":"珍","粉樱月见草":"珍","碧落月见草":"珍","绯色腊梅":"珍","香槟玫瑰":"珍","曼珠沙华":"珍","浅绀紫藤花":"珍","黑蕊白银莲":"珍","青碧华珊":"珍","伯利恒之星":"珍","月影摇光":"珍","绀紫飞燕草":"珍","轻紫大花葱":"珍","蓝叶苏铁":"珍","鸳鸯茉莉":"珍","蜜合月见草":"珍","金白德鸢":"珍","鹅黄铁筷花":"珍","褐红铁筷花":"珍","朱柿长寿花":"珍","半见长寿花":"珍","雾粉麦冬花":"珍","藤黄露薇花":"珍","莹白露薇花":"珍","奶桃大丽花":"珍","黑曜大丽花":"珍","明黄跳舞兰":"珍","白粉蕙兰":"珍","浅黄绿绒蒿":"珍","幽蓝绿绒蒿":"珍","毛蕊紫银莲":"珍","暮粉紫藤花":"珍","霁蓝紫藤花":"珍","黛紫虞美人":"珍","薄红虞美人":"珍","橙黄虞美人":"珍","幻紫铁线莲":"珍","甜橙美女樱":"珍","浅韵美女樱":"珍","粉鹤芋":"珍","曼陀罗华":"珍","金橙海葵":"珍","波叶金桂":"珍","朱砂丹桂":"珍","青山银桂":"珍","粉紫华珊":"珍","橘霞华珊":"珍","焰绯海葵":"珍","柔蓝飞燕草":"珍","桃夭飞燕草":"珍","落霞灯笼花":"珍","紫晶灯笼花":"珍","粉黛德鸢":"珍","杏绯德鸢":"珍","黛紫玉兰":"珍","飞黄玉兰":"珍","粉菲铁筷花":"珍","藕粉长寿花":"珍","霜色麦冬花":"珍","粉米露薇花":"珍","轻紫格桑花":"珍","烟粉格桑花":"珍","秋枫跳舞兰":"珍","樱红跳舞兰":"珍","银白雪柳":"珍","淡粉雪柳":"珍","春绿蕙兰":"珍","黛紫绿绒蒿":"珍","橙心剑兰":"珍","霜白海葵":"珍","碧落夹竹桃":"珍","粉胭海棠花":"珍","火蕊朱顶红":"珍","粉羽朱顶红":"珍","橘光朱顶红":"珍","胭脂芍药":"珍","云锦芍药":"珍","桃云木香花":"珍","春晓木香花":"珍","盈粉芍药":"珍","纯白木香花":"珍","夕岚蔷薇花":"珍","晴山蔷薇花":"珍","黄莺蔷薇花":"珍","白茜剑兰":"珍","芋紫剑兰":"珍","星耀灵蕊":"珍","暮山耧斗菜":"珍","晴蓝耧斗菜":"珍","丹红耧斗菜":"珍","橘焰冠华":"珍","岚岫紫云英":"珍","彤云六初花":"珍","缃桃六初花":"珍","碧玉六初花":"珍","玛瑙石榴花":"珍","冰蓝黑种草":"珍","粉韵石竹花":"珍","赤晖石竹花":"珍","紫晕石竹花":"珍","紫苑番红花":"珍","双辉忍冬":"珍","玉紫雪割草":"珍","瑶晖缅栀子":"珍","蜜桃花毛茛":"珍","奶黄花毛茛":"珍","橙霞花毛茛":"珍","桃绯姜荷花":"珍","白玉姜荷花":"珍","朝晖姜荷花":"珍","明黄凌霄花":"珍","朱红凌霄花":"珍","白紫凌霄花":"珍","粉米茶梅花":"珍","雅梨黄棣棠":"珍","明黄松虫草":"珍","熏紫松虫草":"珍","柔粉松虫草":"珍","绛橙嘉兰":"珍","纱粉嘉兰":"珍","焰红嘉兰":"珍","黛紫洋紫荆":"珍","宫灯百合":"珍","缃黄瑞香花":"珍","素雪瑞香花":"珍","烟紫瑞香花":"珍","松绿立金花":"珍","杏黄立金花":"珍","珊粉立金花":"珍","天荷繁星":"珍","雅致西风莲":"珍","丹红龙面花":"珍","澄蓝龙面花":"珍","蜜粉龙面花":"珍","蜜黄大岩桐":"珍","绛粉大岩桐":"珍","银白耀星花":"珍","重瓣紫灯花":"珍",
+"淡粉矮牵牛":"普","浅粉乒乓菊":"普","凤梨花":"普","紫麦冬花":"普","水红落新妇":"普","紫矢车菊":"普","银白翠珠":"普","明黄矮牵牛":"普","浅橘乒乓菊":"普","浅白乒乓菊":"普","红鹤芋":"普","白鹤芋":"普","薄藤铁线莲":"普","浅蓝落新妇":"普","霜白谷鸢尾":"普","桃粉谷鸢尾":"普","汀蓝兔狸藻":"普","碧白石斛兰":"普","紫荷包牡丹":"普","香水百合":"普","迎春花":"普","正红大丽花":"普","金钟连翘":"普","薄粉蕙兰":"普","淡茜蜀葵花":"普","丹红蜀葵花":"普","金盏蜀葵花":"普","殷红灯笼花":"普","月白格桑花":"普","浅粉夹竹桃":"普","丹紫夹竹桃":"普","浅紫落新妇":"普","橘红海棠花":"普","黄色海棠花":"普","绿叶苏铁":"普","绯雪杰奎琳":"普","桃夭杰奎琳":"普","碧落杰奎琳":"普","杏黄杜鹃":"普","紫红杜鹃":"普","淡粉非洲堇":"普","轻紫非洲堇":"普","嫣红杜鹃":"普","玫红非洲堇":"普","忽地笑":"普","白色满天星":"普","粉色满天星":"普","蓝色满天星":"普","粉矢车菊":"普","蓝矢车菊":"普","轻紫翠珠":"普","盈粉翠珠":"普","紫晶玉簪花":"普","素雪玉簪花":"普","霜蓝玉簪花":"普","鹅黄报春花":"普","绛红报春花":"普","桃粉报春花":"普","橘粉忘忧草":"普","轻紫忘忧草":"普","杏白忘忧草":"普","粉白酢浆草":"普","黄白酢浆草":"普","橙黄酢浆草":"普","朱橙魔杖花":"普","雾粉千鸟花":"普","嫩黄马齿苋":"普","白花马齿苋":"普","淡粉马齿苋":"普","霞粉铁线莲":"普","圣诞一品红":"普","雾白香豌豆":"普","梦蓝香豌豆":"普","薰紫香豌豆":"普","星蓝婆婆纳":"普","浅粉婆婆纳":"普","霜白婆婆纳":"普","火焰针垫花":"普","蜜黄针垫花":"普","冰蓝谷鸢尾":"普","霜白垂筒花":"普","橘红垂筒花":"普","明黄垂筒花":"普","粉月季":"普","安眠薰衣草":"普","橙黄君子兰":"普","粉白君子兰":"普","嫩黄君子兰":"普","富贵竹":"普","浅粉仙客来":"普","淡紫仙客来":"普","浅蓝仙客来":"普","月白兔狸藻":"普","嫣粉石斛兰":"普","柔紫石斛兰":"普","粉荷包牡丹":"普","玉白梨花":"普",
+"白百合":"凡","康乃馨":"凡","铃兰":"凡","黄百合":"凡","紫桔梗":"凡","黄郁金香":"凡","紫罗兰":"凡","粉郁金香":"凡","蝴蝶兰":"凡","粉百合":"凡","红玫瑰":"凡","雏菊":"凡","粉玫瑰":"凡","蓝星花":"凡","黄玫瑰":"凡","紫绣球":"凡","山茶花":"凡","粉绣球":"凡","小苍兰":"凡","蓝绣球":"凡","红马蹄莲":"凡","紫马蹄莲":"凡","向日葵":"凡","鹤望兰":"凡","金盏菊":"凡","水仙花":"凡","非洲菊":"凡","风铃花":"凡","黄马蹄莲":"凡","蒲公英":"凡","紫色风信子":"凡","合欢花":"凡","粉色风信子":"凡","茉莉花":"凡","嫩黄风信子":"凡","明黄如意菊":"凡","栀子花":"凡","淡粉如意菊":"凡","粉桃花":"凡","浅橘如意菊":"凡","嫩绿洋桔梗":"凡","紫色丁香花":"凡","浅粉洋桔梗":"凡","黄色丁香花":"凡","香槟洋桔梗":"凡","紫红三角梅":"凡","勿忘我":"凡","淡黄三角梅":"凡","素白九里香":"凡","粉白三角梅":"凡","嫣红茶蘼花":"凡","圣心百合":"凡","盈粉荼蘼花":"凡","紫百子莲":"凡","雪白荼蘼花":"凡","纯白晚香玉":"凡","淡紫菊苣":"凡","浅紫晚香玉":"凡","巧克力秋英":"凡","嫩黄晚香玉":"凡"
     };
-    const FAN_RANK = ["嫩黄晚香玉","巧克力秋英","浅紫晚香玉","淡紫菊苣","纯白晚香玉","雪白荼蘼花","紫百子莲","盈粉荼蘼花","圣心百合","嫣红茶蘼花","粉白三角梅","素白九里香","淡黄三角梅","勿忘我","紫红三角梅","香槟洋桔梗","黄色丁香花","浅粉洋桔梗","紫色丁香花","嫩绿洋桔梗","浅橘如意菊","粉桃花","淡粉如意菊","栀子花","明黄如意菊","嫩黄风信子","茉莉花","粉色风信子","合欢花","紫色风信子","蒲公英","黄马蹄莲","风铃花","非洲菊","水仙花","金盏菊","鹤望兰","向日葵","紫马蹄莲","红马蹄莲","蓝绣球","小苍兰","粉绣球","山茶花","紫绣球","黄玫瑰","蓝星花","粉玫瑰","雏菊","红玫瑰","粉百合","蝴蝶兰","粉郁金香","紫罗兰","黄郁金香","紫桔梗","黄百合","铃兰","康乃馨","白百合"];
+    const FAN_RANK=["嫩黄晚香玉","巧克力秋英","浅紫晚香玉","淡紫菊苣","纯白晚香玉","雪白荼蘼花","紫百子莲","盈粉荼蘼花","圣心百合","嫣红茶蘼花","粉白三角梅","素白九里香","淡黄三角梅","勿忘我","紫红三角梅","香槟洋桔梗","黄色丁香花","浅粉洋桔梗","紫色丁香花","嫩绿洋桔梗","浅橘如意菊","粉桃花","淡粉如意菊","栀子花","明黄如意菊","嫩黄风信子","茉莉花","粉色风信子","合欢花","紫色风信子","蒲公英","黄马蹄莲","风铃花","非洲菊","水仙花","金盏菊","鹤望兰","向日葵","紫马蹄莲","红马蹄莲","蓝绣球","小苍兰","粉绣球","山茶花","紫绣球","黄玫瑰","蓝星花","粉玫瑰","雏菊","红玫瑰","粉百合","蝴蝶兰","粉郁金香","紫罗兰","黄郁金香","紫桔梗","黄百合","铃兰","康乃馨","白百合"];
     function getFanRank(f){const i=FAN_RANK.indexOf(f);return i===-1?999:i;}
     function getFlowerQuality(f){return FLOWER_QUALITY_MAP[f]||'凡';}
+
+    // DOM 元素
     const authContainer=document.getElementById('authContainer'),appContainer=document.getElementById('appContainer');
     const loginTab=document.getElementById('loginTab'),registerTab=document.getElementById('registerTab');
     const loginForm=document.getElementById('loginForm'),registerForm=document.getElementById('registerForm');
@@ -168,39 +170,53 @@
     const batchModal=document.getElementById('batchModal'),batchFlowerList=document.getElementById('batchFlowerList');
     const batchSearchInput=document.getElementById('batchSearchInput'),selectedCount=document.getElementById('selectedCount');
 
+    // ========== 核心函数 ==========
     async function checkAuth(){const{data:{session}}=await supabase.auth.getSession();if(session){currentUser=session.user;await loadProfile();showApp();}else{showAuth();}}
     async function loadProfile(){const{data}=await supabase.from('profiles').select('*').eq('id',currentUser.id).single();if(data){currentProfile=data;displayName.textContent=data.nickname||data.email?.split('@')[0]||'花友';guildBadge.textContent=data.guild_id||'gh001';ownerToolbar.style.display=data.role==='owner'?'flex':'none';}await loadGuildData();}
     async function loadGuildData(){const guildId=currentProfile?.guild_id||'gh001';const{data}=await supabase.from('flowers').select('data').eq('guild_id',guildId).single();if(data?.data){flowerData=data.data;updateStats();}syncMessage.textContent=`✅ 已连接 · ${guildId}`;}
     function updateStats(){totalMembersSpan.textContent=flowerData.length;const s=new Set();flowerData.forEach(m=>{['仙','华','珍','普','凡'].forEach(q=>{if(m[q])m[q].forEach(f=>s.add(f));});});totalFlowersSpan.textContent=s.size;}
     function showAuth(){authContainer.style.display='block';appContainer.style.display='none';}
     function showApp(){authContainer.style.display='none';appContainer.style.display='block';}
+
+    // 登录/注册
     loginBtn.onclick=async()=>{const email=document.getElementById('loginEmail').value.trim();const password=document.getElementById('loginPassword').value;const err=document.getElementById('loginError');if(!email||!password){err.textContent='请填写完整';return;}err.textContent='';loginBtn.textContent='登录中...';loginBtn.disabled=true;const{data,error}=await supabase.auth.signInWithPassword({email,password});loginBtn.textContent='登录';loginBtn.disabled=false;if(error){err.textContent='邮箱或密码错误';}else{currentUser=data.user;await loadProfile();showApp();}};
     registerBtn.onclick=async()=>{const email=document.getElementById('registerEmail').value.trim();const password=document.getElementById('registerPassword').value;const code=document.getElementById('inviteCode').value.trim();const err=document.getElementById('registerError');if(!email||!password||!code){err.textContent='请填写所有字段';return;}if(password.length<6){err.textContent='密码至少6位';return;}err.textContent='';registerBtn.textContent='验证中...';registerBtn.disabled=true;const{data:codeData,error:codeError}=await supabase.from('invite_codes').select('*').eq('code',code).eq('is_active',true).single();if(codeError||!codeData){err.textContent='邀请码无效';registerBtn.textContent='注册';registerBtn.disabled=false;return;}if(new Date(codeData.expires_at)<new Date()){err.textContent='邀请码已过期';registerBtn.textContent='注册';registerBtn.disabled=false;return;}const{data:userData,error:signUpError}=await supabase.auth.signUp({email,password});if(signUpError){err.textContent=signUpError.message;registerBtn.textContent='注册';registerBtn.disabled=false;return;}await supabase.from('profiles').insert({id:userData.user.id,nickname:email.split('@')[0],guild_id:codeData.guild_id,role:'member'});await supabase.from('invite_codes').update({used_count:1,is_active:false}).eq('code',code);alert(`注册成功！欢迎加入 ${codeData.guild_id}`);loginTab.click();registerBtn.textContent='注册';registerBtn.disabled=false;};
     logoutBtn.onclick=async()=>{await supabase.auth.signOut();showAuth();};
     loginTab.onclick=()=>{loginTab.classList.add('active');registerTab.classList.remove('active');loginForm.style.display='flex';registerForm.style.display='none';};
     registerTab.onclick=()=>{registerTab.classList.add('active');loginTab.classList.remove('active');registerForm.style.display='flex';loginForm.style.display='none';};
+
+    // 邀请码
     window.openInviteModal=async()=>{inviteModal.style.display='flex';await loadInviteCodes();};
     window.closeInviteModal=()=>inviteModal.style.display='none';
     async function loadInviteCodes(){const guildId=currentProfile?.guild_id;const{data}=await supabase.from('invite_codes').select('*').eq('guild_id',guildId).eq('is_active',true).order('created_at',{ascending:false});if(!data?.length){inviteCodeList.innerHTML='<p>暂无有效邀请码</p>';return;}inviteCodeList.innerHTML=data.map(c=>`<div class="invite-code-box"><div style="display:flex;align-items:center;justify-content:center;"><span class="invite-code">${c.code}</span><button class="copy-btn" onclick="copyCode('${c.code}')">📋</button></div><p style="font-size:0.8rem;">过期: ${new Date(c.expires_at).toLocaleTimeString()}</p></div>`).join('');}
     window.generateInviteCode=async()=>{const guildId=currentProfile?.guild_id||'gh001';const chars='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';let random='';for(let i=0;i<8;i++)random+=chars.charAt(Math.floor(Math.random()*chars.length));const code=`${guildId}_${random}`;const{error}=await supabase.from('invite_codes').insert({code,guild_id:guildId,type:'member',created_by:currentUser.id,expires_at:new Date(Date.now()+10*60*1000).toISOString()});if(error){alert('生成失败');return;}await loadInviteCodes();};
     window.copyCode=(code)=>{if(navigator.clipboard?.writeText){navigator.clipboard.writeText(code).then(()=>alert('已复制！')).catch(()=>fallbackCopy(code));}else{fallbackCopy(code);}};
     function fallbackCopy(text){const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');alert('已复制！');}catch(e){alert('请手动复制：\n'+text);}document.body.removeChild(ta);}
+
+    // 日志
     async function addCloudLog(a,m,f){try{await fetch(`${SUPABASE_URL}/rest/v1/flower_logs`,{method:'POST',headers:{"apikey":SUPABASE_KEY,"Authorization":`Bearer ${SUPABASE_KEY}`,"Content-Type":"application/json"},body:JSON.stringify({action:a,member_name:m,flower_name:f,operator:displayName.textContent,guild_id:currentProfile?.guild_id||'gh001'})});}catch(e){}}
     window.loadCloudLogs=async()=>{const guildId=currentProfile?.guild_id||'gh001';try{const r=await fetch(`${SUPABASE_URL}/rest/v1/flower_logs?select=*&guild_id=eq.${guildId}&order=created_at.desc&limit=30`,{headers:{"apikey":SUPABASE_KEY,"Authorization":`Bearer ${SUPABASE_KEY}`}});const l=await r.json();logList.innerHTML=l.length?l.map(log=>{const t=new Date(log.created_at).toLocaleTimeString('zh-CN',{hour12:false,hour:'2-digit',minute:'2-digit'});return`<li class="log-item"><span class="log-time">${t}</span> <span class="log-operator">${log.operator||'未知'}</span> ${log.action}${log.member_name?'：'+log.member_name:''}${log.flower_name?' → '+log.flower_name:''}</li>`;}).join(''):'<li class="log-item">暂无日志</li>';}catch(e){}};
+
+    // 查询
     byMemberBtn.onclick=()=>{queryMode='member';byMemberBtn.classList.add('active');byFlowerBtn.classList.remove('active');searchInput.placeholder='输入成员名字…';};
     byFlowerBtn.onclick=()=>{queryMode='flower';byFlowerBtn.classList.add('active');byMemberBtn.classList.remove('active');searchInput.placeholder='输入花卉名称…';};
-    searchBtn.onclick=()=>{const kw=searchInput.value.trim();if(!kw)return;if(queryMode==='member'){const m=flowerData.find(m=>m.name.includes(kw));if(m){const fs=[];['仙','华','珍','普','凡'].forEach(q=>{if(m[q])m[q].forEach(f=>fs.push({name:f,quality:q}));});const qc={仙:'xian',华:'hua',珍:'zhen',普:'pu',凡:'fan'};currentFlowersList=fs;renderFlowerPage(fs,1);addCloudLog('查询成员',m.name);}else{resultArea.innerHTML='<div style="color:#a00;text-align:center;">❌ 未找到</div>';}}else{const flowerMap=new Map();flowerData.forEach(m=>{['仙','华','珍','普','凡'].forEach(q=>{if(m[q])m[q].forEach(f=>{if(f.includes(kw)){if(!flowerMap.has(f))flowerMap.set(f,{quality:q,count:0});flowerMap.get(f).count++;}});});});const matches=Array.from(flowerMap.entries()).map(([name,info])=>({name,quality:info.quality,count:info.count}));const qo={仙:1,华:2,珍:3,普:4,凡:5};matches.sort((a,b)=>{if(a.quality!==b.quality)return qo[a.quality]-qo[b.quality];if(a.quality==='凡')return getFanRank(a.name)-getFanRank(b.name);return a.name.localeCompare(b.name);});if(matches.length){const qc={仙:'xian',华:'hua',珍:'zhen',普:'pu',凡:'fan'};resultArea.innerHTML=matches.map(m=>`<div class="flower-result-item ${qc[m.quality]}" onclick="showFlowerOwners('${m.name}')"><span>${m.name}</span><span class="flower-count-badge">${m.count}人</span></div>`).join('');addCloudLog('查询花卉',null,kw);}else{resultArea.innerHTML='<div style="color:#a00;text-align:center;">❌ 未找到</div>';}}};
+    searchBtn.onclick=()=>{const kw=searchInput.value.trim();if(!kw)return;if(queryMode==='member'){const m=flowerData.find(m=>m.name.includes(kw));if(m){currentMemberName=m.name;const fs=[];['仙','华','珍','普','凡'].forEach(q=>{if(m[q])m[q].forEach(f=>fs.push({name:f,quality:q}));});currentFlowersList=fs;renderFlowerPage(fs,1);addCloudLog('查询成员',m.name);}else{resultArea.innerHTML='<div style="color:#a00;text-align:center;">❌ 未找到</div>';}}else{const flowerMap=new Map();flowerData.forEach(m=>{['仙','华','珍','普','凡'].forEach(q=>{if(m[q])m[q].forEach(f=>{if(f.includes(kw)){if(!flowerMap.has(f))flowerMap.set(f,{quality:q,count:0});flowerMap.get(f).count++;}});});});const matches=Array.from(flowerMap.entries()).map(([name,info])=>({name,quality:info.quality,count:info.count}));const qo={仙:1,华:2,珍:3,普:4,凡:5};matches.sort((a,b)=>{if(a.quality!==b.quality)return qo[a.quality]-qo[b.quality];if(a.quality==='凡')return getFanRank(a.name)-getFanRank(b.name);return a.name.localeCompare(b.name);});if(matches.length){const qc={仙:'xian',华:'hua',珍:'zhen',普:'pu',凡:'fan'};resultArea.innerHTML=matches.map(m=>`<div class="flower-result-item ${qc[m.quality]}" onclick="showFlowerOwners('${m.name}')"><span>${m.name}</span><span class="flower-count-badge">${m.count}人</span></div>`).join('');addCloudLog('查询花卉',null,kw);}else{resultArea.innerHTML='<div style="color:#a00;text-align:center;">❌ 未找到</div>';}}};
     function renderFlowerPage(fs,p){const s=(p-1)*pageSize,e=s+pageSize,pf=fs.slice(s,e),tp=Math.ceil(fs.length/pageSize);const qc={仙:'xian',华:'hua',珍:'zhen',普:'pu',凡:'fan'};let h=`<div class="flower-grid">`;pf.forEach(f=>{h+=`<div class="flower-card ${qc[f.quality]}" onclick="jumpToFlower('${f.name}')">${f.name}<button class="delete-btn" onclick="event.stopPropagation();deleteFlower('${currentMemberName}','${f.name}')">✕</button></div>`;});h+=`</div>`;if(tp>1)h+=`<div class="pagination"><div class="page-btn ${p===1?'disabled':''}" onclick="window.goToPage(${p-1})">上一页</div><span class="page-info">${p}/${tp}</span><div class="page-btn ${p===tp?'disabled':''}" onclick="window.goToPage(${p+1})">下一页</div></div>`;resultArea.innerHTML=h;currentPage=p;}
-    let currentMemberName='';
     window.goToPage=(p)=>renderFlowerPage(currentFlowersList,p);
     window.jumpToFlower=(n)=>{queryMode='flower';byFlowerBtn.click();searchInput.value=n;searchBtn.click();};
     window.showFlowerOwners=(flowerName)=>{const owners=flowerData.filter(m=>['仙','华','珍','普','凡'].some(q=>m[q]?.includes(flowerName)));listModalData=owners.map(m=>({name:m.name,count:(m.仙?.length||0)+(m.华?.length||0)+(m.珍?.length||0)+(m.普?.length||0)+(m.凡?.length||0)}));listModalTitle.innerHTML=`<i class="fas fa-flower"></i> 拥有「${flowerName}」的成员`;renderSimpleList(listModalData);listModal.style.display='flex';};
     function renderSimpleList(items){if(!items.length){listModalContainer.innerHTML='<div style="text-align:center;padding:30px;">暂无数据</div>';return;}listModalContainer.innerHTML=items.map(i=>`<div class="modal-list-item" onclick="jumpToMember('${i.name}')"><span class="modal-item-name"><i class="fas fa-user"></i> ${i.name}</span><span class="modal-item-badge">${i.count}种</span></div>`).join('');}
     window.jumpToMember=(n)=>{closeListModal();queryMode='member';byMemberBtn.click();searchInput.value=n;searchBtn.click();};
+
+    // 删除
     window.deleteFlower=async(mName,fName)=>{if(!confirm(`确定从 ${mName} 删除 ${fName} 吗？`))return;const m=flowerData.find(m=>m.name===mName);if(!m)return;['仙','华','珍','普','凡'].forEach(q=>{if(m[q])m[q]=m[q].filter(f=>f!==fName);});if(await saveGuildData()){addCloudLog('删除花卉',mName,fName);updateStats();searchBtn.click();}};
     window.deleteMember=async(memberName)=>{if(!confirm(`确定删除成员 ${memberName} 及其所有花卉吗？`))return;const idx=flowerData.findIndex(m=>m.name===memberName);if(idx===-1)return;flowerData.splice(idx,1);if(await saveGuildData()){addCloudLog('删除成员',memberName);updateStats();showMemberModal();}};
+
+    // 添加
     document.getElementById('addRecordBtn').onclick=async()=>{const mName=document.getElementById('newMemberName').value.trim();const fName=document.getElementById('newFlowerName').value.trim();if(!mName||!fName)return;const q=getFlowerQuality(fName);let m=flowerData.find(m=>m.name===mName);let isNew=false;if(!m){m={name:mName,仙:[],华:[],珍:[],普:[],凡:[]};flowerData.push(m);isNew=true;}if(!m[q])m[q]=[];if(!m[q].includes(fName)){m[q].push(fName);}await saveGuildData();document.getElementById('newMemberName').value='';document.getElementById('newFlowerName').value='';updateStats();addCloudLog(isNew?'新增成员':'添加花卉',mName,fName);};
     async function saveGuildData(){const guildId=currentProfile?.guild_id||'gh001';const{data}=await supabase.from('flowers').select('id').eq('guild_id',guildId).single();if(data){await supabase.from('flowers').update({data:flowerData}).eq('id',data.id);}syncMessage.textContent=`✅ 已保存 · ${guildId}`;return true;}
+
+    // 弹窗
     function showMemberModal(){const ms=flowerData.map(m=>({name:m.name,count:(m.仙?.length||0)+(m.华?.length||0)+(m.珍?.length||0)+(m.普?.length||0)+(m.凡?.length||0)})).sort((a,b)=>a.name.localeCompare(b.name));listModalData=ms;listModalTitle.innerHTML='<i class="fas fa-users"></i> 成员列表';listModalContainer.innerHTML=ms.map(i=>`<div class="modal-list-item"><span class="modal-item-name" onclick="jumpToMember('${i.name}')"><i class="fas fa-user"></i> ${i.name}</span><span class="modal-item-badge">${i.count}种</span><button class="member-delete-btn" onclick="event.stopPropagation();deleteMember('${i.name}')"><i class="fas fa-trash"></i></button></div>`).join('');listModal.style.display='flex';}
     function showFlowerModal(){const map=new Map();flowerData.forEach(m=>{['仙','华','珍','普','凡'].forEach(q=>{if(m[q])m[q].forEach(f=>map.set(f,(map.get(f)||0)+1));});});const fs=Array.from(map.entries()).map(([n,c])=>{const q=getFlowerQuality(n);return{name:n,count:c,quality:q,qo:{仙:1,华:2,珍:3,普:4,凡:5}[q]||5};}).sort((a,b)=>{if(a.qo!==b.qo)return a.qo-b.qo;if(a.quality==='凡')return getFanRank(a.name)-getFanRank(b.name);return a.name.localeCompare(b.name);});listModalData=fs;listModalTitle.innerHTML='<i class="fas fa-flower"></i> 花卉图鉴';const qi={仙:'🔴',华:'🟡',珍:'🟣',普:'🔵',凡:'🟢'};listModalContainer.innerHTML=fs.map(i=>`<div class="modal-list-item" onclick="showFlowerOwners('${i.name}')"><span class="modal-item-name">${qi[i.quality]||'⚪'} ${i.name}</span><span class="modal-item-badge">${i.count}人</span></div>`).join('');listModal.style.display='flex';}
     window.filterListModal=()=>{const kw=listModalSearch.value.toLowerCase();renderSimpleList(listModalData.filter(i=>i.name.toLowerCase().includes(kw)));};
@@ -209,17 +225,85 @@
     document.getElementById('flowerStatsCard').onclick=showFlowerModal;
     document.getElementById('refreshDataBtn').onclick=loadGuildData;
     window.toggleCollapse=(id)=>{const p=document.getElementById(id),i=document.getElementById(id==='addPanel'?'addIcon':'logIcon');p.classList.toggle('open');i.classList.toggle('fa-chevron-down');i.classList.toggle('fa-chevron-up');if(id==='logPanel'&&p.classList.contains('open'))loadCloudLogs();};
-    // 批量导入
-    function buildAllFlowersList(){const map=new Map();flowerData.forEach(m=>{['仙','华','珍','普','凡'].forEach(q=>{if(m[q])m[q].forEach(f=>map.set(f,q));});});const flowers=Array.from(map.entries()).map(([name,quality])=>({name,quality}));const qo={仙:1,华:2,珍:3,普:4,凡:5};flowers.sort((a,b)=>{if(a.quality!==b.quality)return qo[a.quality]-qo[b.quality];if(a.quality==='凡')return getFanRank(a.name)-getFanRank(b.name);return a.name.localeCompare(b.name);});return flowers;}
-    window.openBatchModal=()=>{batchModal.style.display='flex';document.getElementById('batchMemberName').value='';document.getElementById('batchResult').innerHTML='';selectedBatchFlowers.clear();allFlowersList=buildAllFlowersList();currentBatchFilter='all';document.querySelectorAll('#batchModal .filter-tab').forEach(t=>t.classList.remove('active'));document.querySelector('#batchModal .filter-tab.all').classList.add('active');batchSearchInput.value='';renderBatchFlowerList(allFlowersList);};
+
+    // ========== 批量导入（从完整品级表取所有花） ==========
+    function buildAllFlowersList(){
+        const flowers=Object.entries(FLOWER_QUALITY_MAP).map(([name,quality])=>({name,quality}));
+        const qo={仙:1,华:2,珍:3,普:4,凡:5};
+        flowers.sort((a,b)=>{
+            if(a.quality!==b.quality)return qo[a.quality]-qo[b.quality];
+            if(a.quality==='凡')return getFanRank(a.name)-getFanRank(b.name);
+            return a.name.localeCompare(b.name);
+        });
+        return flowers;
+    }
+    window.openBatchModal=()=>{
+        batchModal.style.display='flex';
+        document.getElementById('batchMemberName').value='';
+        document.getElementById('batchResult').innerHTML='';
+        selectedBatchFlowers.clear();
+        allFlowersList=buildAllFlowersList();
+        currentBatchFilter='all';
+        document.querySelectorAll('#batchModal .filter-tab').forEach(t=>t.classList.remove('active'));
+        document.querySelector('#batchModal .filter-tab.all').classList.add('active');
+        batchSearchInput.value='';
+        renderBatchFlowerList(allFlowersList);
+    };
     window.closeBatchModal=()=>batchModal.style.display='none';
-    function renderBatchFlowerList(flowers){if(!flowers.length){batchFlowerList.innerHTML='<div style="text-align:center;padding:20px;color:#7f9f6b;">暂无花卉</div>';return;}const qi={仙:'🔴',华:'🟡',珍:'🟣',普:'🔵',凡:'🟢'};batchFlowerList.innerHTML=flowers.map(f=>{const checked=selectedBatchFlowers.has(f.name)?'checked':'';return`<div class="batch-checkbox-item"><input type="checkbox" id="chk_${f.name}" ${checked} onchange="toggleBatchFlower('${f.name}')"><label for="chk_${f.name}">${qi[f.quality]} ${f.name}</label></div>`;}).join('');updateSelectedCount();}
+    function renderBatchFlowerList(flowers){
+        if(!flowers.length){batchFlowerList.innerHTML='<div style="text-align:center;padding:20px;color:#7f9f6b;">暂无花卉</div>';return;}
+        const qi={仙:'🔴',华:'🟡',珍:'🟣',普:'🔵',凡:'🟢'};
+        batchFlowerList.innerHTML=flowers.map(f=>{
+            const checked=selectedBatchFlowers.has(f.name)?'checked':'';
+            return`<div class="batch-checkbox-item"><input type="checkbox" id="chk_${f.name}" ${checked} onchange="toggleBatchFlower('${f.name}')"><label for="chk_${f.name}">${qi[f.quality]} ${f.name}</label></div>`;
+        }).join('');
+        updateSelectedCount();
+    }
     window.toggleBatchFlower=(name)=>{selectedBatchFlowers.has(name)?selectedBatchFlowers.delete(name):selectedBatchFlowers.add(name);updateSelectedCount();};
     function updateSelectedCount(){selectedCount.textContent=`已选 ${selectedBatchFlowers.size} 种花卉`;}
-    window.filterBatchFlowers=()=>{const kw=batchSearchInput.value.toLowerCase();let filtered=allFlowersList;if(currentBatchFilter!=='all')filtered=filtered.filter(f=>f.quality===currentBatchFilter);if(kw)filtered=filtered.filter(f=>f.name.toLowerCase().includes(kw));renderBatchFlowerList(filtered);};
-    window.selectAllVisible=()=>{const checkboxes=document.querySelectorAll('#batchFlowerList input[type="checkbox"]');checkboxes.forEach(cb=>{selectedBatchFlowers.add(cb.id.replace('chk_',''));cb.checked=true;});updateSelectedCount();};
-    document.querySelectorAll('#batchModal .filter-tab').forEach(t=>{t.addEventListener('click',()=>{document.querySelectorAll('#batchModal .filter-tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');currentBatchFilter=t.dataset.filter;filterBatchFlowers();});});
-    window.executeBatchImport=async()=>{const memberName=document.getElementById('batchMemberName').value.trim();if(!memberName){alert('请输入成员名字');return;}if(selectedBatchFlowers.size===0){alert('请至少选择一种花卉');return;}let member=flowerData.find(m=>m.name===memberName);let isNew=false;if(!member){member={name:memberName,仙:[],华:[],珍:[],普:[],凡:[]};flowerData.push(member);isNew=true;}let added=0;for(const f of selectedBatchFlowers){const q=getFlowerQuality(f);if(!member[q])member[q]=[];if(!member[q].includes(f)){member[q].push(f);added++;}}if(await saveGuildData()){addCloudLog(isNew?'批量新增成员':'批量添加花卉',memberName,`${added}种花`);document.getElementById('batchResult').innerHTML=`<span style="color:#2e7d32;">成功导入 ${added} 种花卉！</span>`;updateStats();selectedBatchFlowers.clear();setTimeout(()=>closeBatchModal(),1500);}else{document.getElementById('batchResult').innerHTML='<span style="color:#d32f2f;">导入失败</span>';}};
+    window.filterBatchFlowers=()=>{
+        const kw=batchSearchInput.value.toLowerCase();
+        let filtered=allFlowersList;
+        if(currentBatchFilter!=='all')filtered=filtered.filter(f=>f.quality===currentBatchFilter);
+        if(kw)filtered=filtered.filter(f=>f.name.toLowerCase().includes(kw));
+        renderBatchFlowerList(filtered);
+    };
+    window.selectAllVisible=()=>{
+        const checkboxes=document.querySelectorAll('#batchFlowerList input[type="checkbox"]');
+        checkboxes.forEach(cb=>{selectedBatchFlowers.add(cb.id.replace('chk_',''));cb.checked=true;});
+        updateSelectedCount();
+    };
+    document.querySelectorAll('#batchModal .filter-tab').forEach(t=>{
+        t.addEventListener('click',()=>{
+            document.querySelectorAll('#batchModal .filter-tab').forEach(x=>x.classList.remove('active'));
+            t.classList.add('active');
+            currentBatchFilter=t.dataset.filter;
+            filterBatchFlowers();
+        });
+    });
+    window.executeBatchImport=async()=>{
+        const memberName=document.getElementById('batchMemberName').value.trim();
+        if(!memberName){alert('请输入成员名字');return;}
+        if(selectedBatchFlowers.size===0){alert('请至少选择一种花卉');return;}
+        let member=flowerData.find(m=>m.name===memberName);
+        let isNew=false;
+        if(!member){member={name:memberName,仙:[],华:[],珍:[],普:[],凡:[]};flowerData.push(member);isNew=true;}
+        let added=0;
+        for(const f of selectedBatchFlowers){
+            const q=getFlowerQuality(f);
+            if(!member[q])member[q]=[];
+            if(!member[q].includes(f)){member[q].push(f);added++;}
+        }
+        if(await saveGuildData()){
+            addCloudLog(isNew?'批量新增成员':'批量添加花卉',memberName,`${added}种花`);
+            document.getElementById('batchResult').innerHTML=`<span style="color:#2e7d32;">成功导入 ${added} 种花卉！</span>`;
+            updateStats();
+            selectedBatchFlowers.clear();
+            setTimeout(()=>closeBatchModal(),1500);
+        }else{document.getElementById('batchResult').innerHTML='<span style="color:#d32f2f;">导入失败</span>';}
+    };
+
+    // 启动
     checkAuth();
     document.getElementById('addPanel').classList.add('open');
     document.getElementById('addIcon').classList.add('fa-chevron-up');
