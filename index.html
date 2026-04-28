@@ -67,9 +67,10 @@
         .flower-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .flower-card { background: #fff; border-radius: var(--radius); overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.04); border: 1px solid var(--border); cursor: pointer; transition: 0.2s; position: relative; }
         .flower-card:active { transform: scale(0.97); }
-        .flower-card .card-img { width: 100%; height: 170px; background-color: #fdf6f0; background-size: cover; background-position: center; background-repeat: no-repeat; display: flex; align-items: center; justify-content: center; font-size: 3rem; }
-        .flower-card .card-badge { position: absolute; top: 8px; left: 8px; background: var(--gold); color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; z-index: 2; }
-        .flower-card .card-body { padding: 10px 12px; }
+        .flower-card .card-img { width: 100%; height: 170px; background-color: #fdf6f0; background-size: cover; background-position: center; background-repeat: no-repeat; display: flex; align-items: center; justify-content: center; font-size: 3rem; overflow: hidden; position: relative; }
+        .flower-card .card-img > * { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+        .flower-card .card-badge { position: absolute; top: 8px; left: 8px; background: var(--gold); color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; z-index: 3; }
+        .flower-card .card-body { padding: 10px 12px; position: relative; z-index: 2; }
         .flower-card .card-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .flower-card .card-source { font-size: 0.72rem; color: var(--text2); margin-bottom: 6px; }
         .flower-card .card-owners { display: flex; align-items: center; gap: 4px; }
@@ -77,7 +78,7 @@
         .avatar-stack .avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--accent2); color: var(--accent); font-size: 0.65rem; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; margin-left: -8px; }
         .avatar-stack .avatar:first-child { margin-left: 0; }
         .card-owner-count { font-size: 0.72rem; color: var(--text2); }
-        .flower-card .delete-btn { position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; background: rgba(211,47,47,0.85); color: #fff; border-radius: 50%; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; border: none; z-index: 2; }
+        .flower-card .delete-btn { position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; background: rgba(211,47,47,0.85); color: #fff; border-radius: 50%; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; border: none; z-index: 5; }
         .flower-list-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: #fff; border-radius: var(--radius-sm); margin-bottom: 8px; cursor: pointer; border: 1px solid var(--border); transition: 0.15s; gap: 10px; }
         .flower-list-item:active { background: var(--bg); }
         .flower-list-item .f-name { font-weight: 600; font-size: 0.9rem; flex: 1; }
@@ -161,9 +162,18 @@
 
 <script>
 (function(){
+    console.log('Script loaded. Waiting for DOM...');
     const SUPABASE_URL="https://amngvhgusyipxnnkejzp.supabase.co";
     const SUPABASE_KEY="sb_publishable_yIYNCHcT4Z0z-NMcKVmjTQ_6SoHyxwZ";
-    const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+    let supabase = null;
+    try {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        console.log('Supabase client created successfully.');
+    } catch (e) {
+        console.error('Supabase client creation failed:', e);
+        alert('Supabase 初始化失败，请检查网络连接。');
+        return;
+    }
     let currentUser=null,currentProfile=null,flowerData=[],listModalData=[];
     let allFlowersList=[],selectedBatchFlowers=new Set(),currentBatchFilter='all';
     let currentPage=1,currentFlowersList=[],currentMemberName='',currentViewFilter='all';
@@ -173,22 +183,21 @@
     function tryNextImage(imgElement, flowerName) {
         const folders = ['images1','images2','images3','images4','images5'];
         const exts = ['.png','.jpg','.jpeg'];
-        let current = imgElement.dataset.currentFolder || 0;
-        let currentExt = imgElement.dataset.currentExt || 0;
-
-        currentExt++;
-        if (currentExt >= exts.length) {
-            currentExt = 0;
-            current++;
-        }
-        if (current >= folders.length) {
-            imgElement.style.backgroundImage = 'none';
-            imgElement.textContent = '🌸';
+        let currentIdx = parseInt(imgElement.dataset.currentIdx || '0');
+        currentIdx++;
+        let folderIdx = Math.floor(currentIdx / exts.length);
+        let extIdx = currentIdx % exts.length;
+        
+        if (folderIdx >= folders.length) {
+            if (!imgElement.dataset.fallbackDone) {
+                imgElement.dataset.fallbackDone = 'true';
+                imgElement.style.backgroundImage = 'none';
+                imgElement.textContent = '🌸';
+            }
             return;
         }
-        imgElement.dataset.currentFolder = current;
-        imgElement.dataset.currentExt = currentExt;
-        const path = `${folders[current]}/${encodeURIComponent(flowerName)}${exts[currentExt]}`;
+        imgElement.dataset.currentIdx = currentIdx;
+        const path = `${folders[folderIdx]}/${encodeURIComponent(flowerName)}${exts[extIdx]}`;
         imgElement.style.backgroundImage = `url(${path})`;
     }
 
@@ -198,17 +207,24 @@
     function getFanRank(f){const i=FAN_RANK.indexOf(f);return i===-1?999:i;}
     function getFlowerQuality(f){return FLOWER_QUALITY_MAP[f]||'凡';}
 
-    const authContainer=document.getElementById('authContainer'),appContainer=document.getElementById('appContainer'),loginTab=document.getElementById('loginTab'),registerTab=document.getElementById('registerTab'),loginForm=document.getElementById('loginForm'),registerForm=document.getElementById('registerForm'),loginBtn=document.getElementById('loginBtn'),registerBtn=document.getElementById('registerBtn'),logoutBtn=document.getElementById('logoutBtn'),displayName=document.getElementById('displayName'),guildBadge=document.getElementById('guildBadge'),ownerToolbar=document.getElementById('ownerToolbar'),inviteModal=document.getElementById('inviteModal'),inviteCodeList=document.getElementById('inviteCodeList'),totalMembersSpan=document.getElementById('totalMembers'),totalFlowersSpan=document.getElementById('totalFlowers'),syncMessage=document.getElementById('syncMessage'),resultArea=document.getElementById('resultArea'),paginationArea=document.getElementById('paginationArea'),logList=document.getElementById('logList'),listModal=document.getElementById('listModal'),listModalTitle=document.getElementById('listModalTitle'),listModalContainer=document.getElementById('listModalContainer'),listModalSearch=document.getElementById('listModalSearch'),searchBtn=document.getElementById('searchBtn'),searchInput=document.getElementById('searchInput'),batchModal=document.getElementById('batchModal'),batchFlowerList=document.getElementById('batchFlowerList'),batchSearchInput=document.getElementById('batchSearchInput'),selectedCount=document.getElementById('selectedCount'),clearFilterBtn=document.getElementById('clearFilterBtn');
+    console.log('Data loaded. Initializing DOM elements...');
+    const authContainer=document.getElementById('authContainer');
+    if (!authContainer) {
+        console.error('FATAL: authContainer not found. Aborting.');
+        return;
+    }
+    const appContainer=document.getElementById('appContainer'),loginTab=document.getElementById('loginTab'),registerTab=document.getElementById('registerTab'),loginForm=document.getElementById('loginForm'),registerForm=document.getElementById('registerForm'),loginBtn=document.getElementById('loginBtn'),registerBtn=document.getElementById('registerBtn'),logoutBtn=document.getElementById('logoutBtn'),displayName=document.getElementById('displayName'),guildBadge=document.getElementById('guildBadge'),ownerToolbar=document.getElementById('ownerToolbar'),inviteModal=document.getElementById('inviteModal'),inviteCodeList=document.getElementById('inviteCodeList'),totalMembersSpan=document.getElementById('totalMembers'),totalFlowersSpan=document.getElementById('totalFlowers'),syncMessage=document.getElementById('syncMessage'),resultArea=document.getElementById('resultArea'),paginationArea=document.getElementById('paginationArea'),logList=document.getElementById('logList'),listModal=document.getElementById('listModal'),listModalTitle=document.getElementById('listModalTitle'),listModalContainer=document.getElementById('listModalContainer'),listModalSearch=document.getElementById('listModalSearch'),searchBtn=document.getElementById('searchBtn'),searchInput=document.getElementById('searchInput'),batchModal=document.getElementById('batchModal'),batchFlowerList=document.getElementById('batchFlowerList'),batchSearchInput=document.getElementById('batchSearchInput'),selectedCount=document.getElementById('selectedCount'),clearFilterBtn=document.getElementById('clearFilterBtn');
 
-    async function checkAuth(){const{data:{session}}=await supabase.auth.getSession();if(session){currentUser=session.user;await loadProfile();showApp();}else{showAuth();}}
-    async function loadProfile(){const{data}=await supabase.from('profiles').select('*').eq('id',currentUser.id).single();if(data){currentProfile=data;displayName.textContent=data.nickname||data.email?.split('@')[0]||'花友';guildBadge.textContent=data.guild_id||'gh001';ownerToolbar.style.display=(data.role==='owner'||data.title==='vice_owner')?'flex':'none';}await loadGuildData();}
-    async function loadGuildData(){const guildId=currentProfile?.guild_id||'gh001';const cacheKey=`flower_cache_${guildId}`;const cached=localStorage.getItem(cacheKey);if(cached){try{flowerData=JSON.parse(cached);updateStats();renderAllFlowers();syncMessage.textContent=`📦 缓存 · ${guildId}`;}catch(e){}}try{const{data}=await supabase.from('flowers').select('data').eq('guild_id',guildId).single();if(data?.data){const newData=JSON.stringify(data.data);if(newData!==cached){flowerData=data.data;localStorage.setItem(cacheKey,newData);updateStats();renderAllFlowers();}syncMessage.textContent=`✅ 已连接 · ${guildId}`;}}catch(e){if(!cached)syncMessage.textContent='⚠️ 连接失败';}}
+    console.log('DOM elements initialized. Setting up functions...');
+    async function checkAuth(){console.log('checkAuth called');const{data:{session}}=await supabase.auth.getSession();if(session){currentUser=session.user;await loadProfile();showApp();}else{showAuth();}}
+    async function loadProfile(){console.log('loadProfile called');const{data}=await supabase.from('profiles').select('*').eq('id',currentUser.id).single();console.log('Profile data:',data);if(data){currentProfile=data;displayName.textContent=data.nickname||data.email?.split('@')[0]||'花友';guildBadge.textContent=data.guild_id||'gh001';ownerToolbar.style.display=(data.role==='owner'||data.title==='vice_owner')?'flex':'none';}await loadGuildData();}
+    async function loadGuildData(){console.log('loadGuildData called');const guildId=currentProfile?.guild_id||'gh001';console.log('Guild ID:',guildId);const cacheKey=`flower_cache_${guildId}`;const cached=localStorage.getItem(cacheKey);if(cached){try{flowerData=JSON.parse(cached);updateStats();renderAllFlowers();syncMessage.textContent=`📦 缓存 · ${guildId}`;}catch(e){}}try{const{data}=await supabase.from('flowers').select('data').eq('guild_id',guildId).single();console.log('Flower data:',data);if(data?.data){const newData=JSON.stringify(data.data);if(newData!==cached){flowerData=data.data;localStorage.setItem(cacheKey,newData);updateStats();renderAllFlowers();}syncMessage.textContent=`✅ 已连接 · ${guildId}`;}}catch(e){console.error('Load guild data error:',e);if(!cached)syncMessage.textContent='⚠️ 连接失败';}}
     function updateStats(){totalMembersSpan.textContent=flowerData.length;const s=new Set();flowerData.forEach(m=>{['仙','华','珍','普','凡'].forEach(q=>{if(m[q])m[q].forEach(f=>s.add(f));});});totalFlowersSpan.textContent=s.size;}
     function showAuth(){authContainer.style.display='flex';appContainer.style.display='none';}
     function showApp(){authContainer.style.display='none';appContainer.style.display='flex';}
 
-    loginBtn.onclick=async()=>{const email=document.getElementById('loginEmail').value.trim();const password=document.getElementById('loginPassword').value;const err=document.getElementById('loginError');if(!email||!password){err.textContent='请填写完整';return;}err.textContent='';loginBtn.textContent='登录中...';loginBtn.disabled=true;const{data,error}=await supabase.auth.signInWithPassword({email,password});loginBtn.textContent='登 录';loginBtn.disabled=false;if(error){err.textContent='邮箱或密码错误';}else{currentUser=data.user;await loadProfile();showApp();}}};
-    registerBtn.onclick=async()=>{const email=document.getElementById('registerEmail').value.trim();const password=document.getElementById('registerPassword').value;const code=document.getElementById('inviteCode').value.trim();const err=document.getElementById('registerError');if(!email||!password||!code){err.textContent='请填写所有字段';return;}if(password.length<6){err.textContent='密码至少6位';return;}err.textContent='';registerBtn.textContent='验证中...';registerBtn.disabled=true;const{data:codeData,error:codeError}=await supabase.from('invite_codes').select('*').eq('code',code).eq('is_active',true).single();if(codeError||!codeData){err.textContent='邀请码无效';registerBtn.textContent='注 册';registerBtn.disabled=false;return;}if(new Date(codeData.expires_at)<new Date()){err.textContent='邀请码已过期';registerBtn.textContent='注 册';registerBtn.disabled=false;return;}const{data:userData,error:signUpError}=await supabase.auth.signUp({email,password});if(signUpError){err.textContent=signUpError.message;registerBtn.textContent='注 册';registerBtn.disabled=false;return;}await supabase.from('profiles').insert({id:userData.user.id,nickname:email.split('@')[0],guild_id:codeData.guild_id,role:'member'});await supabase.from('invite_codes').update({used_count:1,is_active:false}).eq('code',code);alert(`注册成功！欢迎加入 ${codeData.guild_id}`);loginTab.click();registerBtn.textContent='注 册';registerBtn.disabled=false;};
+    loginBtn.onclick=async()=>{console.log('Login button clicked');const email=document.getElementById('loginEmail').value.trim();const password=document.getElementById('loginPassword').value;const err=document.getElementById('loginError');if(!email||!password){err.textContent='请填写完整';return;}err.textContent='';loginBtn.textContent='登录中...';loginBtn.disabled=true;const{data,error}=await supabase.auth.signInWithPassword({email,password});console.log('Login response:',{data,error});loginBtn.textContent='登 录';loginBtn.disabled=false;if(error){err.textContent='邮箱或密码错误，或者账号不存在';}else{currentUser=data.user;await loadProfile();showApp();}};
+    registerBtn.onclick=async()=>{console.log('Register button clicked');const email=document.getElementById('registerEmail').value.trim();const password=document.getElementById('registerPassword').value;const code=document.getElementById('inviteCode').value.trim();const err=document.getElementById('registerError');if(!email||!password||!code){err.textContent='请填写所有字段';return;}if(password.length<6){err.textContent='密码至少6位';return;}err.textContent='';registerBtn.textContent='验证中...';registerBtn.disabled=true;const{data:codeData,error:codeError}=await supabase.from('invite_codes').select('*').eq('code',code).eq('is_active',true).single();if(codeError||!codeData){err.textContent='邀请码无效';registerBtn.textContent='注 册';registerBtn.disabled=false;return;}if(new Date(codeData.expires_at)<new Date()){err.textContent='邀请码已过期';registerBtn.textContent='注 册';registerBtn.disabled=false;return;}const{data:userData,error:signUpError}=await supabase.auth.signUp({email,password});if(signUpError){err.textContent=signUpError.message;registerBtn.textContent='注 册';registerBtn.disabled=false;return;}await supabase.from('profiles').insert({id:userData.user.id,nickname:email.split('@')[0],guild_id:codeData.guild_id,role:'member'});await supabase.from('invite_codes').update({used_count:1,is_active:false}).eq('code',code);alert(`注册成功！欢迎加入 ${codeData.guild_id}`);loginTab.click();registerBtn.textContent='注 册';registerBtn.disabled=false;};
     logoutBtn.onclick=async()=>{await supabase.auth.signOut();showAuth();};
     loginTab.onclick=()=>{loginTab.classList.add('active');registerTab.classList.remove('active');loginForm.style.display='flex';registerForm.style.display='none';};
     registerTab.onclick=()=>{registerTab.classList.add('active');loginTab.classList.remove('active');registerForm.style.display='flex';loginForm.style.display='none';};
@@ -257,10 +273,9 @@
         pf.forEach(f=>{const imgName=f.name;const showOwners=f.owners.slice(0,3);const isOwned=f.owners.length>0;
             h+=`<div class="flower-card" onclick="showFlowerOwners('${f.name.replace(/'/g,"\\'")}')" style="${isOwned?'':'opacity:0.55;'}">
                 <div class="card-img" 
-                     data-current-folder="0" 
-                     data-current-ext="0"
+                     data-current-idx="0"
                      style="background-image:url('images1/${encodeURIComponent(imgName)}.png');" 
-                     onerror="tryNextImage(this,'${imgName}')">
+                     onerror="tryNextImage(this,'${imgName.replace(/'/g,"\\'")}')">
                 </div>
                 <div class="card-badge">${f.quality==='仙'?'28分':f.quality==='华'?'25分':f.quality==='珍'?'23分':'5分'}</div>
                 ${!isOwned?'<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.5);color:#fff;padding:4px 12px;border-radius:10px;font-size:0.7rem;z-index:2;">待培育</div>':''}
@@ -282,10 +297,9 @@
         const s=(p-1)*pageSize,e=s+pageSize,pf=fs.slice(s,e),tp=Math.ceil(fs.length/pageSize);let h=`<div style="padding:8px 0;font-weight:600;color:var(--accent);">👤 ${currentMemberName} 的花卉 (${fs.length}种)</div><div class="flower-grid">`;
         pf.forEach(f=>{const imgName=f.name;h+=`<div class="flower-card" onclick="showFlowerOwners('${f.name.replace(/'/g,"\\'")}')">
                 <div class="card-img" 
-                     data-current-folder="0" 
-                     data-current-ext="0"
+                     data-current-idx="0"
                      style="background-image:url('images1/${encodeURIComponent(imgName)}.png');" 
-                     onerror="tryNextImage(this,'${imgName}')">
+                     onerror="tryNextImage(this,'${imgName.replace(/'/g,"\\'")}')">
                 </div>
                 <div class="card-badge">${f.quality==='仙'?'25分':f.quality==='华'?'15分':f.quality==='珍'?'10分':'5分'}</div>
                 <div class="card-body"><div class="card-name">${f.name}</div></div>
@@ -322,7 +336,12 @@
 
     window.toggleCollapse=(id)=>{const p=document.getElementById(id),i=document.getElementById(id==='addPanel'?'addIcon':'logIcon');p.classList.toggle('open');i.classList.toggle('fa-chevron-down');i.classList.toggle('fa-chevron-up');if(id==='logPanel'&&p.classList.contains('open'))loadCloudLogs();};
     document.getElementById('refreshDataBtn').onclick=()=>{loadGuildData().then(()=>renderAllFlowers());};
+    
+    console.log('All functions initialized. Running checkAuth...');
     checkAuth();
+    console.log('checkAuth finished. Waiting for user interaction.');
+    
+    // 默认展开添加面板
     document.getElementById('addPanel').classList.add('open');
     document.getElementById('addIcon').classList.add('fa-chevron-up');
 })();
