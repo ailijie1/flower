@@ -270,12 +270,10 @@
         batchFlowerList.innerHTML='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">'+flowers.map(f=>{
             const checked=selectedBatchFlowers.has(f.name);
             const imgName=f.name.replace(/[・·]/g,'');
-            const borderColor=checked?'var(--accent)':'var(--border)';
-            const bgColor=checked?'#fdf2f5':'#fff';
-            return`<div class="flower-card" onclick="toggleBatchFlower('${f.name}')" style="border:2px solid ${borderColor};background:${bgColor};position:relative;">
+            return`<div class="flower-card" onclick="toggleBatchFlower('${f.name}')" style="border:${checked?'3px solid var(--accent)':'1px solid var(--border)'};background:${checked?'#fdf2f5':'#fff'};position:relative;${checked?'transform:scale(1.03);box-shadow:0 4px 16px rgba(196,138,154,0.3);':''}transition:all 0.2s;">
                 <div class="card-img" style="height:100px;font-size:2rem;position:relative;">
+                    ${checked?'<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(196,138,154,0.2);z-index:2;display:flex;align-items:center;justify-content:center;font-size:2.5rem;">✅</div>':''}
                     <img src="/images1/${imgName}.png" onerror="var n=this.src;if(n.includes('/images1/')){this.src=n.replace('/images1/','/images2/');}else if(n.includes('/images2/')){this.src=n.replace('/images2/','/images3/');}else if(n.includes('/images3/')){this.src=n.replace('/images3/','/images4/');}else if(n.includes('/images4/')){this.src=n.replace('/images4/','/images5/');}else{this.style.display='none';this.parentElement.innerHTML='<span style=font-size:2rem;>🌸</span>';}" style="width:100%;height:100%;object-fit:cover;">
-                    ${checked?'<div style="position:absolute;top:4px;right:4px;background:var(--accent);color:#fff;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">✓</div>':''}
                 </div>
                 <div class="card-body" style="padding:6px 8px;">
                     <div class="card-name" style="font-size:0.72rem;">${qi[f.quality]} ${f.name}</div>
@@ -283,6 +281,7 @@
             </div>`;
         }).join('')+'</div>';
         updateSelectedCount();
+    }
     }    window.toggleBatchFlower=(name)=>{selectedBatchFlowers.has(name)?selectedBatchFlowers.delete(name):selectedBatchFlowers.add(name);updateSelectedCount();};
     function updateSelectedCount(){selectedCount.textContent=`已选 ${selectedBatchFlowers.size} 种花卉`;}
     window.filterBatchFlowers=()=>{const kw=batchSearchInput.value.toLowerCase();let filtered=allFlowersList;if(currentBatchFilter!=='all')filtered=filtered.filter(f=>f.quality===currentBatchFilter);if(kw)filtered=filtered.filter(f=>f.name.toLowerCase().includes(kw));renderBatchFlowerList(filtered);};
