@@ -249,11 +249,11 @@
 
     function renderFlowerPage(fs,p){
         const s=(p-1)*pageSize,e=s+pageSize,pf=fs.slice(s,e),tp=Math.ceil(fs.length/pageSize);let h=`<div class="flower-grid">`;
-        pf.forEach(f=>{const imgName=f.name;const showOwners=f.owners.slice(0,3);const isOwned=f.owners.length>0;
+        pf.forEach(f=>{const imgName=f.name.replace(/[・·]/g,'');const showOwners=f.owners.slice(0,3);const isOwned=f.owners.length>0;
             h+=`<div class="flower-card" onclick="showFlowerOwners('${f.name.replace(/'/g,"\\'")}')" style="${isOwned?'':'opacity:0.55;'}">
                 <div class="card-img">
-                    <img src="images1/${imgName}.png" 
-                         onerror="var n=this.src;if(n.includes('images1')){this.src=n.replace('images1','images2');}else if(n.includes('images2')){this.src=n.replace('images2','images3');}else if(n.includes('images3')){this.src=n.replace('images3','images4');}else if(n.includes('images4')){this.src=n.replace('images4','images5');}else{this.style.display='none';this.parentElement.textContent='🌸';}"
+                   <img src="/flower/images1/${imgName}.png"
+                         onerror="var n=this.src;if(n.includes('images1')){this.src=n.replace('/flower/images1','images2');}else if(n.includes('images2')){this.src=n.replace('/flower/images2','images3');}else if(n.includes('images3')){this.src=n.replace('/flower/images3','images4');}else if(n.includes('images4')){this.src=n.replace('images4','images5');}else{this.style.display='none';this.parentElement.textContent='🌸';}"
                          style="width:100%;height:100%;object-fit:cover;">
                 </div>
                 <div class="card-badge">${f.quality==='仙'?'28分':f.quality==='华'?'25分':f.quality==='珍'?'23分':'5分'}</div>
@@ -274,10 +274,10 @@
 
     function renderMemberFlowerPage(fs,p){
         const s=(p-1)*pageSize,e=s+pageSize,pf=fs.slice(s,e),tp=Math.ceil(fs.length/pageSize);let h=`<div style="padding:8px 0;font-weight:600;color:var(--accent);">👤 ${currentMemberName} 的花卉 (${fs.length}种)</div><div class="flower-grid">`;
-        pf.forEach(f=>{const imgName=f.name;h+=`<div class="flower-card" onclick="showFlowerOwners('${f.name.replace(/'/g,"\\'")}')">
+        pf.forEach(f=>{const imgName=f.name.replace(/[・·]/g,'');h+=`<div class="flower-card" onclick="showFlowerOwners('${f.name.replace(/'/g,"\\'")}')">
                 <div class="card-img">
-                    <img src="images1/${imgName}.png" 
-                         onerror="var n=this.src;if(n.includes('images1')){this.src=n.replace('images1','images2');}else if(n.includes('images2')){this.src=n.replace('images2','images3');}else if(n.includes('images3')){this.src=n.replace('images3','images4');}else if(n.includes('images4')){this.src=n.replace('images4','images5');}else{this.style.display='none';this.parentElement.textContent='🌸';}"
+                    <img src="/flower/images1/${imgName}.png"
+                         onerror="var n=this.src;if(n.includes('images1')){this.src=n.replace('/flower/images1','images2');}else if(n.includes('images2')){this.src=n.replace('/flower/images2','images3');}else if(n.includes('images3')){this.src=n.replace('/flower/images3','images4');}else if(n.includes('images4')){this.src=n.replace('/flower/images4','images5');}else{this.style.display='none';this.parentElement.textContent='🌸';}"
                          style="width:100%;height:100%;object-fit:cover;" >
                 </div>
                 <div class="card-badge">${f.quality==='仙'?'25分':f.quality==='华'?'15分':f.quality==='珍'?'10分':'5分'}</div>
