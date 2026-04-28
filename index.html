@@ -191,7 +191,6 @@
         <div class="profile-stat-card" style="border-left:3px solid var(--accent);"><div class="stat-num" id="profileTotal">0</div><div class="stat-label">🌸 总计</div></div>
     </div>
     <div style="margin-bottom:12px;"><label style="font-size:0.85rem;font-weight:600;">✏️ 修改游戏名称</label><div class="form-row" style="margin-top:4px;"><input type="text" id="editNameInput" class="form-input" placeholder="输入新名称"><button class="add-btn" onclick="updateProfileName()" style="white-space:nowrap;">保存</button></div><p id="editNameError" style="color:#d32f2f;font-size:0.75rem;margin-top:4px;"></p></div>
-    <p style="font-size:0.75rem;color:var(--text2);text-align:center;">📧 邮箱：<span id="profileEmail"></span></p>
 </div></div></div>
 <script>
 (function(){
@@ -361,7 +360,6 @@
         const total=xian+hua+zhen+pu+fan;
         document.getElementById('profileName').textContent=memberName;
         document.getElementById('profileRole').textContent=currentProfile.role==='owner'?'会长':currentProfile.title==='vice_owner'?'副会长':'成员';
-        document.getElementById('profileEmail').textContent=currentProfile.email;
         document.getElementById('profileXian').textContent=xian;
         document.getElementById('profileHua').textContent=hua;
         document.getElementById('profileZhen').textContent=zhen;
