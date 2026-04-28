@@ -258,21 +258,9 @@
         resultArea.innerHTML=h;paginationArea.style.display=tp>1?'block':'none';currentPage=p;
     }
     window.goToPage=(p)=>renderFlowerPage(currentFlowersList,p);
-    function renderMemberFlowerPage(fs,p){
+       function renderMemberFlowerPage(fs,p){
         const s=(p-1)*pageSize,e=s+pageSize,pf=fs.slice(s,e),tp=Math.ceil(fs.length/pageSize);let h=`<div style="padding:8px 0;font-weight:600;color:var(--accent);">👤 ${currentMemberName} 的花卉 (${fs.length}种)</div><div class="flower-grid">`;
-        pf.forEach(f=>{
-            const safeName = f.name.replace(/'/g, "\\'");
-            h+=`<div class="flower-card" onclick="showFlowerOwners('${safeName}')">
-                <div class="card-img">
-                    <img src="/images1/${f.name}.png" 
-                         onerror="var img=this;var name='${f.name.replace(/'/g, "\\'")}';var nameNoDot=name.replace(/[・·]/g,'');var src=img.src;var folder=src.split('/images')[1]?src.split('/images')[1].charAt(0):'1';var nextFolder=parseInt(folder)+1;if(nameNoDot!==name&&src.indexOf(nameNoDot)===-1){img.src=src.replace(name,nameNoDot);}else if(nextFolder<=5){img.src=src.replace('/images'+folder+'/','/images'+nextFolder+'/');}else{img.onerror=null;img.style.display='none';img.parentElement.innerHTML='<span style=font-size:2.5rem;>🌸</span>';}" 
-                         style="width:100%;height:100%;object-fit:cover;">
-                </div>
-                <div class="card-badge">${f.quality==='仙'?'25分':f.quality==='华'?'15分':f.quality==='珍'?'10分':'5分'}</div>
-                <div class="card-body"><div class="card-name">${f.name}</div></div>
-                <button class="delete-btn" onclick="event.stopPropagation();deleteFlower('${currentMemberName}','${safeName}')">✕</button>
-            </div>`;
-        });
+        pf.forEach(f=>{const imgName=f.name.replace(/[・·]/g,'');h+=`<div class="flower-card" onclick="showFlowerOwners('${f.name.replace(/'/g,"\\'")}')"><div class="card-img"><img src="/images1/${imgName}.png" onerror="var n=this.src;if(n.includes('/images1/')){this.src=n.replace('/images1/','/images2/');}else if(n.includes('/images2/')){this.src=n.replace('/images2/','/images3/');}else if(n.includes('/images3/')){this.src=n.replace('/images3/','/images4/');}else if(n.includes('/images4/')){this.src=n.replace('/images4/','/images5/');}else{this.style.display='none';this.parentElement.textContent='🌸';}" style="width:100%;height:100%;object-fit:cover;"></div><div class="card-badge">${f.quality==='仙'?'25分':f.quality==='华'?'15分':f.quality==='珍'?'10分':'5分'}</div><div class="card-body"><div class="card-name">${f.name}</div></div><button class="delete-btn" onclick="event.stopPropagation();deleteFlower('${currentMemberName}','${f.name.replace(/'/g,"\\'")}')">✕</button></div>`;});
         h+=`</div>`;if(tp>1)h+=`<div class="pagination"><button class="page-btn ${p===1?'disabled':''}" onclick="renderMemberFlowerPage(currentFlowersList,${p-1})">上一页</button><span>${p}/${tp}</span><button class="page-btn ${p===tp?'disabled':''}" onclick="renderMemberFlowerPage(currentFlowersList,${p+1})">下一页</button></div>`;
         resultArea.innerHTML=h;paginationArea.style.display='none';currentPage=p;
     }
