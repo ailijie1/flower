@@ -241,7 +241,7 @@
             const showOwners=f.owners.slice(0,3);const isOwned=f.owners.length>0;
             h+=`<div class="flower-card" onclick="showFlowerOwners('${safeName}')" style="${isOwned?'':'opacity:0.55;'}">
                 <div class="card-img">
-                    <img src="/images1/${f.name}.png" 
+                    <img src="/images1/${f.name.replace(/[・·]/g,'')}.png" 
                          onerror="var img=this;var name='${f.name.replace(/'/g, "\\'")}';var nameNoDot=name.replace(/[・·]/g,'');var src=img.src;var folder=src.split('/images')[1]?src.split('/images')[1].charAt(0):'1';var nextFolder=parseInt(folder)+1;if(nameNoDot!==name&&src.indexOf(nameNoDot)===-1){img.src=src.replace(name,nameNoDot);}else if(nextFolder<=5){img.src=src.replace('/images'+folder+'/','/images'+nextFolder+'/');}else{img.onerror=null;img.style.display='none';img.parentElement.innerHTML='<span style=font-size:2.5rem;>🌸</span>';}" 
                          style="width:100%;height:100%;object-fit:cover;">
                 </div>
