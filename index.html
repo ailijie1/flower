@@ -316,7 +316,7 @@
                     <img src="/images1/${imgName}.png" onerror="var n=this.src;if(n.includes('/images1/')){this.src=n.replace('/images1/','/images2/');}else if(n.includes('/images2/')){this.src=n.replace('/images2/','/images3/');}else if(n.includes('/images3/')){this.src=n.replace('/images3/','/images4/');}else if(n.includes('/images4/')){this.src=n.replace('/images4/','/images5/');}else{this.style.display='none';this.parentElement.innerHTML='<span style=font-size:2rem;>🌸</span>';}" style="width:100%;height:100%;object-fit:cover;">
                 </div>
                 <div class="card-body" style="padding:6px 8px;">
-                    <div class="card-name" style="font-size:0.72rem;">${qi[f.quality]} ${f.name}</div>
+                    <div class="card-name" style="font-size:clamp(0.5rem,3vw,0.72rem);line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${qi[f.quality]} ${f.name}</div>
                 </div>
             </div>`;
         }).join('')+'</div>';
