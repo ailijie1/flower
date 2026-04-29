@@ -222,8 +222,19 @@
         }
         await loadGuildData();
     }
-    async function loadGuildData(){const guildId=currentProfile?.guild_id||'gh001';const cacheKey=`flower_cache_${guildId}`;const cached=localStorage.getItem(cacheKey);if(cached){try{flowerData=JSON.parse(cached);updateStats();renderAllFlowers();syncMessage.textContent=`📦 缓存 · ${guildId}`;}catch(e){}}try{const{data}=await supabase.from('flowers').select('data').eq('guild_id',guildId).single();if(data?.data){const newData=JSON.stringify(data.data);if(newData!==cached){flowerData=data.data;localStorage.setItem(cacheKey,newData);updateStats();renderAllFlowers();}syncMessage.textContent=`✅ 已连接 · ${guildId}`;}}catch(e){if(!cached)syncMessage.textContent='⚠️ 连接失败';}}
-    function updateStats(){totalMembersSpan.textContent=flowerData.length;const s=new Set();flowerData.forEach(m=>{['仙','华','珍','普','凡'].forEach(q=>{if(m[q])m[q].forEach(f=>s.add(f));});});totalFlowersSpan.textContent=s.size;}
+    async function loadGuildData(){
+        const guildId=currentProfile?.guild_id||'gh001';
+        const cacheKey=`flower_cache_${guildId}`;
+        // 清除其他公会缓存
+        Object.keys(localStorage).forEach(key=>{
+            if(key.startsWith('flower_cache_')&&key!==cacheKey){
+                localStorage.removeItem(key);
+            }
+        });
+        const cached=localStorage.getItem(cacheKey);
+        if(cached){try{flowerData=JSON.parse(cached);updateStats();renderAllFlowers();syncMessage.textContent=`📦 缓存 · ${guildId}`;}catch(e){}}
+        try{const{data}=await supabase.from('flowers').select('data').eq('guild_id',guildId).single();if(data?.data){const newData=JSON.stringify(data.data);if(newData!==cached){flowerData=data.data;localStorage.setItem(cacheKey,newData);updateStats();renderAllFlowers();}syncMessage.textContent=`✅ 已连接 · ${guildId}`;}}catch(e){if(!cached)syncMessage.textContent='⚠️ 连接失败';}
+    }    function updateStats(){totalMembersSpan.textContent=flowerData.length;const s=new Set();flowerData.forEach(m=>{['仙','华','珍','普','凡'].forEach(q=>{if(m[q])m[q].forEach(f=>s.add(f));});});totalFlowersSpan.textContent=s.size;}
     function showAuth(){authContainer.style.display='flex';appContainer.style.display='none';}
     function showApp(){authContainer.style.display='none';appContainer.style.display='flex';}
     loginBtn.onclick=async()=>{const email=document.getElementById('loginEmail').value.trim();const password=document.getElementById('loginPassword').value;const err=document.getElementById('loginError');if(!email||!password){err.textContent='请填写完整';return;}err.textContent='';loginBtn.textContent='登录中...';loginBtn.disabled=true;const{data,error}=await supabase.auth.signInWithPassword({email,password});loginBtn.textContent='登 录';loginBtn.disabled=false;if(error){err.textContent='邮箱或密码错误';}else{currentUser=data.user;await loadProfile();showApp();}};
