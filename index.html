@@ -470,10 +470,16 @@
     };
     window.removeMember=async(id,name)=>{
         if(!confirm(`确定删除成员 ${name} 吗？此操作不可恢复！`))return;
+        // 先清掉 guild_id 和 game_name，防止他用旧名字重新登录
+        await supabase.from('profiles').update({guild_id:null, game_name:null}).eq('id',id);
+        // 删 profiles
         const{error}=await supabase.from('profiles').delete().eq('id',id);
         if(error){alert('删除失败');return;}
+        // 删 flowerData 里该成员的数据
         flowerData=flowerData.filter(m=>m.name!==name);
         await saveGuildData();
+        // 清除本地缓存
+        localStorage.removeItem('flower_cache_' + currentProfile.guild_id);
         alert(`${name} 已删除！`);
         addCloudLog('删除成员',name);
         updateStats();
