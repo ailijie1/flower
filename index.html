@@ -296,8 +296,26 @@
     window.deleteFlower=async(mName,fName)=>{if(!confirm(`确定从 ${mName} 删除 ${fName} 吗？`))return;const m=flowerData.find(m=>m.name===mName);if(!m)return;['仙','华','珍','普','凡'].forEach(q=>{if(m[q])m[q]=m[q].filter(f=>f!==fName);});if(await saveGuildData()){addCloudLog('删除花卉',mName,fName);updateStats();renderAllFlowers();}};
     window.deleteMember=async(memberName)=>{if(!confirm(`确定删除成员 ${memberName} 及其所有花卉吗？`))return;const idx=flowerData.findIndex(m=>m.name===memberName);if(idx===-1)return;flowerData.splice(idx,1);if(await saveGuildData()){addCloudLog('删除成员',memberName);updateStats();showMemberModal();}};
     document.getElementById('addRecordBtn').onclick=async()=>{const mName=document.getElementById('newMemberName').value.trim();const fName=document.getElementById('newFlowerName').value.trim();if(!mName||!fName)return;const q=getFlowerQuality(fName);let m=flowerData.find(m=>m.name===mName);let isNew=false;if(!m){m={name:mName,仙:[],华:[],珍:[],普:[],凡:[]};flowerData.push(m);isNew=true;}if(!m[q])m[q]=[];if(!m[q].includes(fName)){m[q].push(fName);}await saveGuildData();document.getElementById('newMemberName').value='';document.getElementById('newFlowerName').value='';updateStats();renderAllFlowers();addCloudLog(isNew?'新增成员':'添加花卉',mName,fName);};
-    async function saveGuildData(){const guildId=currentProfile?.guild_id||'gh001';const cacheKey=`flower_cache_${guildId}`;const{data}=await supabase.from('flowers').select('id').eq('guild_id',guildId).single();if(data){await supabase.from('flowers').update({data:flowerData}).eq('id',data.id);}localStorage.setItem(cacheKey,JSON.stringify(flowerData));syncMessage.textContent=`✅ 已保存 · ${guildId}`;return true;}
-    function showMemberModal(){const ms=flowerData.map(m=>({name:m.name,count:(m.仙?.length||0)+(m.华?.length||0)+(m.珍?.length||0)+(m.普?.length||0)+(m.凡?.length||0)})).sort((a,b)=>a.name.localeCompare(b.name));listModalData=ms;listModalTitle.innerHTML='<i class="fas fa-users"></i> 成员列表';listModalContainer.innerHTML=ms.map(i=>`<div class="modal-list-item"><span class="modal-item-name" onclick="jumpToMember('${i.name}')"><i class="fas fa-user"></i> ${i.name}</span><span class="modal-item-badge">${i.count}种</span><button class="member-delete-btn" onclick="event.stopPropagation();deleteMember('${i.name}')"><i class="fas fa-trash"></i></button></div>`).join('');listModal.style.display='flex';}
+    async function saveGuildData(){
+        const guildId=currentProfile?.guild_id||'gh001';
+        const cacheKey=`flower_cache_${guildId}`;
+        // 先存本地
+        localStorage.setItem(cacheKey,JSON.stringify(flowerData));
+        try{
+            const{data,error}=await supabase.from('flowers').select('id').eq('guild_id',guildId).single();
+            if(error){console.error('查询失败:',error);syncMessage.textContent='⚠️ 查询失败';return false;}
+            if(data){
+                const{error:updateError}=await supabase.from('flowers').update({data:flowerData}).eq('id',data.id);
+                if(updateError){console.error('更新失败:',updateError);syncMessage.textContent='⚠️ 保存失败';return false;}
+            }
+            syncMessage.textContent=`✅ 已保存 · ${guildId}`;
+            return true;
+        }catch(e){
+            console.error('保存异常:',e);
+            syncMessage.textContent='⚠️ 保存失败';
+            return false;
+        }
+    }    function showMemberModal(){const ms=flowerData.map(m=>({name:m.name,count:(m.仙?.length||0)+(m.华?.length||0)+(m.珍?.length||0)+(m.普?.length||0)+(m.凡?.length||0)})).sort((a,b)=>a.name.localeCompare(b.name));listModalData=ms;listModalTitle.innerHTML='<i class="fas fa-users"></i> 成员列表';listModalContainer.innerHTML=ms.map(i=>`<div class="modal-list-item"><span class="modal-item-name" onclick="jumpToMember('${i.name}')"><i class="fas fa-user"></i> ${i.name}</span><span class="modal-item-badge">${i.count}种</span><button class="member-delete-btn" onclick="event.stopPropagation();deleteMember('${i.name}')"><i class="fas fa-trash"></i></button></div>`).join('');listModal.style.display='flex';}
     function showFlowerModal(){const map=new Map();flowerData.forEach(m=>{['仙','华','珍','普','凡'].forEach(q=>{if(m[q])m[q].forEach(f=>map.set(f,(map.get(f)||0)+1));});});const qi={仙:'仙',华:'华',珍:'珍',普:'普',凡:'凡'}; const qc={仙:'#e53935',华:'#f9a825',珍:'#8e24aa',普:'#1e88e5',凡:'#43a047'};const fs=Array.from(map.entries()).map(([n,c])=>{const q=getFlowerQuality(n);return{name:n,count:c,quality:q,qo:{仙:1,华:2,珍:3,普:4,凡:5}[q]||5};}).sort((a,b)=>{if(a.qo!==b.qo)return a.qo-b.qo;if(a.quality==='凡')return getFanRank(a.name)-getFanRank(b.name);return a.name.localeCompare(b.name);});listModalData=fs;listModalTitle.innerHTML='<i class="fas fa-flower"></i> 花卉图鉴';listModalContainer.innerHTML=fs.map(i=>`<div class="modal-list-item" onclick="showFlowerOwners('${i.name.replace(/'/g,"\\'")}')"><span class="modal-item-name">${qi[i.quality]||'⚪'} ${i.name}</span><span class="modal-item-badge">${i.count}人</span></div>`).join('');listModal.style.display='flex';}
     window.filterListModal=()=>{const kw=listModalSearch.value.toLowerCase();renderSimpleList(listModalData.filter(i=>i.name.toLowerCase().includes(kw)));};
     window.closeListModal=()=>listModal.style.display='none';
