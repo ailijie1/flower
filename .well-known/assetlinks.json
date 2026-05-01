@@ -1,1 +1,9 @@
 
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "xyz.floweralj.twa",
+        "sha256_cert_fingerprints": ["1D:26:4C:95:6B:32:04:02:EC:51:33:F9:B1:CD:89:F4:E9:0F:34:A2:0E:7C:40:21:F8:AA:48:A2:51:FA:8C:9E"]
+      }
+    }]
