@@ -200,6 +200,10 @@
     <div style="margin-bottom:12px;"><label style="font-size:0.85rem;font-weight:600;">✏️ 修改游戏名称</label><div class="form-row" style="margin-top:4px;"><input type="text" id="editNameInput" class="form-input" placeholder="输入新名称"><button class="add-btn" onclick="updateProfileName()" style="white-space:nowrap;">保存</button></div><p id="editNameError" style="color:#d32f2f;font-size:0.75rem;margin-top:4px;"></p></div>
 </div></div></div>
 <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js');
+}
+</script>
 (function(){
     const SUPABASE_URL="https://amngvhgusyipxnnkejzp.supabase.co";
     const SUPABASE_KEY="sb_publishable_yIYNCHcT4Z0z-NMcKVmjTQ_6SoHyxwZ";
