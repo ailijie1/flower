@@ -1,21 +1,23 @@
 {
-  "name": "flower",
-  "short_name": "flower",
+  "name": "花园世界",
+  "short_name": "花园",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f1eb",
+  "theme_color": "#c48a9a",
+  "description": "公会花卉图鉴系统",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     },
     {
       "src": "/web-app-manifest-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
-  ],
-  "theme_color": "#ffffff",
-  "background_color": "#ddc3c3",
-  "display": "standalone"
+  ]
 }
